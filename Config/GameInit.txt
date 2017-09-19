@@ -1,0 +1,1 @@
+map WorldMaps/maps/church.bsp
