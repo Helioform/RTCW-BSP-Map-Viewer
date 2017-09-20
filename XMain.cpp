@@ -1,7 +1,5 @@
 #include "XMain.h"
 
-static float r = 10.1;
-
 bool XIllumin::ParseInitFile(const std::string & fileName)
 {
 	std::ifstream initFile(fileName);
@@ -70,16 +68,17 @@ bool XIllumin::ParseEntities(void)
 	return playerPosFound;
 }
 
-bool XIllumin::InitD3D(const std::string& params)
+bool XIllumin::InitGameObjects(const std::string& params)
 {
 	m_pD3D = new XD3DRenderer();
+	m_pTimer = new XTimer();
 
 	m_pUICamera = new XCamera(D3DXVECTOR3(0.0f, 0.0f, 1.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT, 0.1f, 10000.0f);
 
 	m_pInput = new XInput();
 	m_pInput->Initialize(m_hInst, m_hWnd, m_width, m_height);
 
-	if (!m_pD3D->CreateD3DDevice(m_hWnd, m_width, m_height, false))
+	if (!m_pD3D->CreateD3DDevice(m_hWnd, m_width, m_height, true))
 	{
 		FAIL_MSG_BOX(L"Error initializing Direct3D");
 		return false;
@@ -146,29 +145,35 @@ bool XIllumin::RenderAll(const std::string& args)
 
 bool XIllumin::GameMain(const std::string& args)
 {
+	m_pTimer->StartCounter();
+
 	m_pInput->Poll();
 
 	int mx, my;
 	m_pInput->GetMousePosition(mx, my);
 
+	double deltaT = 0.001*m_pTimer->GetElapsedTime();
+
 	if (m_pInput->IsKeyPressed(DIK_Q))
-		(m_pEntities[0]->GetCamera())->Pitch(0.001*r);
+		(m_pEntities[0]->GetCamera())->Pitch(deltaT);
 	if(m_pInput->IsKeyPressed(DIK_C))
-		(m_pEntities[0]->GetCamera())->Pitch(-0.001*r);
+		(m_pEntities[0]->GetCamera())->Pitch(-deltaT);
 	if (m_pInput->IsKeyPressed(DIK_W))
-		m_pEntities[0]->GetCamera()->Move(0.1*r);
+		m_pEntities[0]->GetCamera()->Move(100*deltaT);
 	if (m_pInput->IsKeyPressed(DIK_S))
-		m_pEntities[0]->GetCamera()->Move(-0.1*r);
+		m_pEntities[0]->GetCamera()->Move(-100*deltaT);
 	if (m_pInput->IsKeyPressed(DIK_A))
-		m_pEntities[0]->GetCamera()->RotateAtAroundY(-0.001*r);
+		m_pEntities[0]->GetCamera()->RotateAtAroundY(-deltaT);
 	if (m_pInput->IsKeyPressed(DIK_D))
-		m_pEntities[0]->GetCamera()->RotateAtAroundY(0.001*r);
+		m_pEntities[0]->GetCamera()->RotateAtAroundY(deltaT);
 
 	m_pEntities[0]->GetCamera()->UpdateViewMatrix();
 
 	m_pMap->AddSurfacesToDraw(*m_pEntities[0]->GetCamera());
 
 	RenderAll(" ");
+
+	m_pTimer->CalculateElapsedTIme();
 
 	return 1;
 }
@@ -178,6 +183,7 @@ void XIllumin::CleanUp()
 {
 	delete m_pD3D;
 	delete m_pMap;
+	delete m_pTimer;
 }
 
 
@@ -205,7 +211,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		pMainGameWindow->FAIL_MSG_BOX(L"Error loading init file.");
 		return FALSE;
 	}
-	pMainGameWindow->InitD3D(" ");
+
+	
+	pMainGameWindow->InitGameObjects(" ");
 
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_WIN32PROJECT1));
 	MSG msg;
@@ -216,7 +224,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		{
 			if (msg.message == WM_QUIT)
 			{
-				//	pMainGameWindow->CleanUp();
+				pMainGameWindow->CleanUp();
 				break;
 			}
 
