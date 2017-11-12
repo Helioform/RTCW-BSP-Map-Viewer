@@ -16,11 +16,11 @@ class XTextureManager
 protected:
 	std::vector<XTextureContainer*> m_textures;
 	std::vector<XTextureContainer*> m_lightmaps;
-	ID3D11SamplerState*  m_pSampleState;
-	ID3D11Device* m_pD3D;
-	ID3D11DeviceContext* m_pd3dDeviceContext;
-	int m_numTextures;
-	int m_numLightmaps;
+	ID3D11SamplerState*				m_pSampleState;
+	ID3D11Device*					m_pD3D;
+	ID3D11DeviceContext*			m_pd3dDeviceContext;
+	int								m_numTextures;
+	int								m_numLightmaps;
 
 public:
 	XTextureManager();
@@ -53,7 +53,7 @@ public:
 		return m_pSampleState;
 	}
 
-	bool CreateTexture(std::vector<unsigned char> imgData, unsigned int height, unsigned int width, bool isLightmap);
+	bool CreateTexture(unsigned char* imgData, unsigned int height, unsigned int width, bool isLightmap);
 	bool CreateWhiteTexture(int, int, bool);
 	bool Load(const std::string& filePath, bool isLightmap);
 	bool Save(const std::string& filePath);

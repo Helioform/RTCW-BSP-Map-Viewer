@@ -30,6 +30,8 @@ bool XIllumin::ParseInitFile(const std::string & fileName)
 		return false;
 	}
 
+	initFile.close();
+
 	return true;
 }
 
@@ -42,28 +44,50 @@ bool XIllumin::ParseEntities(void)
 	std::istringstream entStream(ents);
 	std::string line;
 	bool playerPosFound = false;
+	int entDataPos = 0;
+	std::string entClassName, entName;
+	int x=0, y=0, z=0;
+	
 	while (std::getline(entStream, line))
-	{
-		// find the initial position of the player
-		if (line.find("info_player_start") != std::string::npos)
+	{	
+		if (line == "{")
 		{
-			m_numEntities++;
-			std::getline(entStream, line); // get next line
-			std::string playerPosLine = line.substr(std::string("\"origin\" ").length()+1, line.length()-1);
-			int x, y, z;
-			std::stringstream playerPos(playerPosLine);
-			playerPos >> x;
-			playerPos >> y;
-			playerPos >> z;
+			while (line != "}")
+			{	
+				std::getline(entStream, line);
 
-			m_pEntities.push_back(new XPlayer("info_player_start", D3DXVECTOR3(x, z, y), D3DXVECTOR3(0, 0, 1), SCREEN_WIDTH, SCREEN_HEIGHT, 45, 0.1, 10000));
+				if ((entDataPos = line.find("\"classname\"")) != std::string::npos)
+				{
+					entName = line.substr(std::string("\"classname\" ").length() + 1, line.length() - 1);
+				}
+				else if ((entDataPos = line.find("\"origin\"")) != std::string::npos)
+				{
+					std::string entPosLine = line.substr(std::string("\"origin\" ").length() + 1, line.length() - 1);
 
-			playerPosFound = true;
+					std::stringstream entPos(entPosLine);
+					entPos >> x;
+					entPos >> y;
+					entPos >> z;
+				}
+				else if ((entDataPos = line.find("\"model\"")) != std::string::npos)
+				{
+					
+				}
+			}
 		}
-	}
+				
+		if (entName == "info_player_start\"" || entName == "info_player_deathmatch\"")
+		{
+			m_playerEntityIndex = m_numEntities;
+			m_pEntities.push_back(new XPlayer(entName, D3DXVECTOR3(x, z, y), D3DXVECTOR3(0, 0, 1), SCREEN_WIDTH, SCREEN_HEIGHT, 90, 0.1, 10000));
+		}
+		else
+		{		
+			m_pEntities.push_back(new XEntity(entName, D3DXVECTOR3(x, z, y), D3DXVECTOR3(0, 0, 1), SCREEN_WIDTH, SCREEN_HEIGHT, 90, 0.1, 10000));
+		}
 
-	if(!playerPosFound)
-		m_pEntities.push_back(new XPlayer("info_player_start", D3DXVECTOR3(0, 0, 0), D3DXVECTOR3(0, 0, 1), SCREEN_WIDTH, SCREEN_HEIGHT, 45, 0.1, 10000));
+		m_numEntities++;	
+	}
 
 	return playerPosFound;
 }
@@ -78,7 +102,7 @@ bool XIllumin::InitGameObjects(const std::string& params)
 	m_pInput = new XInput();
 	m_pInput->Initialize(m_hInst, m_hWnd, m_width, m_height);
 
-	if (!m_pD3D->CreateD3DDevice(m_hWnd, m_width, m_height, true))
+	if (!m_pD3D->CreateD3DDevice(m_hWnd, m_width, m_height, false))
 	{
 		FAIL_MSG_BOX(L"Error initializing Direct3D");
 		return false;
@@ -105,9 +129,9 @@ bool XIllumin::InitGameObjects(const std::string& params)
 
 	m_pMap = new XWorldMap(m_pD3D->GetDeviceContext(), m_pD3D->GetD3DDevice(), m_pTextureManager);
 
-	if (!m_pMap->CreateLightmapShader())
+	if (!m_pMap->LoadLightmapShader())
 	{
-		FAIL_MSG_BOX(L"Error creating lightmap shader");
+		FAIL_MSG_BOX(L"Error loading lightmap shader");
 		return false;
 	}
 
@@ -135,7 +159,7 @@ bool XIllumin::RenderAll(const std::string& args)
 {
 	m_pD3D->ClearScene(D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f));
 
-	if (!m_pD3D->Render(m_pMap, m_pEntities[0]->GetCamera()))
+	if (!m_pD3D->Render(m_pMap, GetPlayer()->GetCamera()))
 		return false;
 
 	m_pD3D->ShowScene();
@@ -150,26 +174,28 @@ bool XIllumin::GameMain(const std::string& args)
 	m_pInput->Poll();
 
 	int mx, my;
-	m_pInput->GetMousePosition(mx, my);
+	m_pInput->GetMouseDelta(mx, my);
 
 	double deltaT = 0.001*m_pTimer->GetElapsedTime();
+	GetPlayer()->GetCamera()->Pitch(my*0.01);
+	GetPlayer()->GetCamera()->RotateAtAroundY(mx*0.01);
 
 	if (m_pInput->IsKeyPressed(DIK_Q))
-		(m_pEntities[0]->GetCamera())->Pitch(deltaT);
+		GetPlayer()->GetCamera()->Pitch(deltaT);
 	if(m_pInput->IsKeyPressed(DIK_C))
-		(m_pEntities[0]->GetCamera())->Pitch(-deltaT);
+		GetPlayer()->GetCamera()->Pitch(-deltaT);
 	if (m_pInput->IsKeyPressed(DIK_W))
-		m_pEntities[0]->GetCamera()->Move(100*deltaT);
+		GetPlayer()->GetCamera()->Move(100*deltaT);
 	if (m_pInput->IsKeyPressed(DIK_S))
-		m_pEntities[0]->GetCamera()->Move(-100*deltaT);
+		GetPlayer()->GetCamera()->Move(-100*deltaT);
 	if (m_pInput->IsKeyPressed(DIK_A))
-		m_pEntities[0]->GetCamera()->RotateAtAroundY(-deltaT);
+		GetPlayer()->GetCamera()->RotateAtAroundY(deltaT);
 	if (m_pInput->IsKeyPressed(DIK_D))
-		m_pEntities[0]->GetCamera()->RotateAtAroundY(deltaT);
+		GetPlayer()->GetCamera()->RotateAtAroundY(-deltaT);
 
-	m_pEntities[0]->GetCamera()->UpdateViewMatrix();
+	GetPlayer()->GetCamera()->UpdateViewMatrix();
 
-	m_pMap->AddSurfacesToDraw(*m_pEntities[0]->GetCamera());
+	m_pMap->AddSurfacesToDraw(*GetPlayer()->GetCamera());
 
 	RenderAll(" ");
 
@@ -190,7 +216,7 @@ void XIllumin::CleanUp()
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
 	XIllumin* pMainGameWindow = new XIllumin(L"X3DEngine", 800, 600);
-
+	
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -202,22 +228,25 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
 	pMainGameWindow->MyRegisterClass(hInstance);
 
-
 	if (!pMainGameWindow->InitInstance(hInstance, nCmdShow))
 		return FALSE;
+	
+	ShowCursor(0);
+	
 
 	if (!pMainGameWindow->ParseInitFile("Config/GameInit.txt"))
 	{
 		pMainGameWindow->FAIL_MSG_BOX(L"Error loading init file.");
 		return FALSE;
 	}
-
 	
 	pMainGameWindow->InitGameObjects(" ");
 
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_WIN32PROJECT1));
 	MSG msg;
-
+	
+	
+	
 	while (1)
 	{
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -231,8 +260,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-
-			if (!pMainGameWindow->GameMain(" "))
+		
+		
+		if (!pMainGameWindow->GameMain(" "))
 				break;
 	}
 

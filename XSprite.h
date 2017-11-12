@@ -4,11 +4,11 @@
 
 class XSprite
 {
-	Vertex m_vertices[6];
-	float m_width, m_height;
-	ID3D11Buffer* m_pVertexBuffer;
-	D3DXVECTOR3 m_center;
-	ID3D11InputLayout* m_pLayout;
+	Vertex				m_vertices[6];
+	float m_width,		m_height;
+	ID3D11Buffer*		m_pVertexBuffer;
+	D3DXVECTOR3			m_center;
+	ID3D11InputLayout*	m_pLayout;
 
 
 public:

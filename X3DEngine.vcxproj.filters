@@ -63,6 +63,12 @@
     <ClCompile Include="XMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="XTimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HelperFunctions.h">
@@ -120,6 +126,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="XMain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XTimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

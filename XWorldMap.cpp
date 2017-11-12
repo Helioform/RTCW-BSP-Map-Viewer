@@ -207,17 +207,114 @@ void XWorldMap::ReadVisibilityData(std::ifstream & is, int offset, unsigned int 
 	is.read((char*)(m_q3VisData.vecs), m_visDataSize);
 }
 
-bool XWorldMap::CreateLightmapShader()
+bool XWorldMap::LoadLightmapShader()
 {
-	m_pShaders[0] = new XD3DShader(m_pd3dDeviceContext, m_pD3D, m_pTextureManager);
+	m_pD3DShaders[0] = new XD3DShader(m_pd3dDeviceContext, m_pD3D, m_pTextureManager);
 
-	if (!m_pShaders[0]->LoadAndCompile("Effects/lightmap.vs", "Effects/lightmap.ps"))
+	if (!m_pD3DShaders[0]->LoadAndCompile("Effects/lightmap.vs", "Effects/lightmap.ps"))
 	{
-		m_pShaders[0]->OutputErrorToFile();
+		m_pD3DShaders[0]->OutputErrorToFile();
 		return false;
 	}
-	m_pShaders[0]->CreateMatrixBuffer();
-//	m_pShaders[0]->CreateLightBuffer();
+	m_pD3DShaders[0]->CreateMatrixBuffer();
+	//m_pShaders[0] = new XShader("lightmap", 0, 0, m_pD3DShaders[0]);
+	m_numShaders=0;
+	//	m_pShaders[0]->CreateLightBuffer();
+
+	return true;
+}
+
+bool XWorldMap::LoadShaders()
+{
+	std::string shaderName;
+	int type = 0;
+	std::string shaderScriptFilePath = MapPath + "scripts\\*";
+	std::vector<std::string> fileNames;
+
+	GetFileNames(shaderScriptFilePath, fileNames);
+
+	std::string scriptData = "";
+	// open all script files for reading
+	for (int i = 0; i < fileNames.size(); ++i)
+	{
+		std::ifstream scriptFile;
+		scriptFile.open(MapPath + "scripts/" + fileNames[i]);
+
+		if (!scriptFile.is_open())
+			return false;
+
+		// aggregate all script file data
+		std::string presentFileData;
+
+		while (std::getline(scriptFile, presentFileData))
+			scriptData += presentFileData+"\n";
+
+		scriptFile.close();
+	}
+
+	std::string line;
+	size_t shaderNamePos = 0;
+	std::istringstream scriptStringStream(scriptData);
+	int shaderSurfParams = 0;
+
+	for (int i = 0; i < m_q3Textures.size(); ++i)
+	{
+		shaderName = m_q3Textures[i].name;
+		scriptStringStream.seekg(0, scriptStringStream.beg);
+		std::string token;
+		shaderSurfParams = 0;
+		bool shaderFound = false;
+
+		while (std::getline(scriptStringStream, line))
+		{
+			if ((shaderNamePos = line.find(shaderName)) != std::string::npos)
+			{
+				shaderFound = true;
+				std::getline(scriptStringStream, line);
+
+				while (1)
+				{
+					if (line == "{")
+					{
+
+						std::getline(scriptStringStream, line);
+						size_t pos = 0;
+
+						pos = SkipWhites(line, 0);
+						// skip comments
+						if (line[pos] == '/' && line[pos + 1] == '/')
+							std::getline(scriptStringStream, line);
+
+						pos = ParseWord(line, pos, token);
+
+						if (token == "surfaceparm")
+						{
+							token = "";
+							size_t _pos = SkipWhites(line, pos);
+							ParseWord(line, _pos, token);
+							if (token == "nodraw")
+								shaderSurfParams = SURF_NODRAW;
+								if (token == "fog")
+									shaderSurfParams = CONTENTS_FOG;
+						}
+						std::getline(scriptStringStream, line);
+					}
+
+					std::getline(scriptStringStream, line);
+
+					if (line == "}")
+						break;
+				}
+
+			}
+
+			if (shaderFound)
+				break;
+		}
+
+		m_pShaders[m_numShaders] = new XShader(shaderName, type, shaderSurfParams, nullptr);
+		m_numShaders++;
+	}
 
 	return true;
 }
@@ -265,11 +362,11 @@ bool XWorldMap::CreateInputLayout()
 	// Get a count of the elements in the layout.
 	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 	// Create the vertex input layout.
-	hr = m_pD3D->CreateInputLayout(polygonLayout, numElements, m_pShaders[0]->GetVertexShaderBuffer()->GetBufferPointer(),
-		m_pShaders[0]->GetVertexShaderBuffer()->GetBufferSize(), &m_pLayout);
+	hr = m_pD3D->CreateInputLayout(polygonLayout, numElements, m_pD3DShaders[0]->GetVertexShaderBuffer()->GetBufferPointer(),
+		m_pD3DShaders[0]->GetVertexShaderBuffer()->GetBufferSize(), &m_pLayout);
 
-	m_pShaders[0]->GetVertexShaderBuffer()->Release();
-	m_pShaders[0]->GetPixelShaderBuffer()->Release();
+	m_pD3DShaders[0]->GetVertexShaderBuffer()->Release();
+	m_pD3DShaders[0]->GetPixelShaderBuffer()->Release();
 
 	if (FAILED(hr))
 		return false;
@@ -304,6 +401,9 @@ bool XWorldMap::Load(std::string fileName)
 	}
 
 	mapFile.close();
+
+	if (!LoadShaders())
+		return false;
 	if (!CreateTextures())
 		return false;
 	if (!CreateLightmaps())
@@ -355,7 +455,7 @@ bool XWorldMap::CreateTextures()
 	for (int i = 0; i < m_q3Textures.size(); ++i)
 	{
 		std::string jpgTextureFileName;
-		jpgTextureFileName += "WorldMaps/";
+		jpgTextureFileName += MapPath;
 		jpgTextureFileName += m_q3Textures[i].name;
 		jpgTextureFileName += ".jpg";
 
@@ -363,16 +463,16 @@ bool XWorldMap::CreateTextures()
 		{
 			TGAImage tgaFile;
 			std::string tgaTextureFileName;
-			tgaTextureFileName += "WorldMaps/";
+			tgaTextureFileName += MapPath;
 			tgaTextureFileName += m_q3Textures[i].name;
 			tgaTextureFileName += ".tga";
 			if (tgaFile.Load(tgaTextureFileName))
 			{
-				if (!m_pTextureManager->CreateTexture(tgaFile.GetImageData(), tgaFile.GetHeight(), tgaFile.GetWidth(), false))
+				if (!m_pTextureManager->CreateTexture(tgaFile.GetImageData().data(), tgaFile.GetHeight(), tgaFile.GetWidth(), false))
 					return false;
 			}
 			else
-				m_pTextureManager->CreateWhiteTexture(128, 128, false);
+				 m_pTextureManager->CreateWhiteTexture(128, 128, false);
 		}
 	}
 
@@ -381,13 +481,19 @@ bool XWorldMap::CreateTextures()
 
 bool XWorldMap::CreatePolygons()
 {
-//	m_visibleFaces.reserve(100);
+	m_visibleFaces.reserve(1000);
 
 	// create face vertices and faces
 	for (int i = 0; i < m_q3Faces.size(); ++i)
 	{
 		if (m_q3Faces[i].type == 1) // we have a polygon
 		{
+			if (m_pShaders[m_q3Faces[i].texture]->GetSurfaceFlags() == CONTENTS_FOG) // don't create no draw surface
+			{
+				m_faceData.push_back(nullptr);
+				continue;
+			}
+
 			std::vector<TexVertex> vertices;
 			for (int j = 0; j < m_q3Faces[i].nmmeshverts; ++j)
 			{
@@ -514,53 +620,20 @@ bool XWorldMap::CreatePolygons()
 
 bool XWorldMap::CreateLightmaps()
 {
+	unsigned char* lightMapData = new unsigned char[4*LIGHTMAP_SIZE*LIGHTMAP_SIZE];
+	
 	for (int i = 0; i < m_q3LightMaps.size(); ++i)
 	{
-		std::vector<unsigned char> lightMapData;
-		lightMapData.reserve(4*128*128);
-		int intensity = 0;
-		int sumIntensity = 0;
-		int maxIntensity = 0;
-		float out[3];
 		unsigned char* buffer = m_q3LightMaps[i].map;
 		int k = 0;
-		float rgba[4], r, g, b;
-		char srgba[4];
-		float gamma = 2.5f;
-
+	
 		for (int j = 0; j < LIGHTMAP_SIZE * LIGHTMAP_SIZE; ++j)
-		{
-			r = buffer[j * 3 + 0];
-			g = buffer[j * 3 + 1];
-			b = buffer[j * 3 + 2];
-		/*
-			float intensity;
-			float out[3];
-
-			intensity = 0.33f * r + 0.685f * g + 0.063f * b;
-
-			if (intensity > 255)
-				intensity = 1.0f;
-			else
-				intensity /= 255.0f;
-
-			if (intensity > maxIntensity)
-				maxIntensity = intensity;
-
-			HSVtoRGB(intensity, 1.00, 0.50, out);
-			sumIntensity += intensity;
-				//	ColorShiftLightingBytes(&buf_p[j * 3], &image[j * 4]);
-				//	image[j * 4 + 3] = 255;
-				//
-			*/
-			//fill data back in
-			lightMapData.push_back(r);
-			lightMapData.push_back(g);
-			lightMapData.push_back(b);
-			lightMapData.push_back(255);
-			
+		{	
+			ColorShiftLightingBytes(&buffer[j * 3], &lightMapData[j * 4]);
+			lightMapData[j * 4 + 3] = 255;
 		}
-		if (!m_pTextureManager->CreateTexture(lightMapData, 128, 128, true))
+
+		if (!m_pTextureManager->CreateTexture(lightMapData, LIGHTMAP_SIZE, LIGHTMAP_SIZE, true))
 			return false;
 	}
 
@@ -604,8 +677,8 @@ void XWorldMap::AddSurfacesToDraw(XCamera& cam)
 	m_visibleFaces.clear();
 
 	// find the cluster the camera is in
-	int l = FindLeaf(cam.Eye());
-	int camCluster = m_q3Leaves[l].cluster;
+	const int l = FindLeaf(cam.Eye());
+	const int camCluster = m_q3Leaves[l].cluster;
 
 	// iterate through all leaves and find the ones visible from camera	
 	for (int i = 0; i < GetNumLeaves(); ++i)
@@ -619,10 +692,14 @@ void XWorldMap::AddSurfacesToDraw(XCamera& cam)
 		for (int j = 0; j < m_q3Leaves[i].nleaffaces; ++j)
 		{
 			const int f = j + m_q3Leaves[i].leafface;
+			if (m_faceData[m_q3LeafFaces[f].face] == nullptr)
+				continue;
 
 			TextureIndexedFaceData* pFace = m_faceData[m_q3LeafFaces[f].face];
-		//	if(!IsAlreadyVisible(pFace)) 
-				m_visibleFaces.push_back(pFace);
+			if (IsAlreadyVisible(pFace))
+				continue;
+			
+			m_visibleFaces.push_back(pFace);
 		}
 	}
 

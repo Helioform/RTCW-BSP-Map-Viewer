@@ -9,29 +9,34 @@ using namespace DirectX;
 
 #define PI 3.14159265359
 
+struct Plane
+{
+	float A, B, C, D;
+};
+
 struct Frustum
 {
-	D3DXVECTOR3 origin;
-	float topSlope, bottomSlope, rightSLope, leftSlope, zNear, zFar;
+	Plane top, bottom, right, left, zNear, zFar;
 };
 
 class XCamera
 {
 protected:
-	Frustum m_frustum;
-	D3DXMATRIX m_view, m_projection;
+	Frustum		m_frustum;
+	D3DXMATRIX	m_view, m_projection;
 	D3DXVECTOR3 m_at, m_up, m_eye, m_right;
 
-	float	m_height, m_width, m_aspectRatio;
-	float	m_fov;
-	float	m_nearPlane, m_farPlane;
-	float	m_totalPhi, m_totalTheta;
-	bool	m_isOrtho;
-	bool    m_isPerspective;
+	float		m_height, m_width, m_aspectRatio;
+	float		m_fov;
+	float		m_nearPlane, m_farPlane;
+	float		m_totalPhi, m_totalTheta;
+	bool		m_isOrtho;
+	bool		m_isPerspective;
 public:
 	XCamera();
 	XCamera(const D3DXVECTOR3& at, const D3DXVECTOR3& up, const D3DXVECTOR3& eye, const D3DXVECTOR3& right, float width, float height, float fov, float nearPlane, float farPlane)
 	{
+		m_totalPhi = m_totalTheta = 0.0f;
 		m_at = at;
 		m_eye = eye;
 		m_up = up;
@@ -44,9 +49,6 @@ public:
 		m_farPlane = farPlane;
 		UpdateViewMatrix();
 		D3DXMatrixPerspectiveFovLH(&m_projection, PI*m_fov / 180.0f, m_aspectRatio, m_nearPlane, m_farPlane);
-		m_frustum.zNear = eye.z + m_nearPlane;
-		m_frustum.zFar = eye.z + m_farPlane;;
-
 	}
 
 	XCamera(const D3DXVECTOR3& at, const D3DXVECTOR3& up, const D3DXVECTOR3& eye, float width, float height, float nearPlane, float farPlane)
@@ -124,6 +126,8 @@ public:
 		m_view(1, 3) = 0.0f;
 		m_view(2, 3) = 0.0f;
 		m_view(3, 3) = 1.0f;
+	
+		ExtractFrustumPlanes();
 	}
 
 	void SetOrthographicMatrix(float width, float height, float zNear, float zFar)
@@ -138,7 +142,7 @@ public:
 
 	void OrientAt(float phi, float theta)
 	{
-		m_totalPhi += phi;
+		
 		m_totalTheta += theta;
 
 		m_at.x = sin(m_totalPhi)*cos(m_totalTheta);
@@ -154,7 +158,8 @@ public:
 	void Pitch(float angle) 
 	{
 		D3DXMATRIX R;
-		D3DXMatrixRotationAxis(&R, &m_right, angle);
+		//m_totalPhi += angle;
+		D3DXMatrixRotationAxis(&R, &m_right, angle);// m_totalPhi);
 		D3DXVec3TransformNormal(&m_up, &m_up, &R);
 		D3DXVec3TransformNormal(&m_at, &m_at, &R);
 	}
@@ -173,11 +178,71 @@ public:
 		D3DXVec3TransformNormal(&m_at, &m_at, &R);
 	}
 
+	void ExtractFrustumPlanes()
+	{
+		// calculate view projection matrix
+		D3DXMATRIX vp =  m_view*m_projection;
+
+		m_frustum.zNear.A = vp(0, 2) + vp(0, 3);
+		m_frustum.zNear.B = vp(1, 2) + vp(1, 3);
+		m_frustum.zNear.C = vp(2, 2) + vp(2, 3);
+		m_frustum.zNear.D = vp(3, 2) + vp(3, 3);
+
+		m_frustum.zFar.A = -vp(0, 2) + vp(0, 3);
+		m_frustum.zFar.B = -vp(1, 2) + vp(1, 3);
+		m_frustum.zFar.C = -vp(2, 2) + vp(2, 3);
+		m_frustum.zFar.D = -vp(3, 2) + vp(3, 3);
+
+		m_frustum.bottom.A = vp(0, 1) + vp(0, 3);
+		m_frustum.bottom.B = vp(1, 1) + vp(1, 3);
+		m_frustum.bottom.C = vp(2, 1) + vp(2, 3);
+		m_frustum.bottom.D = vp(3, 1) + vp(3, 3);
+
+		m_frustum.top.A = -vp(0, 1) + vp(0, 3);
+		m_frustum.top.B = -vp(1, 1) + vp(1, 3);
+		m_frustum.top.C = -vp(2, 1) + vp(2, 3);
+		m_frustum.top.D = -vp(3, 1) + vp(3, 3);
+
+		m_frustum.left.A = vp(0, 0) + vp(0, 3);
+		m_frustum.left.B = vp(1, 0) + vp(1, 3);
+		m_frustum.left.C = vp(2, 0) + vp(2, 3);
+		m_frustum.left.D = vp(3, 0) + vp(3, 3);
+
+		m_frustum.right.A = -vp(0, 0) + vp(0, 3);
+		m_frustum.right.B = -vp(1, 0) + vp(1, 3);
+		m_frustum.right.C = -vp(2, 0) + vp(2, 3);
+		m_frustum.right.D = -vp(3, 0) + vp(3, 3);
+	}
+
 	bool IsInFrustum(int* mins, int* maxs) 
 	{
-		//if (mins[2] >= m_frustum.zNear && mins[2] <= m_frustum.zFar)
-		//		return true;
+		D3DXVECTOR3 box[] = { D3DXVECTOR3(mins[0], mins[1], mins[2]), D3DXVECTOR3(maxs[0],maxs[1],maxs[2]) };
 
+		const Plane *planes[6] =
+		{ &m_frustum.zNear, &m_frustum.left, &m_frustum.right, &m_frustum.bottom, &m_frustum.top, &m_frustum.zFar };
+
+		for (int i = 0; i < 6; ++i)
+		{
+			// This is the current plane
+			const Plane &p = *planes[i];
+
+			// p-vertex selection (with the index trick)
+			// According to the plane normal we can know the
+			// indices of the positive vertex
+			const int px = static_cast<int>(p.A > 0.0f);
+			const int py = static_cast<int>(p.B > 0.0f);
+			const int pz = static_cast<int>(p.C > 0.0f);
+
+			// Dot product
+			// project p-vertex on plane normal
+			// (How far is p-vertex from the origin)
+			const float dp = (p.A*box[px].x) + (p.B*box[py].y) + (p.C*box[pz].z);
+
+			// Doesn't intersect if it is behind the plane
+			if (dp < -p.D) 
+				return false; 
+
+		}
 
 		return true;
 	}

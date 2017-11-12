@@ -5,6 +5,7 @@
 #include "XCamera.h"
 
 #define LIGHTMAP_SIZE 128
+static const std::string MapPath = "WorldMaps//";
 
 #pragma pack(1)
 struct Q3MapDirEntry
@@ -177,29 +178,29 @@ class XWorldMap :
 {
 
 protected:
-	unsigned int	m_numEntities, m_numTextures, m_numPlanes, m_numNodes, m_numEffects, m_numFaces, m_numVertices, m_numMeshVertices,
-		m_numLightMaps, m_numLeaves, m_numLeafFaces, m_visDataSize;
-	bool m_lightMapsOn;
-	std::vector<TextureIndexedFaceData*> m_faceData;
-	std::vector<TextureIndexedFaceData*> m_visibleFaces;
-	std::vector<ID3D11ShaderResourceView*> m_textures;
-	std::vector<ID3D11ShaderResourceView*> m_lightMaps;
-	std::vector<Q3MapTexture> m_q3Textures;
-	Q3MapEntities m_q3Entities;
-	std::vector<Q3MapVertex> m_q3Vertices;
-	std::vector<Q3MapEffect> m_q3MapEffects;
-	std::vector<Q3MapLeafBrush> m_q3MapLeafBrushes;
-	std::vector<Q3MapBrush> m_q3MapBrushes;
-	std::vector<Q3MapBrushSide> m_q3MapBrushSides;
-	std::vector<Q3MapModel> m_q3MapModels;
-	std::vector<Q3MapFace> m_q3Faces;
-	std::vector<Q3MapMeshVert> m_q3MeshVertices;
-	std::vector<Q3MapPlane> m_q3Planes;
-	std::vector<Q3MapNode> m_q3Nodes;
-	std::vector<Q3MapLeaf> m_q3Leaves;
-	std::vector<Q3MapLeafFace> m_q3LeafFaces;
-	std::vector<Q3MapLightMap> m_q3LightMaps;
-	Q3MapVisData m_q3VisData;
+	unsigned int							m_numEntities, m_numTextures, m_numPlanes, m_numNodes, m_numEffects, m_numFaces, m_numVertices, m_numMeshVertices,
+											m_numLightMaps, m_numLeaves, m_numLeafFaces, m_visDataSize;
+	bool									m_lightMapsOn;
+	std::vector<TextureIndexedFaceData*>	m_faceData;
+	std::vector<TextureIndexedFaceData*>	m_visibleFaces;
+	std::vector<ID3D11ShaderResourceView*>	m_textures;
+	std::vector<ID3D11ShaderResourceView*>	m_lightMaps;
+	std::vector<Q3MapTexture>				m_q3Textures;
+	Q3MapEntities							m_q3Entities;
+	std::vector<Q3MapVertex>				m_q3Vertices;
+	std::vector<Q3MapEffect>				m_q3MapEffects;
+	std::vector<Q3MapLeafBrush>				m_q3MapLeafBrushes;
+	std::vector<Q3MapBrush>					m_q3MapBrushes;
+	std::vector<Q3MapBrushSide>				m_q3MapBrushSides;
+	std::vector<Q3MapModel>					m_q3MapModels;
+	std::vector<Q3MapFace>					m_q3Faces;
+	std::vector<Q3MapMeshVert>				m_q3MeshVertices;
+	std::vector<Q3MapPlane>					m_q3Planes;
+	std::vector<Q3MapNode>					m_q3Nodes;
+	std::vector<Q3MapLeaf>					m_q3Leaves;
+	std::vector<Q3MapLeafFace>				m_q3LeafFaces;
+	std::vector<Q3MapLightMap>				m_q3LightMaps;
+	Q3MapVisData							m_q3VisData;
 public:
 	XWorldMap();
 	XWorldMap(ID3D11DeviceContext* pDevCntxt, ID3D11Device* pD3D, XTextureManager* pTextureManager) {
@@ -267,7 +268,8 @@ public:
 	void ReadLightMaps(std::ifstream& is, int offset, unsigned int length);
 	void ReadVisibilityData(std::ifstream& is, int offset, unsigned int length);
 
-	bool CreateLightmapShader();
+	bool LoadLightmapShader();
+	bool LoadShaders();
 	bool CreateInputLayout();
 	bool Load(std::string fileName);
 	bool OutputEntitiesToFile(const std::string& fileName);

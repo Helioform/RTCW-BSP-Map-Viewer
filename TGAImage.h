@@ -34,10 +34,10 @@ struct TGAFooter
 
 class TGAImage
 {
-	std::vector<unsigned char> m_imageData;
-	unsigned int m_height, m_width;
-	unsigned int m_bitsPerPixel;
-	int m_imageSize;
+	std::vector<unsigned char>	m_imageData;
+	unsigned int				m_height, m_width;
+	unsigned int				m_bitsPerPixel;
+	int							m_imageSize;
 
 public:
 	TGAImage();

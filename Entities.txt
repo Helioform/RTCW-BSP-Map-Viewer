@@ -1,0 +1,7 @@
+{
+"classname" "worldspawn"
+}
+{
+"origin" "-112 -56 16"
+"classname" "info_player_start"
+}

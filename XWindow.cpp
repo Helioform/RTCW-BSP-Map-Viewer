@@ -47,7 +47,15 @@ BOOL XWindow::InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	ShowWindow(m_hWnd, nCmdShow);
 	UpdateWindow(m_hWnd);
-	
+/*
+	MSG msg;
+	while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE))
+	{
+		TranslateMessage(&msg);
+		DispatchMessageW(&msg);
+	}
+*/
+
 	return TRUE;
 }
 

@@ -8,7 +8,7 @@ protected:
 	std::string m_name;
 	D3DXVECTOR3 m_position;
 	D3DXVECTOR3 m_direction;
-	XCamera* m_pCamera;
+	XCamera*	m_pCamera;
 public:
 	XEntity();
 	XEntity(const std::string& name, const D3DXVECTOR3& position, const D3DXVECTOR3& direction, float screenHeight, float screenWidth, float fov, float nplane, float fplane)
@@ -41,6 +41,5 @@ public:
 	}
 
 	XCamera* GetCamera(void) const { return m_pCamera; }
-	bool ParseEntities(const std::string& ents);
 };
 

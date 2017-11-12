@@ -377,7 +377,9 @@ bool XD3DRenderer::Render(XWorldMap* pMap, XCamera* cam)
 	stride = sizeof(TexVertex);
 	offset = 0;
 
-	XD3DShader* pShader = pMap->GetShader(0);
+	XD3DShader* pShader = pMap->GetD3DShader(0);
+//	XD3DShader* pShader = pXShader->GetD3DShader();
+
 	std::vector<TextureIndexedFaceData*> visibleFaces = pMap->GetVisibleFaces();
 	
 	for (int i = 0; i < visibleFaces.size(); ++i)

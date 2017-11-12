@@ -4,9 +4,9 @@
 class XTimer
 {
 protected:
-	double m_freq, m_elapsedTime;
-	__int64 m_counterStart;
-	bool m_paused;
+	double		m_freq, m_elapsedTime;
+	__int64		m_counterStart;
+	bool		m_paused;
 public:
 	XTimer() : m_freq(0.0), m_elapsedTime(0.0), m_counterStart(0), m_paused(false) { }
 	~XTimer();

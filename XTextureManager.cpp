@@ -11,7 +11,7 @@ XTextureManager::~XTextureManager()
 {
 }
 
-bool XTextureManager::CreateTexture(std::vector<unsigned char> imgData, unsigned int height, unsigned int width, bool isLightmap)
+bool XTextureManager::CreateTexture(unsigned char* imgData, unsigned int height, unsigned int width, bool isLightmap)
 {
 
 	HRESULT hr;

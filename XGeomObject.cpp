@@ -16,6 +16,45 @@ XGeomObject::~XGeomObject()
 }
 
 
+bool XGeomObject::LoadShaders(void)
+{
+	return true;
+}
+
+int XGeomObject::SkipWhites(const std::string & text, int pos)
+{
+	int charPos = pos;
+
+	while (text[charPos] == ' ' || text[charPos] == '\t')
+		charPos++;
+
+	return charPos;
+}
+
+int XGeomObject::ParseWord(const std::string & text, int pos, std::string & token)
+{
+	int charPos = pos;
+
+	do
+	{
+		token += text[charPos];
+		charPos++;
+
+	} while (text[charPos] > 32);
+
+	return charPos;
+}
+
+void XGeomObject::ParseShader(const std::string & text)
+{
+}
+
+int XGeomObject::FindShader(const std::string & text, int pos)
+{
+	return 0;
+}
+
+
 bool XGeomObject::CreateFaceData(TexVertex* pVertices, unsigned long* pIndices, unsigned int numVertices, unsigned int numIndices, ID3D11ShaderResourceView** pTextures)
 {
 	m_Faces.reserve(numIndices / 3);

@@ -1,0 +1,2 @@
+textures/common/caulk
+textures/graveyard/gy_wall_01

@@ -8,7 +8,3 @@ XEntity::XEntity()
 }
 
 
-bool XEntity::ParseEntities(const std::string & ents)
-{
-	return false;
-}

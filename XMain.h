@@ -15,7 +15,7 @@ protected:
 	// player object
 	std::vector<XEntity*> m_pEntities;
 	int m_numEntities;
-
+	int m_playerEntityIndex;
 	XTimer* m_pTimer;
 	// The direct3d app object
 	XD3DRenderer* m_pD3D;
@@ -32,6 +32,8 @@ public:
 	XIllumin(WCHAR* title, int width, int height) : XWindow(title, width, height) { m_numEntities = 0; m_pD3D = nullptr; m_pMap = nullptr; m_pTimer = nullptr; }
 	~XIllumin() { if (m_pD3D) delete m_pD3D; if (m_pMap) delete m_pMap; if (m_pTimer) delete m_pTimer; }
 
+	XEntity* GetPlayer() {
+		return m_pEntities[m_playerEntityIndex]; }
 	bool ParseInitFile(const std::string& fileName);
 	bool ParseEntities(void);
 	bool InitGameObjects(const std::string& params);

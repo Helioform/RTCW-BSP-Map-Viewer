@@ -29,4 +29,7 @@ public:
 	bool IsKeyPressed(unsigned char key);
 	void GetMousePosition(int& posX, int& posY);
 	void GetLastMousePosition(int& posX, int& posY);
+	void GetMouseDelta(int& posX, int& posY) {
+		posX = m_mouseX - m_lastMouseX; posY = m_mouseY - m_lastMouseY;
+	}
 };

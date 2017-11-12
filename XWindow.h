@@ -10,11 +10,11 @@
 class XWindow
 {
 protected:
-	HINSTANCE m_hInst;                                
-	WCHAR m_szTitle[MAX_LOADSTRING];                 
-	WCHAR m_szWindowClass[MAX_LOADSTRING];        
-	HWND m_hWnd;
-	int m_height, m_width;
+	HINSTANCE	m_hInst;                                
+	WCHAR		m_szTitle[MAX_LOADSTRING];                 
+	WCHAR		m_szWindowClass[MAX_LOADSTRING];        
+	HWND		m_hWnd;
+	int			m_height, m_width;
 
 public:
 	XWindow() {}

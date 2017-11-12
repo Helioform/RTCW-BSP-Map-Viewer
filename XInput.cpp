@@ -18,8 +18,8 @@ bool XInput::Initialize(HINSTANCE instance, HWND wnd, int screenWidth, int scree
 	HRESULT hr;
 	m_screenWidth = screenWidth;
 	m_screenHeight = screenHeight;
-	m_mouseX = 0;
-	m_mouseY = 0;
+	m_mouseX = screenWidth/2;
+	m_mouseY = screenHeight/2;
 
 	hr = DirectInput8Create(instance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&m_pDirectInput, NULL);
 	
@@ -123,7 +123,9 @@ bool XInput::Poll()
 		return false;
 	if (!ReadKeyboard())
 		return false;
-
+	m_lastMouseX = m_mouseX;
+	m_lastMouseY = m_mouseY;
+	
 	m_mouseX += m_mouseState.lX;
 	m_mouseY += m_mouseState.lY;
 

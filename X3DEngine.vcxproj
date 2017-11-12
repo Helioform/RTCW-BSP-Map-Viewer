@@ -131,11 +131,13 @@
     <ClCompile Include="XFont.cpp" />
     <ClCompile Include="XGeomObject.cpp" />
     <ClCompile Include="XInput.cpp" />
+    <ClCompile Include="XLight.cpp" />
     <ClCompile Include="XMain.cpp" />
     <ClCompile Include="XPlayer.cpp" />
     <ClCompile Include="XShader.cpp" />
     <ClCompile Include="XSprite.cpp" />
     <ClCompile Include="XTextureManager.cpp" />
+    <ClCompile Include="XTimer.cpp" />
     <ClCompile Include="XWindow.cpp" />
     <ClCompile Include="XWorldMap.cpp" />
   </ItemGroup>
@@ -152,11 +154,13 @@
     <ClInclude Include="XFont.h" />
     <ClInclude Include="XGeomObject.h" />
     <ClInclude Include="XInput.h" />
+    <ClInclude Include="XLight.h" />
     <ClInclude Include="XMain.h" />
     <ClInclude Include="XPlayer.h" />
     <ClInclude Include="XShader.h" />
     <ClInclude Include="XSprite.h" />
     <ClInclude Include="XTextureManager.h" />
+    <ClInclude Include="XTimer.h" />
     <ClInclude Include="XWindow.h" />
     <ClInclude Include="XWorldMap.h" />
   </ItemGroup>
