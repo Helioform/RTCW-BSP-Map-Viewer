@@ -7,6 +7,8 @@ Requires:
 
   *Visual Studio 2017
   
+  *DirectX 10 and 11 headers and libs
+  
   *Main Return To Castle Wolfenstein bsp maps and textures (placed in WorldMaps folder)
   
   *Graphics Card with Direct3D 10 GPU
