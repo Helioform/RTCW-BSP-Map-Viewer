@@ -4,6 +4,8 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <map>
+#include <algorithm>
 #include <sstream>
 #include <tchar.h> 
 #include <stdio.h>

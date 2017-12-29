@@ -20,7 +20,10 @@ bool XTextureManager::CreateTexture(unsigned char* imgData, unsigned int height,
 	memset(&texDesc, 0, sizeof(D3D11_TEXTURE2D_DESC));
 	texDesc.Width = width;
 	texDesc.Height = height;
-	texDesc.MipLevels = texDesc.ArraySize = 1;
+	texDesc.MipLevels = 1;
+	
+
+	texDesc.ArraySize = 1;
 	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	texDesc.SampleDesc.Count = 1;
 	texDesc.SampleDesc.Quality = 0;
@@ -87,8 +90,18 @@ bool XTextureManager::CreateWhiteTexture(int width, int height, bool isLightMap)
 	memset(&texDesc, 0, sizeof(D3D11_TEXTURE2D_DESC));
 	texDesc.Width = width;
 	texDesc.Height = height;
-	texDesc.MipLevels = texDesc.ArraySize = 1;
-	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	if (isLightMap)
+	{
+		texDesc.MipLevels = 0;
+		texDesc.ArraySize = 1;
+	}
+	else
+	{
+		texDesc.MipLevels = 1;
+		texDesc.ArraySize = 1;
+	}
+
+		texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	texDesc.SampleDesc.Count = 1;
 	texDesc.SampleDesc.Quality = 0;
 	texDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -105,19 +118,8 @@ bool XTextureManager::CreateWhiteTexture(int width, int height, bool isLightMap)
 	m_pd3dDeviceContext->Map(pTex2D, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedTex);
 
 	UCHAR* pTexels = (UCHAR*)mappedTex.pData;
-	int j = 0;
-	for (UINT row = 0; row < texDesc.Height; row++)
-	{
-		UINT rowStart = row * mappedTex.RowPitch;
-		for (UINT col = 0; col < texDesc.Width; col++)
-		{
-			UINT colStart = col * 4;
-			pTexels[rowStart + colStart + 0] = 255;
-			pTexels[rowStart + colStart + 1] = 255;
-			pTexels[rowStart + colStart + 2] = 255;
-			pTexels[rowStart + colStart + 3] = 255;
-		}
-	}
+	
+	memset(pTexels, 0, width*height * 4);
 
 	m_pd3dDeviceContext->Unmap(pTex2D, D3D11CalcSubresource(0, 0, 1));
 
@@ -182,7 +184,7 @@ bool XTextureManager::CreateSamplerState()
 	HRESULT hr;
 	D3D11_SAMPLER_DESC samplerDesc;
 	// Create a texture sampler state description.
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;//D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;

@@ -23,19 +23,7 @@ XD3DRenderer::XD3DRenderer(HWND wnd, int screenWidth, int screenHeight, bool ful
 
 XD3DRenderer::~XD3DRenderer()
 {
-	if (m_pD3DDevice)
-		m_pD3DDevice->Release();
-	if(m_pSwapChain!= nullptr)
-		m_pSwapChain->Release();
-	if(m_pRenderTargetView!= nullptr)
-		m_pRenderTargetView->Release();
-	if(m_pBackBuffer!= nullptr)
-		m_pBackBuffer->Release();
-	if(m_pDepthStencilBuffer!= nullptr)
-		m_pDepthStencilBuffer->Release();
-	if(m_pDepthStencilView!= nullptr)
-		m_pDepthStencilView->Release();
-	
+	ShutdownD3D();	
 }
 
 bool XD3DRenderer::LoadDriver()
@@ -147,6 +135,20 @@ bool XD3DRenderer::CreateD3DDevice(HWND wnd, int screenWidth, int screenHeight, 
 		return false;
 
 	return true;
+}
+
+void XD3DRenderer::ShutdownD3D(void)
+{
+	SAFE_RELEASE(m_pD3DDevice);
+	SAFE_RELEASE(m_pDeviceContext);
+	SAFE_RELEASE(m_pSwapChain);
+	SAFE_RELEASE(m_pRenderTargetView);
+	SAFE_RELEASE(m_pBackBuffer);
+	SAFE_RELEASE(m_pDepthStencilBuffer);
+	SAFE_RELEASE(m_pDepthStencilState);
+	SAFE_RELEASE(m_pDisabledDepthStencilState);
+	SAFE_RELEASE(m_pRasterState);
+	SAFE_RELEASE(m_pDepthStencilView);
 }
 
 bool XD3DRenderer::CreateRenderTargetView()
@@ -400,8 +402,9 @@ bool XD3DRenderer::Render(XWorldMap* pMap, XCamera* cam)
 			pShader->SetParams(cam->ViewMatrix(), cam->ProjectionMatrix(), visibleFaces[i]->textureIndex, visibleFaces[i]->lightMapIndex);
 				
 		// Set the vertex and pixel shaders that will be used to render these faces
-		m_pDeviceContext->VSSetShader(pShader->GetVertexShader(), nullptr, 0);
-		m_pDeviceContext->PSSetShader(pShader->GetPixelShader(), nullptr, 0);
+		pShader->BindVertexShader();
+		pShader->BindPixelShader();
+
 		ID3D11SamplerState* pSampleState = pMap->GetTextureManager()->GetSamplerState();
 		m_pDeviceContext->PSSetSamplers(0, 1, &pSampleState);
 

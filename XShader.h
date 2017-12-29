@@ -6,6 +6,8 @@
 #include <D3DX11async.h>
 #include "XTextureManager.h"
 
+#define MAX_SHADERS 256
+
 // shader flags
 #define XD3D_SRCBLEND_ZERO                       0x00000001
 #define XD3D_SRCBLEND_ONE                        0x00000002
@@ -138,6 +140,7 @@ protected:
 	ID3D10Blob*				m_pPixelShaderBuffer;
 	ID3D11VertexShader*		m_pVertexShader;
 	ID3D11PixelShader*		m_pPixelShader;
+	ID3D11BlendState*		m_blendStates[8];
 
 public:
 	XD3DShader();
@@ -174,6 +177,13 @@ public:
 
 	bool LoadAndCompile(const std::string& vertexShaderFileName, const std::string& pixelShaderFileName);
 	bool SetParams(const D3DXMATRIX& view, const D3DXMATRIX& projection, int textureId, int lightmapId = -1);
+	void BindVertexShader() {
+		m_pDeviceContext->VSSetShader(m_pVertexShader, nullptr, 0);
+	}	
+	void BindPixelShader() {
+		m_pDeviceContext->PSSetShader(m_pPixelShader, nullptr, 0);
+	}
+
 	bool CreateMatrixBuffer();
 	bool CreateLightBuffer();
 	void OutputErrorToFile();
@@ -183,39 +193,57 @@ public:
 class XShader
 {
 protected:	
-	std::string m_name;
-	int			m_lightmapIndex;
-	int			m_numStates;
-	int			m_currentState;
-	int			m_textureID;
-	XD3DShader* m_pD3DShader;
-	int			m_shaderType;
-	int			m_surfaceFlags;
-	int			m_contentFlags;
-	bool		m_isSky;
-	SkyParams	m_sky;
-	bool		m_polygonOffset;
-	bool		m_noMipMap;
-	bool		m_noPicMip;
+	std::string				m_name;
+	std::string				m_textureNames[8];
+	int						m_numTextures;
+	unsigned int			m_textureBlends[8];
+	int						m_lightmapIndex;
+	int						m_numStates;
+	int						m_numD3DShaders;
+	int						m_currentState;
+	int						m_textureID;
+	std::vector<XD3DShader*>m_pD3DShaders;
+	int						m_shaderType;
+	int						m_surfaceFlags;
+	int						m_contentFlags;
+	bool					m_isSky;
+	SkyParams				m_sky;
+	bool					m_polygonOffset;
+	bool					m_noPicMip;
 public:
-	XShader();
-	XShader(const std::string name, int type, int surfParams, XD3DShader* pD3DShader) {
-		m_name = name;  m_shaderType = type; m_surfaceFlags = surfParams; m_pD3DShader = pD3DShader;
+	XShader() : m_name(""), m_numTextures(0), m_lightmapIndex(0), m_numStates(0), m_numD3DShaders(0), m_currentState(0),
+		m_textureID(0), m_shaderType(0), m_surfaceFlags(0), m_contentFlags(0), m_isSky(false), m_noPicMip(true) {}
+
+	XShader(const std::string name, const std::string* textureNames, int numTextures, int type, int surfParams)
+	{
+		m_name = name;  m_shaderType = type; m_surfaceFlags = surfParams; m_numD3DShaders = 0;
+		memcpy(m_textureNames, textureNames, numTextures);
 	}
 
 	~XShader();
-	int GetSurfaceFlags() {
-		return m_surfaceFlags;
-	}
+	
+	void	SetName(const std::string name) { m_name = name; }
+	void	SetSurfaceFlags(int surfParam) { m_surfaceFlags = surfParam; }
+	void	SetTextureName(int i, const std::string name) { m_textureNames[i] = name; m_numTextures++; }
+	void	SetBlendState(int i, unsigned int blendFactor) { m_textureBlends[i] = blendFactor; }
+	void	SetShaderType(int type) { m_shaderType = type;}
 
-	void SetSurfaceFlags(int surfParam) {
-		m_surfaceFlags = surfParam;
+	std::string  GetName() { return m_name; }
+	int			 GetSurfaceFlags() { return m_surfaceFlags; }
+	std::string  GetTextureName(int i) { return m_textureNames[i]; }
+	unsigned int GetBlendState(int i) { return m_textureBlends[i]; }
+	int			GetShaderType() { return m_shaderType; }
+	
+	XD3DShader* GetD3DShader(int i)
+	{
+		if (i > m_numD3DShaders) return nullptr;
+		return m_pD3DShaders[i];
 	}
-	bool Load() { return true; }
-	bool SetParams() { return true; }
-	void SetShaderType(int type) { m_shaderType = type;}
-	int GetShaderType() { return m_shaderType; }
-	XD3DShader* GetD3DShader() {
-		return m_pD3DShader;
+	
+	bool AttachD3DShader(XD3DShader* pD3DShader)
+	{ 
+		m_pD3DShaders.push_back(pD3DShader);
+		m_numD3DShaders++;
+		return true;
 	}
 };

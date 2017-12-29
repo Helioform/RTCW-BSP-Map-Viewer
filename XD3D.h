@@ -12,6 +12,8 @@ using namespace DirectX;
 
 #define GPA(d3dModule, func) GetProcAddress(d3dModule, func)
 
+#define SAFE_RELEASE(obj) if(obj) { obj->Release(); obj = nullptr; }
+
 class XD3DRenderer
 {
 protected:
@@ -43,6 +45,7 @@ public:
 
 	bool LoadDriver();
 	bool CreateD3DDevice(HWND wnd, int screenwidth, int screenheight, bool fullscreen );
+	void ShutdownD3D(void);
 	bool CreateRenderTargetView();
 	bool CreateDepthBuffer();
 	bool CreateDepthStencilView();

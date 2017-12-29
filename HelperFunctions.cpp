@@ -61,7 +61,7 @@ void ColorShiftLightingBytes(unsigned char in[4], unsigned char out[4])
 	int shift, r, g, b;
 
 	// shift the color data based on overbright range
-	shift = 7 - 1;//r_mapOverBrightBits->integer - tr.overbrightBits;
+	shift = 4 - 1;//r_mapOverBrightBits->integer - tr.overbrightBits;
 
 	// shift the data based on overbright range
 	r = in[0] << shift;

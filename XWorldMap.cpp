@@ -224,6 +224,8 @@ bool XWorldMap::LoadLightmapShader()
 	return true;
 }
 
+
+
 bool XWorldMap::LoadShaders()
 {
 	std::string shaderName;
@@ -252,68 +254,35 @@ bool XWorldMap::LoadShaders()
 		scriptFile.close();
 	}
 
-	std::string line;
-	size_t shaderNamePos = 0;
-	std::istringstream scriptStringStream(scriptData);
-	int shaderSurfParams = 0;
+	int shaderSurfParams=0;
+	XShaderParser shaderParser(&scriptData);
+	std::string token;
+	int shaderPos = 0;
+
+	shaderParser.Tokenize();
 
 	for (int i = 0; i < m_q3Textures.size(); ++i)
 	{
 		shaderName = m_q3Textures[i].name;
-		scriptStringStream.seekg(0, scriptStringStream.beg);
-		std::string token;
-		shaderSurfParams = 0;
-		bool shaderFound = false;
 
-		while (std::getline(scriptStringStream, line))
-		{
-			if ((shaderNamePos = line.find(shaderName)) != std::string::npos)
-			{
-				shaderFound = true;
-				std::getline(scriptStringStream, line);
-
-				while (1)
-				{
-					if (line == "{")
-					{
-
-						std::getline(scriptStringStream, line);
-						size_t pos = 0;
-
-						pos = SkipWhites(line, 0);
-						// skip comments
-						if (line[pos] == '/' && line[pos + 1] == '/')
-							std::getline(scriptStringStream, line);
-
-						pos = ParseWord(line, pos, token);
-
-						if (token == "surfaceparm")
-						{
-							token = "";
-							size_t _pos = SkipWhites(line, pos);
-							ParseWord(line, _pos, token);
-							if (token == "nodraw")
-								shaderSurfParams = SURF_NODRAW;
-								if (token == "fog")
-									shaderSurfParams = CONTENTS_FOG;
-						}
-						std::getline(scriptStringStream, line);
-					}
-
-					std::getline(scriptStringStream, line);
-
-					if (line == "}")
-						break;
-				}
-
-			}
-
-			if (shaderFound)
-				break;
+		if ((shaderPos = shaderParser.FindShader(shaderName)) != -1)
+		{	
+			if (!shaderParser.ParseShader(shaderPos))	
+				return false;							
+			// create our new shader and add it to the list
+			XShader* pShader = new XShader();
+			shaderParser.BuildShader(pShader);
+			pShader->AttachD3DShader(m_pD3DShaders[0]);
+			m_pShaders[m_numShaders] = pShader;
+			m_numShaders++;
 		}
-
-		m_pShaders[m_numShaders] = new XShader(shaderName, type, shaderSurfParams, nullptr);
-		m_numShaders++;
+		else
+		{
+			XShader* pShader = new XShader(shaderName, nullptr, 0, 0, 0);
+			pShader->AttachD3DShader(m_pD3DShaders[0]);
+			m_pShaders[m_numShaders] = pShader;
+			m_numShaders++;
+		}
 	}
 
 	return true;
@@ -487,11 +456,15 @@ bool XWorldMap::CreatePolygons()
 	for (int i = 0; i < m_q3Faces.size(); ++i)
 	{
 		if (m_q3Faces[i].type == 1) // we have a polygon
-		{
-			if (m_pShaders[m_q3Faces[i].texture]->GetSurfaceFlags() == CONTENTS_FOG) // don't create no draw surface
+		{	
+			if (m_q3Faces[i].texture < m_numShaders)
 			{
-				m_faceData.push_back(nullptr);
-				continue;
+				if (m_pShaders[m_q3Faces[i].texture]->GetSurfaceFlags() == CONTENTS_FOG ||
+					m_pShaders[m_q3Faces[i].texture]->GetSurfaceFlags() == SURF_NODRAW) // don't create no draw surface
+				{
+					m_faceData.push_back(nullptr);
+					continue;
+				}
 			}
 
 			std::vector<TexVertex> vertices;
@@ -696,8 +669,8 @@ void XWorldMap::AddSurfacesToDraw(XCamera& cam)
 				continue;
 
 			TextureIndexedFaceData* pFace = m_faceData[m_q3LeafFaces[f].face];
-			if (IsAlreadyVisible(pFace))
-				continue;
+		//	if (IsAlreadyVisible(pFace))
+		//		continue;
 			
 			m_visibleFaces.push_back(pFace);
 		}

@@ -97,7 +97,7 @@ bool XIllumin::InitGameObjects(const std::string& params)
 	m_pD3D = new XD3DRenderer();
 	m_pTimer = new XTimer();
 
-	m_pUICamera = new XCamera(D3DXVECTOR3(0.0f, 0.0f, 1.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT, 0.1f, 10000.0f);
+	m_pUICamera = new XCamera(D3DXVECTOR3(0.0f, 0.0f, 1.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT, 0.1f, 1000.0f);
 
 	m_pInput = new XInput();
 	m_pInput->Initialize(m_hInst, m_hWnd, m_width, m_height);
@@ -121,7 +121,13 @@ bool XIllumin::InitGameObjects(const std::string& params)
 	}
 	if (!m_pD3D->CreateDepthStencilView())
 	{
-		FAIL_MSG_BOX(L"Error depth stencil");
+		FAIL_MSG_BOX(L"Error creating depth stencil");
+		return false;
+	}
+
+	if (!m_pD3D->CreateDisabledDepthStencilState())
+	{
+		FAIL_MSG_BOX(L"Error creating disabled depth stencil state");
 		return false;
 	}
 
@@ -141,14 +147,13 @@ bool XIllumin::InitGameObjects(const std::string& params)
 		return false;
 	}
 
-	m_pTextureManager->CreateSamplerState();
-	
 	if (!m_pMap->Load(m_currentMapName))
 	{
 		FAIL_MSG_BOX(L"Error loading map");
 		return false;
 	}
-
+	
+	m_pTextureManager->CreateSamplerState();
 	ParseEntities();
 
 	return true;
@@ -240,13 +245,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		return FALSE;
 	}
 	
-	pMainGameWindow->InitGameObjects(" ");
+	if (!pMainGameWindow->InitGameObjects(" "))
+		return FALSE;
 
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_WIN32PROJECT1));
 	MSG msg;
 	
 	
-	
+	// main game loop
 	while (1)
 	{
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))

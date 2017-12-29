@@ -8,12 +8,9 @@
 #include "HelperFunctions.h"
 #include "XShader.h"
 #include <iostream>
-
-#define MAX_SHADERS 256
+#include "XShaderParser.h"
 
 using namespace DirectX;
-
-
 
 struct TexVertex
 {
@@ -42,8 +39,8 @@ struct TextureIndexedFaceData
 struct Vertex
 {
 	D3DXVECTOR3 pos;
-	D3DXVECTOR4 color;
 	D3DXVECTOR2 tex;
+	D3DXVECTOR4 color;	
 };
 
 class XGeomObject
@@ -69,11 +66,8 @@ public:
 	}
 	~XGeomObject();
 
-	virtual bool LoadShaders(void);
-	int SkipWhites(const std::string& text, int pos);
-	int ParseWord(const std::string& text, int pos, std::string& token);
-	void ParseShader(const std::string& text);
-	int FindShader(const std::string& text, int pos);
+	virtual bool LoadShaders(void);	
+	
 	
 
 	XD3DShader* GetD3DShader(int i) {

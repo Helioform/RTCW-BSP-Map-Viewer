@@ -69,6 +69,9 @@
     <ClCompile Include="XLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="XShaderParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HelperFunctions.h">
@@ -132,6 +135,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="XLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XShaderParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

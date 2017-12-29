@@ -79,8 +79,8 @@
     <LibraryPath>C:\Program Files\Epic Games\UE_4.17\Engine\Source\ThirdParty\Windows\DirectX\Lib\x64;C:\Users\Hermetix\Downloads\unrealengine-master\unrealengine-master\Engine\Source\ThirdParty\Windows\DirectX\Lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\Hermetix\Downloads\unrealengine-master\unrealengine-master\Engine\Source\ThirdParty\Windows\DirectX\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files\Epic Games\UE_4.17\Engine\Source\ThirdParty\Windows\DirectX\Lib\x64;C:\Users\Hermetix\Downloads\unrealengine-master\unrealengine-master\Engine\Source\ThirdParty\Windows\DirectX\Lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>.\DirectX\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>.\DirectX\Lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -135,6 +135,7 @@
     <ClCompile Include="XMain.cpp" />
     <ClCompile Include="XPlayer.cpp" />
     <ClCompile Include="XShader.cpp" />
+    <ClCompile Include="XShaderParser.cpp" />
     <ClCompile Include="XSprite.cpp" />
     <ClCompile Include="XTextureManager.cpp" />
     <ClCompile Include="XTimer.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="XMain.h" />
     <ClInclude Include="XPlayer.h" />
     <ClInclude Include="XShader.h" />
+    <ClInclude Include="XShaderParser.h" />
     <ClInclude Include="XSprite.h" />
     <ClInclude Include="XTextureManager.h" />
     <ClInclude Include="XTimer.h" />

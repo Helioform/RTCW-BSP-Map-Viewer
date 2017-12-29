@@ -269,6 +269,7 @@ public:
 	void ReadVisibilityData(std::ifstream& is, int offset, unsigned int length);
 
 	bool LoadLightmapShader();
+	
 	bool LoadShaders();
 	bool CreateInputLayout();
 	bool Load(std::string fileName);

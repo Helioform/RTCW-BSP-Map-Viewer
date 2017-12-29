@@ -167,11 +167,6 @@ void XD3DShader::OutputErrorToFile()
 }
 
 
-XShader::XShader()
-{
-}
-
-
 XShader::~XShader()
 {
 }
