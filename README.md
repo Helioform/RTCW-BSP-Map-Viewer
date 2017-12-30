@@ -9,8 +9,7 @@ Requires:
   
   * DirectX 10 and 11 headers and libs
   
-  * Main Return To Castle Wolfenstein bsp maps, textures and script
-  files unpacked from the RTCW Main folder and placed in WorldMaps folder.
+  * Textures, maps and script files unpacked from RTCW Main folder and placed in WorldMaps folder
   
   * Graphics Card with Direct3D 10 GPU
   
