@@ -3,8 +3,12 @@
 #include "TGAImage.h"
 #include "XTextureManager.h"
 #include "XCamera.h"
+#include "XPlayer.h"
 
 #define LIGHTMAP_SIZE 128
+#define SCREEN_HEIGHT 600
+#define SCREEN_WIDTH  800
+
 static const std::string MapPath = "WorldMaps//";
 
 #pragma pack(1)
@@ -178,13 +182,11 @@ class XWorldMap :
 {
 
 protected:
-	unsigned int							m_numEntities, m_numTextures, m_numPlanes, m_numNodes, m_numEffects, m_numFaces, m_numVertices, m_numMeshVertices,
+	unsigned int							m_playerEntityIndex, m_entStringLength, m_numModels, m_numLeafBrushes, m_numBrushSides, m_numBrushes, m_numEntities, m_numTextures, m_numPlanes, m_numNodes, m_numEffects, m_numFaces, m_numVertices, m_numMeshVertices,
 											m_numLightMaps, m_numLeaves, m_numLeafFaces, m_visDataSize;
 	bool									m_lightMapsOn;
 	std::vector<TextureIndexedFaceData*>	m_faceData;
 	std::vector<TextureIndexedFaceData*>	m_visibleFaces;
-	std::vector<ID3D11ShaderResourceView*>	m_textures;
-	std::vector<ID3D11ShaderResourceView*>	m_lightMaps;
 	std::vector<Q3MapTexture>				m_q3Textures;
 	Q3MapEntities							m_q3Entities;
 	std::vector<Q3MapVertex>				m_q3Vertices;
@@ -201,15 +203,58 @@ protected:
 	std::vector<Q3MapLeafFace>				m_q3LeafFaces;
 	std::vector<Q3MapLightMap>				m_q3LightMaps;
 	Q3MapVisData							m_q3VisData;
+	std::vector<XEntity*>					m_mapEntities;
+	int										m_currentLeafPosition;
 public:
-	XWorldMap();
-	XWorldMap(ID3D11DeviceContext* pDevCntxt, ID3D11Device* pD3D, XTextureManager* pTextureManager) {
+	XWorldMap() { }
+
+	XWorldMap(XD3DRenderer* pD3D, XTextureManager* pTextureManager) {
 		m_pD3D = pD3D;
-		m_pd3dDeviceContext = pDevCntxt;
 		m_pTextureManager = pTextureManager;
 		m_numShaders = 1;
 	}
-	~XWorldMap();
+	
+	void SetLeafPosition(int leaf) {
+		m_currentLeafPosition = leaf;
+	}
+
+	int GetCurrentLeafPosition() {
+		return m_currentLeafPosition;
+	}
+
+	XEntity* GetPlayer() {
+		return m_mapEntities[m_playerEntityIndex];
+	}
+	void Unload(void)
+	{
+		for (auto i : m_faceData)
+			i->pTexVBuffer->Release();
+
+		for (auto i : m_visibleFaces)
+			i->pTexVBuffer->Release();
+
+		m_q3Textures.clear();
+		delete [] m_q3Entities.ents;
+		m_q3Vertices.clear();
+		m_q3MapEffects.clear();
+		m_q3MapLeafBrushes.clear();
+		m_q3MapBrushes.clear();
+		m_q3MapBrushSides.clear();
+		m_q3MapModels.clear();
+		m_q3Faces.clear();
+		m_q3MeshVertices.clear();
+		m_q3Planes.clear();
+		m_q3Nodes.clear();
+		m_q3Leaves.clear();
+		m_q3LeafFaces.clear();
+		m_q3LightMaps.clear();
+		delete [] m_q3VisData.vecs;
+	}
+
+	~XWorldMap()
+	{
+		Unload();
+	}
 
 	std::vector<TextureIndexedFaceData*> GetFaceData() { return m_faceData; }
 	std::vector<TextureIndexedFaceData*> GetVisibleFaces() {
@@ -218,8 +263,10 @@ public:
 	const Q3MapEntities& GetEntities() const {
 		return m_q3Entities;
 	}
-	std::vector<ID3D11ShaderResourceView*> GetTextures() { return m_textures; }
-	std::vector<ID3D11ShaderResourceView*> GetLightMaps() { return m_lightMaps; }
+
+	std::vector<Q3MapLeafBrush> GetLeafBrushes() { return m_q3MapLeafBrushes; }
+	std::vector<Q3MapBrush> GetBrushes() { return m_q3MapBrushes; }
+	std::vector<Q3MapBrushSide> GetBrushSides() { return m_q3MapBrushSides; }
 	std::vector<Q3MapFace> GetFaces() { return m_q3Faces; }
 	std::vector<Q3MapPlane> GetPlanes() { return m_q3Planes; }
 	std::vector<Q3MapNode> GetNodes() { return m_q3Nodes; }
@@ -271,6 +318,7 @@ public:
 	bool LoadLightmapShader();
 	
 	bool LoadShaders();
+	bool LoadEntities(void);
 	bool CreateInputLayout();
 	bool Load(std::string fileName);
 	bool OutputEntitiesToFile(const std::string& fileName);
@@ -281,5 +329,6 @@ public:
 	int FindLeaf(const D3DXVECTOR3& cameraPos) const;
 	bool IsClusterVisible(int visCluster, int testCluster) const;
 	void AddSurfacesToDraw(XCamera& cam);
+	void Render(XCamera* pCam);
 };
 

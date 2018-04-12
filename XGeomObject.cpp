@@ -1,4 +1,4 @@
-#include "stdafx.h"
+
 #include <string>
 
 #include "XGeomObject.h"
@@ -123,7 +123,7 @@ bool XGeomObject::CreateVertexBuffer(ID3D11Buffer** pVB, TexVertex* pVertices, u
 	vertexData.SysMemSlicePitch = 0;
 
 	// Now create the vertex buffer.
-	hr = m_pD3D->CreateBuffer(&vertexBufferDesc, &vertexData, pVB);
+	hr = m_pD3D->GetD3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexData, pVB);
 	
 	if (FAILED(hr))
 		return false;
@@ -150,7 +150,7 @@ bool XGeomObject::CreateIndexBuffer(ID3D11Buffer** pIB, unsigned long* pIndices,
 	indexData.SysMemSlicePitch = 0;
 
 	// Create the index buffer.
-	hr = m_pD3D->CreateBuffer(&indexBufferDesc, &indexData, pIB);
+	hr = m_pD3D->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexData, pIB);
 	
 	if (FAILED(hr))
 		return false;

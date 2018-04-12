@@ -23,12 +23,11 @@ char* XShaderParser::SkipWhites(char* text, bool & hasNewLines)
 }
 
 
-std::string XShaderParser::ParseToken(char** text, bool allowLineBreaks)
+char* XShaderParser::ParseToken(char** text, bool allowLineBreaks)
 {
 	int c = 0, len;
 	bool hasNewLines = false;
 	char *data;
-//	memset(m_currentToken, 0, MAX_TOKEN_CHARS);
 	data = *text;
 	len = 0;
 	m_currentToken[0] = 0;
@@ -127,27 +126,27 @@ std::string XShaderParser::ParseToken(char** text, bool allowLineBreaks)
 	m_currentToken[len] = '\0';
 
 	*text = (char *)data;
-	return std::string(m_currentToken);
+	return m_currentToken;
 }
 
 
-void XShaderParser::Tokenize()
+void XShaderParser::ParseShaderFile()
 {
 	int i = m_scriptData->length();
 	char* text = new char[i];
 	memcpy(text, m_scriptData->c_str(), i);
-	std::string token = " ";
-	
-	m_tokens.reserve(i);
+	char* token = " ";
 
 	while (i > 0)
 	{
 		token = ParseToken(&text, false);
-
-		if (token != "")
+		
+		if (StrCaseCmp(token, ""))
 		{
-			m_tokens.push_back(token);
-			m_numTokens++;
+			memset(m_currentShaderName, 0, MAX_TOKEN_CHARS);
+			memcpy(m_currentShaderName, token, strlen(token));
+			
+			ParseShader(&text);
 		}
 
 		i = strlen(text);
@@ -156,94 +155,182 @@ void XShaderParser::Tokenize()
 }
 
 
-bool XShaderParser::ParseShader(int index)
+bool XShaderParser::ParseShader(char** text)
 {
-	std::string token;
-	int pos = index+1;
+	int stack[64]; // used to parse nested bracket content
+	int s = 0;
+	memset(stack, 0, 64 * sizeof(int));
+	char* token = ParseToken(text, false);
+	int numStages = 0;
+	unsigned int surfaceParams = 0, blendDest = 0, blendSrc = 0;
+	float	animFreq = 0;
+	std::string textureName;
+	char* animTextureNames[8];
+	XShader sh;
 
-	std::vector<std::string>::iterator it = m_tokens.begin();
-	it++;
+	while(!StrCaseCmp(token, ""))
+		token = ParseToken(text, false);
 
 	// make sure the syntax is valid
-	if (*it != "{")
+	if (!StrCaseCmp(token, "{"))
+		stack[s++] = 1;
+	else
 		return false;
 
-	while (1)
-	{
-		token = *it;
-		it++;
+	while(stack[0]) // while the stack is not empty
+	{	
+		token = ParseToken(text, false);
+		
+		if (!StrCaseCmp(token, ""))
+			continue;
 
-		if (token == "}")
+		if (!StrCaseCmp(token, "{"))
 		{
-			break;
+			stack[s++] = 1;
+			if (s >= 64)
+				return false;
+
+			numStages++;
+			token = ParseToken(text, false);
 		}
-		else if (token == "surfaceparm")
+		else if (!StrCaseCmp(token, "}"))
 		{
-			token = *it;
-			it++;
-			ParseSurfaceParams(token);
+			stack[--s] = 0;
+			if (numStages) 
+			{
+				if (stack[0])
+				{
+					TextureStage ts;
+					ts.destBlend = blendDest;
+					ts.srcBlend = blendSrc;
+					ts.animFrequency = animFreq;
+					ts.textureName = textureName;
+				
+					sh.SetTextureStage(ts);
+					animFreq = 0.0f;
+					blendDest = blendSrc = 0;
+					textureName = "";
+			
+				}
+			}
+
+			token = ParseToken(text, false);
 		}
-		else if (token == "map")
+		else if (!StrCaseCmp(token, "surfaceparm"))
+		{	
+			token = ParseToken(text, false);
+			surfaceParams |= ParseSurfaceParams(token);
+			token = ParseToken(text, false);
+		}
+		else if (!StrCaseCmp(token, "map"))
 		{
-			token = *it; 
-			it++;
-			ParseTextureMapNames(token);
+			token = ParseToken(text, false);
+			textureName = std::string(token);
+			token = ParseToken(text, false);
+		}
+		else if (!StrCaseCmp(token, "animMap"))
+		{
+			// parse frequency
+			token = ParseToken(text, false);
+			
+			// parse first texture name
+			token = ParseToken(text, false);
+			int i = 0;
+
+			while (token[0] == 't' && i < 8)
+			{
+				token = ParseToken(text, false);
+				i++;
+			}
+
+		}
+		else if (!StrCaseCmp(token, "blendFunc"))
+		{
+			token = ParseToken(text, false);
+			if (!StrCaseCmp(token, "filter"))
+				continue;
+
+			if (!StrCaseCmp(token, "add"))
+				continue;
+
+			if (!StrCaseCmp(token, "blend"))
+				continue;
+
+			if (!StrCaseCmp(token, "GL_add"))
+				continue;
+
+			blendSrc |= ParseBlend(token);
+			token = ParseToken(text, false);
+			blendDest |= ParseBlend(token);
+			token = ParseToken(text, false);
 		}
 		else
-			it++;
+		{
+			token = ParseToken(text, false);
+		}
 	}
 	
+	sh.SetName(m_currentShaderName);
+	sh.SetSurfaceFlags(surfaceParams);
+	m_shaders[m_currentShaderName] = sh;
+	m_numShaders++;
+
 	return true;
 }
 
-int XShaderParser::FindShader(const std::string& shaderName)
+bool XShaderParser::FindShader(const std::string& shaderName, XShader* sh)
 {
-	std::vector<std::string>::iterator it;
+	std::unordered_map<std::string, XShader>::const_iterator it = m_shaders.find(shaderName);
 
-	it = std::find(m_tokens.begin(), m_tokens.end(), shaderName);
-			
-	if (it != m_tokens.end())
+	if (it == m_shaders.end())
+		return false;
+	else
 	{
-		return std::distance(m_tokens.begin(), it);
+		*sh = it->second;
+		return true;
 	}
-	
-	return -1;
 }
 
-void XShaderParser::ParseSurfaceParams(std::string & text)
+unsigned int XShaderParser::ParseSurfaceParams(const std::string& text)
 {
-	if (text == "nodraw")
-		m_surfaceParams.push_back(SURF_NODRAW);
-	else if (text == "fog")
-		m_surfaceParams.push_back(CONTENTS_FOG);
+	if (!StrCaseCmp(text.c_str(), "nodraw"))
+		return SURF_NODRAW;
+	else if (!StrCaseCmp(text.c_str(), "fog"))
+		return CONTENTS_FOG;
 
+	return 0;
 }
 
-void XShaderParser::ParseTextureMapNames(std::string & text)
+unsigned int XShaderParser::ParseBlend(const std::string & text)
 {
-	m_textureMapNames.push_back(text);
+	if (!StrCaseCmp(text.c_str(), "GL_ZERO"))
+		return XD3D_BLEND_ZERO;
+	else if (!StrCaseCmp(text.c_str(), "GL_ONE"))
+		return XD3D_BLEND_ONE;
+	else if (!StrCaseCmp(text.c_str(), "GL_DST_COLOR"))
+		return XD3D_BLEND_DST_COLOR;
+	else if (!StrCaseCmp(text.c_str(), "GL_SRC_COLOR"))
+		return XD3D_BLEND_SRC_COLOR;
+	else if (!StrCaseCmp(text.c_str(), "GL_ONE_MINUS_DST_COLOR"))
+		return XD3D_BLEND_ONE_MINUS_DST_COLOR;
+	else if (!StrCaseCmp(text.c_str(), "GL_SRC_ALPHA"))
+		return XD3D_BLEND_SRC_ALPHA;
+	else if (!StrCaseCmp(text.c_str(), "GL_ONE_MINUS_SRC_ALPHA"))
+		return XD3D_BLEND_ONE_MINUS_SRC_ALPHA;
+
+	return 0;
 }
 
-void XShaderParser::ParseBlend(std::string & text)
+void XShaderParser::ParseTCMod(const std::string & text)
 {
 }
 
-void XShaderParser::ParseTCMod(std::string & text)
-{
-}
-
-void XShaderParser::ParseVector(std::string & text, float * v)
+void XShaderParser::ParseVector(const std::string & text, float * v)
 {
 }
 
 void XShaderParser::BuildShader(XShader * pShader)
 {
-	for (auto i : m_surfaceParams)
-		pShader->SetSurfaceFlags(i);
-
-	for (int i = 0; i < m_textureMapNames.size(); ++i)
-		pShader->SetTextureName(i, m_textureMapNames[i]);
-
-	m_textureMapNames.clear();
-	m_surfaceParams.clear();
+	
 }
+

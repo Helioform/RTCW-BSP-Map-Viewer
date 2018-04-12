@@ -29,7 +29,7 @@ public:
 		return true;
 	}
 
-	void CalculateElapsedTIme()
+	void CalculateElapsedTime()
 	{
 		LARGE_INTEGER li;
 		QueryPerformanceCounter(&li);

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+
 #include "XSprite.h"
 
 
@@ -46,7 +46,7 @@ bool XSprite::CreateInputLayout()
 	// Get a count of the elements in the layout.
 	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 	// Create the vertex input layout.
-	hr = m_pD3D->CreateInputLayout(polygonLayout, numElements, m_pShader->GetD3DShader(0)->GetVertexShaderBuffer()->GetBufferPointer(),
+	hr = m_pD3D->GetD3DDevice()->CreateInputLayout(polygonLayout, numElements, m_pShader->GetD3DShader(0)->GetVertexShaderBuffer()->GetBufferPointer(),
 		m_pShader->GetD3DShader(0)->GetVertexShaderBuffer()->GetBufferSize(), &m_pLayout);
 
 	m_pShader->GetD3DShader(0)->GetVertexShaderBuffer()->Release();
@@ -74,7 +74,7 @@ bool XSprite::CreateVertexBuffer()
 	vertexData.SysMemPitch = 0;
 	vertexData.SysMemSlicePitch = 0;
 
-	hr = m_pD3D->CreateBuffer(&vertexBufferDesc, &vertexData, &m_pVertexBuffer);
+	hr = m_pD3D->GetD3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexData, &m_pVertexBuffer);
 
 	if (FAILED(hr))
 		return false;
@@ -101,7 +101,7 @@ bool XSprite::CreateIndexBuffer(void)
 	indexData.SysMemSlicePitch = 0;
 
 	// Create the index buffer.
-	hr = m_pD3D->CreateBuffer(&indexBufferDesc, &indexData, &m_pIndexBuffer);
+	hr = m_pD3D->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexData, &m_pIndexBuffer);
 
 	if (FAILED(hr))
 		return false;

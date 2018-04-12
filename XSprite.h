@@ -13,8 +13,7 @@ class XSprite
 	ID3D11Buffer*		m_pIndexBuffer;
 	D3DXVECTOR3			m_center;
 	ID3D11InputLayout*	m_pLayout;
-	ID3D11Device*		m_pD3D;
-	ID3D11DeviceContext* m_pDeviceContext;
+	XD3DRenderer*		m_pD3D;
 	XShader*			m_pShader;
 	XD3DShader*			m_pD3DShaders[MAX_SPRITE_D3DSHADERS];
 	XTextureManager*	m_pTextureManager;
@@ -25,9 +24,8 @@ class XSprite
 public:
 	XSprite();
 
-	XSprite(ID3D11Device* pd3d, ID3D11DeviceContext* pDeviceContext, XShader* pShader, XTextureManager* pTextureManager, int width, int height, const D3DXVECTOR3& center) {
-		m_pD3D = pd3d;
-		m_pDeviceContext = pDeviceContext;
+	XSprite(XD3DRenderer* pD3D, XShader* pShader, XTextureManager* pTextureManager, int width, int height, const D3DXVECTOR3& center) {
+		m_pD3D = pD3D;
 		m_pShader = pShader;
 		m_pTextureManager = pTextureManager;
 		m_width = width;
@@ -37,18 +35,6 @@ public:
 		m_foreGroundColor = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 		m_numD3DShaders = 0;
 
-	}
-
-	XSprite(ID3D11Device* pd3d, ID3D11DeviceContext* pDeviceContext, XTextureManager* pTextureManager, int width, int height, const D3DXVECTOR3& center)
-	{
-		m_pD3D = pd3d;
-		m_pDeviceContext = pDeviceContext;
-		m_pShader = nullptr;
-		m_pTextureManager = pTextureManager;
-		m_width = width;
-		m_height = height;
-		m_center = center;
-		m_numD3DShaders = 0;
 	}
 
 	~XSprite();
@@ -61,10 +47,10 @@ public:
 	bool CreateVertexBuffer(void);
 	bool CreateIndexBuffer(void);
 	bool CreateInputLayout(void);
-	bool LoadD3DShader(const std::string& vertexShaderFileName, const std::string& pixelShaderFileName)
+	void LoadD3DShader(const std::string& vertexShaderFileName, const std::string& pixelShaderFileName)
 	{
-		if (m_numD3DShaders == 8) return false;
-		m_pD3DShaders[m_numD3DShaders] = new XD3DShader(m_pDeviceContext, m_pD3D, m_pTextureManager);
+		if (m_numD3DShaders == 8) return;
+		m_pD3DShaders[m_numD3DShaders] = new XD3DShader(m_pD3D, m_pTextureManager);
 		m_pD3DShaders[m_numD3DShaders]->LoadAndCompile(vertexShaderFileName, pixelShaderFileName);
 		m_numD3DShaders++;
 	}

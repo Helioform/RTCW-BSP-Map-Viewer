@@ -1,12 +1,9 @@
 #pragma once
-#pragma comment(lib,"d3d11.lib")
-#pragma comment(lib, "DXGI")
 
 #include <d3d11.h>
 #include <DirectXMath.h>
-#include "XGeomObject.h"
-#include "XWorldMap.h"
 #include "XCamera.h"
+#include "Singleton.h"
 
 using namespace DirectX;
 
@@ -14,7 +11,7 @@ using namespace DirectX;
 
 #define SAFE_RELEASE(obj) if(obj) { obj->Release(); obj = nullptr; }
 
-class XD3DRenderer
+class XD3DRenderer : public Singleton<XD3DRenderer>
 {
 protected:
 	HMODULE						m_XD3DModule;
@@ -45,6 +42,7 @@ public:
 
 	bool LoadDriver();
 	bool CreateD3DDevice(HWND wnd, int screenwidth, int screenheight, bool fullscreen );
+	bool InitD3D(HWND wnd, int screenWidth, int screenHeight, bool fullScreen);
 	void ShutdownD3D(void);
 	bool CreateRenderTargetView();
 	bool CreateDepthBuffer();
@@ -53,8 +51,6 @@ public:
 
 	bool Setup();
 	bool ClearScene(const D3DXCOLOR& col);
-	bool Render(XGeomObject*, XCamera*);
-	bool Render(XWorldMap*, XCamera*);
 	bool ShowScene();
 	void TurnOnZBuffer();
 	void TurnOffZBuffer();

@@ -7,33 +7,22 @@
 #include "XTextureManager.h"
 
 #define MAX_SHADERS 256
+#define MAX_TEXTURE_BLENDS 8
+#define MAX_TEXTURE_STAGES 8
+#define MAX_TEXTURE_ANIMS 8
 
 // shader flags
-#define XD3D_SRCBLEND_ZERO                       0x00000001
-#define XD3D_SRCBLEND_ONE                        0x00000002
-#define XD3D_SRCBLEND_DST_COLOR                  0x00000003
-#define XD3D_SRCBLEND_ONE_MINUS_DST_COLOR        0x00000004
-#define XD3D_SRCBLEND_SRC_ALPHA                  0x00000005
-#define XD3D_SRCBLEND_ONE_MINUS_SRC_ALPHA        0x00000006
-#define XD3D_SRCBLEND_DST_ALPHA                  0x00000007
-#define XD3D_SRCBLEND_ONE_MINUS_DST_ALPHA        0x00000008
-#define XD3D_SRCBLEND_ALPHA_SATURATE             0x00000009
-#define XD3D_SRCBLEND_BITS                       0x0000000f
-
-#define XD3D_DSTBLEND_ZERO                       0x00000010
-#define XD3D_DSTBLEND_ONE                        0x00000020
-#define XD3D_DSTBLEND_SRC_COLOR                  0x00000030
-#define XD3D_DSTBLEND_ONE_MINUS_SRC_COLOR        0x00000040
-#define XD3D_DSTBLEND_SRC_ALPHA                  0x00000050
-#define XD3D_DSTBLEND_ONE_MINUS_SRC_ALPHA        0x00000060
-#define XD3D_DSTBLEND_DST_ALPHA                  0x00000070
-#define XD3D_DSTBLEND_ONE_MINUS_DST_ALPHA        0x00000080
-#define XD3D_DSTBLEND_BITS                       0x000000f0
-#define XD3D_DEPTHMASK_TRUE                      0x00000100
-#define XD3D_POLYMODE_LINE                       0x00001000
-#define XD3D_DEPTHTEST_DISABLE                   0x00010000
-#define XD3D_DEPTHFUNC_EQUAL                     0x00020000
-#define XD3D_FOG_DISABLE                         0x00020000
+#define XD3D_BLEND_ZERO                       0x00000001
+#define XD3D_BLEND_ONE                        0x00000002
+#define XD3D_BLEND_SRC_COLOR				  0x00000003
+#define XD3D_BLEND_DST_COLOR                  0x00000004
+#define XD3D_BLEND_ONE_MINUS_DST_COLOR        0x00000005
+#define XD3D_BLEND_SRC_ALPHA                  0x00000006
+#define XD3D_BLEND_ONE_MINUS_SRC_ALPHA        0x00000007
+#define XD3D_BLEND_DST_ALPHA                  0x00000008
+#define XD3D_BLEND_ONE_MINUS_DST_ALPHA        0x00000009
+#define XD3D_BLEND_ALPHA_SATURATE             0x0000000A
+#define XD3D_BLEND_BITS                       0x0000000B
 
 
 
@@ -112,6 +101,63 @@ struct SkyParams
 
 };
 
+enum tcModFunc
+{
+	sinWave,
+	triWave,
+	squareWave,
+	sawTooth,
+	inverseSawTooth
+};
+
+struct tcModScale
+{
+	float sScale, tScale;
+};
+
+struct tcModScroll
+{
+	float sSpeed, tSpeed;
+};
+
+struct tcModRotate
+{
+	float degreesPerSecond;
+};
+
+struct tcModStretch
+{
+	tcModFunc func;
+	float	base;
+	float	amplitude;
+	float	phase;
+	float   frequency;
+};
+
+struct tcModTransform
+{
+
+
+};
+
+struct tcModTurb
+{
+	float	base;
+	float	amplitude;
+	float	phase;
+	float	frequency;
+};
+
+struct tcMod
+{
+	tcModScale		scale;
+	tcModScroll		scroll;
+	tcModRotate		rotate;
+	tcModStretch	stretch;
+	tcModTransform	transform;
+	tcModTurb		turbulence;
+};
+
 struct MatrixBufferType
 {
 	D3DXMATRIX world;
@@ -130,8 +176,7 @@ class XD3DShader
 {
 protected:
 	XTextureManager*		m_pTextureManager;
-	ID3D11Device*			m_pD3D;
-	ID3D11DeviceContext*	m_pDeviceContext;
+	XD3DRenderer*			m_pD3D;
 	ID3D11Buffer*			m_pMatrixBuffer;
 	ID3D11Buffer*			m_pLightBuffer;
 	D3DXMATRIX				m_world;
@@ -144,8 +189,7 @@ protected:
 
 public:
 	XD3DShader();
-	XD3DShader(ID3D11DeviceContext* pDeviceContext, ID3D11Device* pD3D, XTextureManager* pTextureManager) {
-		m_pDeviceContext = pDeviceContext;
+	XD3DShader(XD3DRenderer* pD3D, XTextureManager* pTextureManager) {	
 		m_pD3D = pD3D;
 		m_pTextureManager = pTextureManager;
 		D3DXMatrixIdentity(&m_world);
@@ -178,10 +222,10 @@ public:
 	bool LoadAndCompile(const std::string& vertexShaderFileName, const std::string& pixelShaderFileName);
 	bool SetParams(const D3DXMATRIX& view, const D3DXMATRIX& projection, int textureId, int lightmapId = -1);
 	void BindVertexShader() {
-		m_pDeviceContext->VSSetShader(m_pVertexShader, nullptr, 0);
+		m_pD3D->GetDeviceContext()->VSSetShader(m_pVertexShader, nullptr, 0);
 	}	
 	void BindPixelShader() {
-		m_pDeviceContext->PSSetShader(m_pPixelShader, nullptr, 0);
+		m_pD3D->GetDeviceContext()->PSSetShader(m_pPixelShader, nullptr, 0);
 	}
 
 	bool CreateMatrixBuffer();
@@ -190,13 +234,23 @@ public:
 };
 
 
+struct TextureStage
+{
+	std::string				textureName;
+	std::string				animTexturesNames[MAX_TEXTURE_ANIMS];
+	float					animFrequency;
+	unsigned int			srcBlend;
+	unsigned int			destBlend;
+	tcMod					tcMod;
+};
+
 class XShader
 {
 protected:	
 	std::string				m_name;
 	std::string				m_textureNames[8];
 	int						m_numTextures;
-	unsigned int			m_textureBlends[8];
+	unsigned int			m_textureBlends[MAX_TEXTURE_BLENDS];
 	int						m_lightmapIndex;
 	int						m_numStates;
 	int						m_numD3DShaders;
@@ -210,13 +264,16 @@ protected:
 	SkyParams				m_sky;
 	bool					m_polygonOffset;
 	bool					m_noPicMip;
+	TextureStage			m_textureStages[MAX_TEXTURE_STAGES];
+	int						m_numStages;
+
 public:
-	XShader() : m_name(""), m_numTextures(0), m_lightmapIndex(0), m_numStates(0), m_numD3DShaders(0), m_currentState(0),
+	XShader() : m_name(""), m_numStages(0), m_numTextures(0), m_lightmapIndex(0), m_numStates(0), m_numD3DShaders(0), m_currentState(0),
 		m_textureID(0), m_shaderType(0), m_surfaceFlags(0), m_contentFlags(0), m_isSky(false), m_noPicMip(true) {}
 
 	XShader(const std::string name, const std::string* textureNames, int numTextures, int type, int surfParams)
 	{
-		m_name = name;  m_shaderType = type; m_surfaceFlags = surfParams; m_numD3DShaders = 0;
+		m_name = name;  m_shaderType = type; m_surfaceFlags = surfParams; m_numD3DShaders = 0; m_numTextures = numTextures;
 		memcpy(m_textureNames, textureNames, numTextures);
 	}
 
@@ -227,16 +284,55 @@ public:
 	void	SetTextureName(int i, const std::string name) { m_textureNames[i] = name; m_numTextures++; }
 	void	SetBlendState(int i, unsigned int blendFactor) { m_textureBlends[i] = blendFactor; }
 	void	SetShaderType(int type) { m_shaderType = type;}
+	
+	void SetTextureStage(const TextureStage& stage)
+	{
+		assert(m_numStages <= MAX_TEXTURE_STAGES);
+		m_textureStages[m_numStages++] = stage;
+	}
+
+	TextureStage& GetTextureStage(int i)
+	{
+		assert(i < MAX_TEXTURE_STAGES);
+		return m_textureStages[i];
+	};
+
+	void SetDestBlend(int i, unsigned int destBlend) {
+		assert(i < MAX_TEXTURE_STAGES); m_textureStages[i].destBlend = destBlend;
+	}
+
+	void SetSrcBlend(int i, unsigned int srcBlend) {
+		assert(i < MAX_TEXTURE_STAGES); m_textureStages[i].srcBlend = srcBlend;
+	}
+
+	unsigned int GetDestBlend(int i) {
+		assert(i < MAX_TEXTURE_STAGES); return m_textureStages[i].destBlend;
+	}
+
+	unsigned int GetSrcBlend(int i) {
+		assert(i < MAX_TEXTURE_STAGES); return m_textureStages[i].srcBlend;
+	}
+
+	void SetTCMod(int i, const tcMod& t)
+	{
+		assert(i < MAX_TEXTURE_STAGES);
+		m_textureStages[i].tcMod = t;
+	}
+
+	tcMod& GetTCMod(int i) {
+		assert(i < MAX_TEXTURE_STAGES);
+		return m_textureStages[i].tcMod;
+	}
 
 	std::string  GetName() { return m_name; }
 	int			 GetSurfaceFlags() { return m_surfaceFlags; }
-	std::string  GetTextureName(int i) { return m_textureNames[i]; }
+	std::string  GetTextureName(int i) { return m_textureStages[i].textureName; }
 	unsigned int GetBlendState(int i) { return m_textureBlends[i]; }
 	int			GetShaderType() { return m_shaderType; }
-	
+	int			GetNumTextures() { return m_numTextures; }
 	XD3DShader* GetD3DShader(int i)
 	{
-		if (i > m_numD3DShaders) return nullptr;
+		assert(i < MAX_SHADERS);
 		return m_pD3DShaders[i];
 	}
 	

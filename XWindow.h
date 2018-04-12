@@ -24,10 +24,22 @@ public:
 	HWND GetWindowHandle() { return m_hWnd; }
 	WCHAR* GetWindowTitle() { return m_szTitle; }
 	WCHAR* GetWindowClass() { return m_szWindowClass; }
+	void SetWindowWidth(int w) {
+		m_width = w;
+	}
+
+	void SetWindowHeight(int h) {
+		m_height = h;
+	}
+
+	void SetTitle(WCHAR* title) {
+		memcpy(m_szTitle, title, sizeof(title));
+	}
+
 	void FAIL_MSG_BOX(LPWSTR msg) { MessageBox(m_hWnd, msg, L"Error", MB_OK); }
 
 	static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-	ATOM MyRegisterClass(HINSTANCE hInstance);
-	int InitInstance(HINSTANCE, int);
+	virtual ATOM MyRegisterClass(HINSTANCE hInstance);
+	virtual int InitInstance(HINSTANCE, int);
 };
 	

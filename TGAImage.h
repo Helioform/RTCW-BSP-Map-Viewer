@@ -26,9 +26,9 @@ struct TGAFooter
 {
 	int extOffset;
 	int dev;	
-	char signature[16];	// Contains "TRUEVISION-XFILE"
-	char dot;		// Contains "."
-	char last;		// Contains NULL
+	char signature[16];	
+	char dot;		
+	char last;		
 };
 #pragma pack()
 

@@ -1,15 +1,7 @@
-#include "stdafx.h"
+
 #include "XWorldMap.h"
 
 
-XWorldMap::XWorldMap()
-{
-}
-
-
-XWorldMap::~XWorldMap()
-{
-}
 
 bool XWorldMap::ReadHeader(std::ifstream & is, Q3MapHeader & head)
 {
@@ -27,9 +19,9 @@ bool XWorldMap::ReadHeader(std::ifstream & is, Q3MapHeader & head)
 void XWorldMap::ReadEntities(std::ifstream & is, int offset, unsigned int length)
 {
 	is.seekg(offset, is.beg);
-	m_numEntities = length;
+	m_entStringLength = length;
 	m_q3Entities.ents = new char[length];
-	is.read((m_q3Entities.ents), m_numEntities);
+	is.read((m_q3Entities.ents), m_entStringLength);
 }
 
 void XWorldMap::ReadTextures(std::ifstream & is, int offset, unsigned int length)
@@ -109,18 +101,58 @@ void XWorldMap::ReadLeafFaces(std::ifstream & is, int offset, unsigned int lengt
 
 void XWorldMap::ReadLeafBrushes(std::ifstream & is, int offset, unsigned int length)
 {
+	is.seekg(offset, is.beg);
+	m_numLeafBrushes = length / sizeof(Q3MapLeafBrush);
+	m_q3MapLeafBrushes.reserve(m_numLeafBrushes);
+	Q3MapLeafBrush leafBrush;
+
+	for (int i = 0; i < m_numLeafBrushes; ++i)
+	{
+		is.read((char*)(&leafBrush), sizeof(Q3MapLeafBrush));
+		m_q3MapLeafBrushes.push_back(leafBrush);
+	}
 }
 
 void XWorldMap::ReadModels(std::ifstream & is, int offset, unsigned int length)
 {
+	is.seekg(offset, is.beg);
+	m_numModels = length / sizeof(Q3MapModel);
+	m_q3MapModels.reserve(m_numModels);
+	Q3MapModel model;
+
+	for (int i = 0; i < m_numModels; ++i)
+	{
+		is.read((char*)(&model), sizeof(Q3MapModel));
+		m_q3MapModels.push_back(model);
+	}
 }
 
 void XWorldMap::ReadBrushes(std::ifstream & is, int offset, unsigned int length)
 {
+	is.seekg(offset, is.beg);
+	m_numBrushes = length / sizeof(Q3MapBrush);
+	m_q3MapBrushes.reserve(m_numBrushes);
+	Q3MapBrush brush;
+
+	for (int i = 0; i < m_numBrushes; i++)
+	{
+		is.read((char*)(&brush), sizeof(Q3MapBrush));
+		m_q3MapBrushes.push_back(brush);
+	}
 }
 
 void XWorldMap::ReadBrushSides(std::ifstream & is, int offset, unsigned int length)
 {
+	is.seekg(offset, is.beg);
+	m_numBrushSides = length / sizeof(Q3MapBrushSide);
+	m_q3MapBrushSides.reserve(m_numBrushSides);
+	Q3MapBrushSide brushSide;
+
+	for (int i = 0; i < m_numBrushSides; i++)
+	{
+		is.read((char*)(&brushSide), sizeof(Q3MapBrushSide));
+		m_q3MapBrushSides.push_back(brushSide);
+	}
 }
 
 void XWorldMap::ReadVertices(std::ifstream & is, int offset, unsigned int length)
@@ -209,7 +241,7 @@ void XWorldMap::ReadVisibilityData(std::ifstream & is, int offset, unsigned int 
 
 bool XWorldMap::LoadLightmapShader()
 {
-	m_pD3DShaders[0] = new XD3DShader(m_pd3dDeviceContext, m_pD3D, m_pTextureManager);
+	m_pD3DShaders[0] = new XD3DShader(m_pD3D, m_pTextureManager);
 
 	if (!m_pD3DShaders[0]->LoadAndCompile("Effects/lightmap.vs", "Effects/lightmap.ps"))
 	{
@@ -259,24 +291,23 @@ bool XWorldMap::LoadShaders()
 	std::string token;
 	int shaderPos = 0;
 
-	shaderParser.Tokenize();
+	shaderParser.ParseShaderFile();
+	XShader sh;
 
 	for (int i = 0; i < m_q3Textures.size(); ++i)
 	{
 		shaderName = m_q3Textures[i].name;
 
-		if ((shaderPos = shaderParser.FindShader(shaderName)) != -1)
-		{	
-			if (!shaderParser.ParseShader(shaderPos))	
-				return false;							
+		if (shaderParser.FindShader(shaderName, &sh))
+		{			
 			// create our new shader and add it to the list
-			XShader* pShader = new XShader();
-			shaderParser.BuildShader(pShader);
-			pShader->AttachD3DShader(m_pD3DShaders[0]);
+			XShader* pShader = new XShader(sh);
+			pShader->SetName(shaderName);
+			pShader->AttachD3DShader(m_pD3DShaders[0]);		
 			m_pShaders[m_numShaders] = pShader;
 			m_numShaders++;
 		}
-		else
+		else // create default shader
 		{
 			XShader* pShader = new XShader(shaderName, nullptr, 0, 0, 0);
 			pShader->AttachD3DShader(m_pD3DShaders[0]);
@@ -287,6 +318,64 @@ bool XWorldMap::LoadShaders()
 
 	return true;
 }
+
+bool XWorldMap::LoadEntities()
+{
+	m_numEntities = 0;
+	std::string ents = std::string(m_q3Entities.ents);
+
+	int pos;
+	std::istringstream entStream(ents);
+	std::string line;
+	bool playerPosFound = false;
+	int entDataPos = 0;
+	std::string entClassName, entName;
+	int x = 0, y = 0, z = 0;
+
+	while (std::getline(entStream, line))
+	{
+		if (line == "{")
+		{
+			while (line != "}")
+			{
+				std::getline(entStream, line);
+
+				if ((entDataPos = line.find("\"classname\"")) != std::string::npos)
+				{
+					entName = line.substr(std::string("\"classname\" ").length() + 1, line.length() - 1);
+				}
+				else if ((entDataPos = line.find("\"origin\"")) != std::string::npos)
+				{
+					std::string entPosLine = line.substr(std::string("\"origin\" ").length() + 1, line.length() - 1);
+
+					std::stringstream entPos(entPosLine);
+					entPos >> x;
+					entPos >> y;
+					entPos >> z;
+				}
+				else if ((entDataPos = line.find("\"model\"")) != std::string::npos)
+				{
+
+				}
+			}
+		}
+
+		if (entName == "info_player_start\"" || entName == "info_player_deathmatch\"")
+		{
+			m_playerEntityIndex = m_numEntities;
+			m_mapEntities.push_back(new XPlayer(entName, D3DXVECTOR3(x, z, y), D3DXVECTOR3(0, 0, 1), SCREEN_WIDTH, SCREEN_HEIGHT, 90, 0.1, 10000));
+		}
+		else
+		{
+			m_mapEntities.push_back(new XEntity(entName, D3DXVECTOR3(x, z, y), D3DXVECTOR3(0, 0, 1), SCREEN_WIDTH, SCREEN_HEIGHT, 90, 0.1, 10000));
+		}
+
+		m_numEntities++;
+	}
+
+	return playerPosFound;
+}
+	
 
 bool XWorldMap::CreateInputLayout()
 {
@@ -331,7 +420,7 @@ bool XWorldMap::CreateInputLayout()
 	// Get a count of the elements in the layout.
 	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 	// Create the vertex input layout.
-	hr = m_pD3D->CreateInputLayout(polygonLayout, numElements, m_pD3DShaders[0]->GetVertexShaderBuffer()->GetBufferPointer(),
+	hr = m_pD3D->GetD3DDevice()->CreateInputLayout(polygonLayout, numElements, m_pD3DShaders[0]->GetVertexShaderBuffer()->GetBufferPointer(),
 		m_pD3DShaders[0]->GetVertexShaderBuffer()->GetBufferSize(), &m_pLayout);
 
 	m_pD3DShaders[0]->GetVertexShaderBuffer()->Release();
@@ -361,6 +450,10 @@ bool XWorldMap::Load(std::string fileName)
 		ReadNodes(mapFile, head.direntries[3].offset, head.direntries[3].length);
 		ReadLeaves(mapFile, head.direntries[4].offset, head.direntries[4].length);
 		ReadLeafFaces(mapFile, head.direntries[5].offset, head.direntries[5].length);
+		ReadLeafBrushes(mapFile, head.direntries[6].offset, head.direntries[6].length);
+		ReadModels(mapFile, head.direntries[7].offset, head.direntries[7].length);
+		ReadBrushes(mapFile, head.direntries[8].offset, head.direntries[8].length);
+		ReadBrushSides(mapFile, head.direntries[9].offset, head.direntries[9].length);
 		ReadVertices(mapFile, head.direntries[10].offset, head.direntries[10].length);
 		ReadMeshVertices(mapFile, head.direntries[11].offset, head.direntries[11].length);
 		ReadEffects(mapFile, head.direntries[12].offset, head.direntries[12].length);
@@ -420,6 +513,7 @@ bool XWorldMap::OutputShadersToFile(const std::string & fileName)
 
 bool XWorldMap::CreateTextures()
 {
+	/*
 	// load textures and create texture buffers
 	for (int i = 0; i < m_q3Textures.size(); ++i)
 	{
@@ -444,6 +538,64 @@ bool XWorldMap::CreateTextures()
 				 m_pTextureManager->CreateWhiteTexture(128, 128, false);
 		}
 	}
+	*/
+	for (int i = 0; i < m_numShaders; ++i)
+	{
+		int numTextures = m_pShaders[i]->GetNumTextures();
+
+		if (numTextures != 0)
+		{
+			std::string name = m_pShaders[i]->GetTextureName(0);
+			
+			// if there is a lightmap load the other texture
+			if(name == "$lightmap")
+				name = m_pShaders[i]->GetTextureName(1);
+
+			std::string textureFileName = MapPath + name;
+			TGAImage tgaFile;
+
+			if (tgaFile.Load(textureFileName))
+			{
+				if (!m_pTextureManager->CreateTexture(tgaFile.GetImageData().data(), tgaFile.GetHeight(), tgaFile.GetWidth(), false))
+					return false;
+			}
+			else
+			{
+				std::string jpgTextureFileName;
+				jpgTextureFileName += MapPath;
+				jpgTextureFileName += name.substr(0, name.length()-3);
+				jpgTextureFileName += "jpg";
+
+				if (!m_pTextureManager->Load(jpgTextureFileName, false))
+				{
+					m_pTextureManager->CreateWhiteTexture(128, 128, false);
+				}
+			}
+		}
+		else // no shader just try an image file
+		{
+			std::string jpgTextureFileName;
+			jpgTextureFileName += MapPath;
+			jpgTextureFileName += m_pShaders[i]->GetName();
+			jpgTextureFileName += ".jpg";
+
+			if (!m_pTextureManager->Load(jpgTextureFileName, false))
+			{
+				TGAImage tgaFile;
+				std::string tgaTextureFileName;
+				tgaTextureFileName += MapPath;
+				tgaTextureFileName += m_pShaders[i]->GetName();
+				tgaTextureFileName += ".tga";
+				if (tgaFile.Load(tgaTextureFileName))
+				{
+					if (!m_pTextureManager->CreateTexture(tgaFile.GetImageData().data(), tgaFile.GetHeight(), tgaFile.GetWidth(), false))
+						return false;
+				}
+				else
+					m_pTextureManager->CreateWhiteTexture(128, 128, false);
+			}
+		}
+	}
 
 	return true;
 }
@@ -454,18 +606,17 @@ bool XWorldMap::CreatePolygons()
 
 	// create face vertices and faces
 	for (int i = 0; i < m_q3Faces.size(); ++i)
-	{
+	{	
+		
+		if ((m_pShaders[m_q3Faces[i].texture]->GetSurfaceFlags() & CONTENTS_FOG) ||
+			(m_pShaders[m_q3Faces[i].texture]->GetSurfaceFlags() & SURF_NODRAW)) // don't create no draw surface
+		{
+			m_faceData.push_back(nullptr);
+			continue;
+		}
+
 		if (m_q3Faces[i].type == 1) // we have a polygon
 		{	
-			if (m_q3Faces[i].texture < m_numShaders)
-			{
-				if (m_pShaders[m_q3Faces[i].texture]->GetSurfaceFlags() == CONTENTS_FOG ||
-					m_pShaders[m_q3Faces[i].texture]->GetSurfaceFlags() == SURF_NODRAW) // don't create no draw surface
-				{
-					m_faceData.push_back(nullptr);
-					continue;
-				}
-			}
 
 			std::vector<TexVertex> vertices;
 			for (int j = 0; j < m_q3Faces[i].nmmeshverts; ++j)
@@ -650,8 +801,8 @@ void XWorldMap::AddSurfacesToDraw(XCamera& cam)
 	m_visibleFaces.clear();
 
 	// find the cluster the camera is in
-	const int l = FindLeaf(cam.Eye());
-	const int camCluster = m_q3Leaves[l].cluster;
+//	const int l = FindLeaf(cam.GetPosition());
+	const int camCluster = m_q3Leaves[m_currentLeafPosition].cluster;
 
 	// iterate through all leaves and find the ones visible from camera	
 	for (int i = 0; i < GetNumLeaves(); ++i)
@@ -676,6 +827,45 @@ void XWorldMap::AddSurfacesToDraw(XCamera& cam)
 		}
 	}
 
+}
+
+void XWorldMap::Render(XCamera* pCam)
+{
+	HRESULT hr;
+	unsigned int stride;
+	unsigned int offset;
+
+	// Set vertex buffer stride and offset.
+	stride = sizeof(TexVertex);
+	offset = 0;
+
+	XD3DShader* pShader = GetD3DShader(0);
+
+	std::vector<TextureIndexedFaceData*> visibleFaces = GetVisibleFaces();
+
+	for (int i = 0; i < visibleFaces.size(); ++i)
+	{
+		ID3D11Buffer* pVB = visibleFaces[i]->pTexVBuffer;
+		m_pD3D->GetDeviceContext()->IASetVertexBuffers(0, 1, &pVB, &stride, &offset);
+
+		m_pD3D->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		m_pD3D->GetDeviceContext()->IASetInputLayout(GetInputLayout());
+
+		if (visibleFaces[i]->lightMapIndex < 0)
+			pShader->SetParams(pCam->ViewMatrix(), pCam->ProjectionMatrix(), visibleFaces[i]->textureIndex);
+		else
+			pShader->SetParams(pCam->ViewMatrix(), pCam->ProjectionMatrix(), visibleFaces[i]->textureIndex, visibleFaces[i]->lightMapIndex);
+
+		pShader->BindVertexShader();
+		pShader->BindPixelShader();
+
+		ID3D11SamplerState* pSampleState = GetTextureManager()->GetSamplerState();
+		m_pD3D->GetDeviceContext()->PSSetSamplers(0, 1, &pSampleState);
+
+		// Render the faces
+		m_pD3D->GetDeviceContext()->Draw(visibleFaces[i]->numVertices, 0);
+	}
 }
 
 XBezierPatch::XBezierPatch()

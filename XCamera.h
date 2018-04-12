@@ -1,18 +1,12 @@
 #pragma once
 
-#pragma comment(lib,"d3dx10.lib")
-
 #include <DirectXMath.h>
 #include <D3DX10.h>
+#include "Primitives.h"
 
 using namespace DirectX;
 
 #define PI 3.14159265359
-
-struct Plane
-{
-	float A, B, C, D;
-};
 
 struct Frustum
 {
@@ -79,9 +73,13 @@ public:
 	D3DXMATRIX & ViewMatrix(void) { return m_view; }
 	D3DXMATRIX & ProjectionMatrix(void) { return m_projection; }
 
+	D3DXVECTOR3 GetPosition()
+	{
+		return D3DXVECTOR3(m_view(3, 0), m_view(3, 1), m_view(3, 2));
+	}
+
 	void UpdateViewMatrix()
 	{
-		//D3DXMatrixLookAtLH(&m_view, &m_eye, &m_at, &m_up);
 		//
 		// Orthonormalize the right, up and look vectors.
 		//
@@ -158,8 +156,8 @@ public:
 	void Pitch(float angle) 
 	{
 		D3DXMATRIX R;
-		//m_totalPhi += angle;
-		D3DXMatrixRotationAxis(&R, &m_right, angle);// m_totalPhi);
+
+		D3DXMatrixRotationAxis(&R, &m_right, angle);
 		D3DXVec3TransformNormal(&m_up, &m_up, &R);
 		D3DXVec3TransformNormal(&m_at, &m_at, &R);
 	}
@@ -178,41 +176,7 @@ public:
 		D3DXVec3TransformNormal(&m_at, &m_at, &R);
 	}
 
-	void ExtractFrustumPlanes()
-	{
-		// calculate view projection matrix
-		D3DXMATRIX vp =  m_view*m_projection;
-
-		m_frustum.zNear.A = vp(0, 2) + vp(0, 3);
-		m_frustum.zNear.B = vp(1, 2) + vp(1, 3);
-		m_frustum.zNear.C = vp(2, 2) + vp(2, 3);
-		m_frustum.zNear.D = vp(3, 2) + vp(3, 3);
-
-		m_frustum.zFar.A = -vp(0, 2) + vp(0, 3);
-		m_frustum.zFar.B = -vp(1, 2) + vp(1, 3);
-		m_frustum.zFar.C = -vp(2, 2) + vp(2, 3);
-		m_frustum.zFar.D = -vp(3, 2) + vp(3, 3);
-
-		m_frustum.bottom.A = vp(0, 1) + vp(0, 3);
-		m_frustum.bottom.B = vp(1, 1) + vp(1, 3);
-		m_frustum.bottom.C = vp(2, 1) + vp(2, 3);
-		m_frustum.bottom.D = vp(3, 1) + vp(3, 3);
-
-		m_frustum.top.A = -vp(0, 1) + vp(0, 3);
-		m_frustum.top.B = -vp(1, 1) + vp(1, 3);
-		m_frustum.top.C = -vp(2, 1) + vp(2, 3);
-		m_frustum.top.D = -vp(3, 1) + vp(3, 3);
-
-		m_frustum.left.A = vp(0, 0) + vp(0, 3);
-		m_frustum.left.B = vp(1, 0) + vp(1, 3);
-		m_frustum.left.C = vp(2, 0) + vp(2, 3);
-		m_frustum.left.D = vp(3, 0) + vp(3, 3);
-
-		m_frustum.right.A = -vp(0, 0) + vp(0, 3);
-		m_frustum.right.B = -vp(1, 0) + vp(1, 3);
-		m_frustum.right.C = -vp(2, 0) + vp(2, 3);
-		m_frustum.right.D = -vp(3, 0) + vp(3, 3);
-	}
+	void ExtractFrustumPlanes();
 
 	bool IsInFrustum(int* mins, int* maxs) 
 	{
@@ -229,17 +193,17 @@ public:
 			// p-vertex selection (with the index trick)
 			// According to the plane normal we can know the
 			// indices of the positive vertex
-			const int px = static_cast<int>(p.A > 0.0f);
-			const int py = static_cast<int>(p.B > 0.0f);
-			const int pz = static_cast<int>(p.C > 0.0f);
+			const int px = static_cast<int>(p.n[0] > 0.0f);
+			const int py = static_cast<int>(p.n[1] > 0.0f);
+			const int pz = static_cast<int>(p.n[2] > 0.0f);
 
 			// Dot product
 			// project p-vertex on plane normal
 			// (How far is p-vertex from the origin)
-			const float dp = (p.A*box[px].x) + (p.B*box[py].y) + (p.C*box[pz].z);
+			const float dp = (p.n[0]*box[px].x) + (p.n[1]*box[py].y) + (p.n[2]*box[pz].z);
 
 			// Doesn't intersect if it is behind the plane
-			if (dp < -p.D) 
+			if (dp < -p.d) 
 				return false; 
 
 		}

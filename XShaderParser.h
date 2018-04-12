@@ -9,27 +9,24 @@ class XShaderParser
 {
 protected:
 	std::string*				m_scriptData;
-	std::vector<int>			m_surfaceParams;
-	std::vector<std::string>	m_textureMapNames;
-	std::vector<std::string>	m_tokens;
-	int							m_numTokens;
-	char						m_currentToken[1024];
-
+	std::unordered_map<std::string, XShader>	m_shaders;
+	int							m_numShaders;
+	char						m_currentToken[MAX_TOKEN_CHARS];
+	char						m_currentShaderName[MAX_TOKEN_CHARS];
 public:
-	XShaderParser() : m_numTokens(0) { }
-	XShaderParser(std::string* scriptData) { m_scriptData = scriptData; m_numTokens = 0;  }
+	XShaderParser() : m_numShaders(0) { }
+	XShaderParser(std::string* scriptData) { m_scriptData = scriptData; m_numShaders = 0; }
 	~XShaderParser();
 
 	char*		SkipWhites(char* text, bool& hasNewLines);
-	std::string	ParseToken(char** text, bool allowLineBreaks);
-	void		Tokenize();
-	bool		ParseShader(int index);
-	int			FindShader(const std::string& shaderName);
-	void		ParseSurfaceParams(std::string& text);
-	void		ParseTextureMapNames(std::string& text);
-	void		ParseBlend(std::string& text);
-	void		ParseTCMod(std::string& text);
-	void		ParseVector(std::string& text, float* v);
+	char*		ParseToken(char** text, bool allowLineBreaks);
+	void		ParseShaderFile();
+	bool		ParseShader(char** text);
+	bool		FindShader(const std::string& shaderName, XShader* sh);
+	unsigned int ParseSurfaceParams(const std::string& text);
+	unsigned int ParseBlend(const std::string& text);
+	void		ParseTCMod(const std::string& text);
+	void	ParseVector(const std::string& text, float* v);
 	void		BuildShader(XShader* pShader);
 };
 

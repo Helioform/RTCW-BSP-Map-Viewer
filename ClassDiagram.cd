@@ -1,0 +1,361 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="CollisionSystem" Collapsed="true">
+    <Position X="6" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAAEAAAAAAAAEAAAAgCAAABAAAAAAAAAAAAA=</HashCode>
+      <FileName>CollisionSystem.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TGAImage" Collapsed="true">
+    <Position X="7.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgIAAAAAABAABAgAAAADAQAIAAECAAAAAAEAAAAg=</HashCode>
+      <FileName>TGAImage.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XCamera" Collapsed="true">
+    <Position X="11.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CIEAACAAJIEAIBghAGAAAEUAQCbEAACAAQFRABoQAwI=</HashCode>
+      <FileName>XCamera.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XD3DRenderer" Collapsed="true">
+    <Position X="13" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAMAKQQCAACKJAAQAGAAQAAUAIEEAAwQhgQgFADAQE=</HashCode>
+      <FileName>XD3D.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XEntity" Collapsed="true">
+    <Position X="1.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAACAAACAAgAAAAAACIAgAAAIAAgAAAACAQAAAAAA=</HashCode>
+      <FileName>XEntity.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XFont" Collapsed="true">
+    <Position X="6" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAACAAAAAAAAA=</HashCode>
+      <FileName>XFont.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XGeomObject" Collapsed="true">
+    <Position X="0.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAWgAAGAAA6IAWAAAIAAIEMAEhAAAAIQDEEAAACCA=</HashCode>
+      <FileName>XGeomObject.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XInput" Collapsed="true">
+    <Position X="7.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAIYAAAAQAAgQABABAAQAKACgAAQGQABAAIAAA=</HashCode>
+      <FileName>XInput.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XLight" Collapsed="true">
+    <Position X="0.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAIAAAAAAAAAAABAAAAAAAAAgAAAAgAAAA=</HashCode>
+      <FileName>XLight.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XIllumin" Collapsed="true">
+    <Position X="3.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABCAAiAAIBAAAAIBBBAAAIpEQA4AACQIAAAAAEAAAAQ=</HashCode>
+      <FileName>XMain.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XPlayer" Collapsed="true">
+    <Position X="2.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAAAAAAABAAAAAQAAAAAAAAAAAABAAAAAAAA=</HashCode>
+      <FileName>XPlayer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XD3DShader" Collapsed="true">
+    <Position X="14.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAiAAARAACIAACAAAAAAUkQAYEQABAABAIiCBAQE=</HashCode>
+      <FileName>XShader.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XShader" Collapsed="true">
+    <Position X="9.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>MEAFEAgwEAAAAQBaAIEwAgAAAIAQAgIAAIIAQAhBBAA=</HashCode>
+      <FileName>XShader.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XShaderParser" Collapsed="true">
+    <Position X="11.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABABAIABAAAgIABgAAAICQAAADAEAAAAAAAKAIACAAA=</HashCode>
+      <FileName>XShaderParser.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XSprite" Collapsed="true">
+    <Position X="13" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAEggAAFAAAgAAdAAAQAAAGAAABEACAAQCAAEgACiA=</HashCode>
+      <FileName>XSprite.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XTextureManager" Collapsed="true">
+    <Position X="14.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgoADAIIAEEAAAAAAAQAAQAAgAgKBEABAAAAAAAg=</HashCode>
+      <FileName>XTextureManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XTimer" Collapsed="true">
+    <Position X="6" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAhAAAAAAEAAAEAAAAAAAAwAAAAAgAAgAAAABAAA=</HashCode>
+      <FileName>XTimer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XWindow" Collapsed="true">
+    <Position X="3.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>iAAAAAQEACAAAAABAAARCAAAAAIAAASAAICAQAJAAAA=</HashCode>
+      <FileName>XWindow.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XBezierPatch" Collapsed="true">
+    <Position X="9.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEABAAAAAAAAAIQAAAJAAAAAAQAIAAAAAhBAAA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="XWorldMap" Collapsed="true">
+    <Position X="0.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>Au4QsHmgQpAAQYKoaGvacuGQCAQQB4YIBSBAY0AASIk=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="TGAHeader" Collapsed="true">
+    <Position X="13" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAEAAAAAEAAAQIQAAAAAAAAAhBAAAAABgAAAAACAA=</HashCode>
+      <FileName>TGAImage.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="TGAFooter" Collapsed="true">
+    <Position X="11.25" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAAAAAAAAIgAAAAAAAAAAAAAAAAAAABgA=</HashCode>
+      <FileName>TGAImage.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Plane" Collapsed="true">
+    <Position X="13" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAApAEAAAA=</HashCode>
+      <FileName>XCamera.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Frustum" Collapsed="true">
+    <Position X="7.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAYAAAAAAgAAAAIAAAAAAAAAAAAgAA=</HashCode>
+      <FileName>XCamera.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="TexVertex" Collapsed="true">
+    <Position X="9.5" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAAAgIgAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>XGeomObject.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="FaceData" Collapsed="true">
+    <Position X="6" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAA=</HashCode>
+      <FileName>XGeomObject.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="TextureIndexedFaceData" Collapsed="true">
+    <Position X="7.75" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAAAAAAAAAAAAgIAAABAAAAAAAAAkAAAAAAAAAA=</HashCode>
+      <FileName>XGeomObject.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Vertex" Collapsed="true">
+    <Position X="14.75" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAIAAAAAAAACAAAAAAAAAAAA=</HashCode>
+      <FileName>XGeomObject.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="SkyParams" Collapsed="true">
+    <Position X="6" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>XShader.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="MatrixBufferType" Collapsed="true">
+    <Position X="11.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAA=</HashCode>
+      <FileName>XShader.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="LightBufferType" Collapsed="true">
+    <Position X="9.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAACAAA=</HashCode>
+      <FileName>XShader.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="XTextureContainer" Collapsed="true">
+    <Position X="6" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAACAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>XTextureManager.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapDirEntry" Collapsed="true">
+    <Position X="7.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapHeader" Collapsed="true">
+    <Position X="14.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAABA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapEntities" Collapsed="true">
+    <Position X="11.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapTexture" Collapsed="true">
+    <Position X="11.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAQ=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapPlane" Collapsed="true">
+    <Position X="9.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapNode" Collapsed="true">
+    <Position X="7.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAAgAAAAAQAAAAAAAAAAAAAAgAAAAAAAAAAAAA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapLeaf" Collapsed="true">
+    <Position X="6" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AJAAAAABgAAAgAAAAAAAAAAAIAAAAAAAIAAAAAAAAAE=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapLeafFace" Collapsed="true">
+    <Position X="9.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapLeafBrush" Collapsed="true">
+    <Position X="7.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapModel" Collapsed="true">
+    <Position X="6" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAAggAAAAAAAAAAAAAAAAQAAAAAAAAAQEAAAAA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapBrush" Collapsed="true">
+    <Position X="14.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAQAgAAAAAAAAAABAA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapBrushSide" Collapsed="true">
+    <Position X="6" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapVertex" Collapsed="true">
+    <Position X="13" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAIgAAAAAAgCAAAAAAAAAAAA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapMeshVert" Collapsed="true">
+    <Position X="14.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapEffect" Collapsed="true">
+    <Position X="9.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAgAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapFace" Collapsed="true">
+    <Position X="13" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAAAAAAAAACaAAAAgAABABAgAEAAAAEAAAQCg=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapLightMap" Collapsed="true">
+    <Position X="11.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapLightVol" Collapsed="true">
+    <Position X="13" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAABACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Q3MapVisData" Collapsed="true">
+    <Position X="14.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAAIAABAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>XWorldMap.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

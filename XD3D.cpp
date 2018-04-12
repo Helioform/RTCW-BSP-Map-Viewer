@@ -1,6 +1,7 @@
-#include "stdafx.h"
+
 #include "XD3D.h"
 
+XD3DRenderer* Singleton<class XD3DRenderer>::ms_singleton = new XD3DRenderer();
 
 XD3DRenderer::XD3DRenderer()
 {
@@ -18,7 +19,7 @@ XD3DRenderer::XD3DRenderer()
 
 XD3DRenderer::XD3DRenderer(HWND wnd, int screenWidth, int screenHeight, bool fullScreen)
 {
-	CreateD3DDevice(wnd, screenWidth, screenHeight, fullScreen);
+	InitD3D(wnd, screenWidth, screenHeight, fullScreen);
 }
 
 XD3DRenderer::~XD3DRenderer()
@@ -132,6 +133,26 @@ bool XD3DRenderer::CreateD3DDevice(HWND wnd, int screenWidth, int screenHeight, 
 		D3D11_SDK_VERSION, &swapChainDesc, &m_pSwapChain, &m_pD3DDevice, NULL, &m_pDeviceContext);
 
 	if (FAILED(hr))
+		return false;
+
+	return true;
+}
+
+bool XD3DRenderer::InitD3D(HWND wnd, int screenWidth, int screenHeight, bool fullScreen)
+{
+	if (!CreateD3DDevice(wnd, screenWidth, screenHeight, fullScreen))
+		return false;
+
+	if (!CreateDepthBuffer())
+		return false;
+
+	if (!CreateRenderTargetView())
+		return false;
+
+	if (!CreateDepthStencilView())
+		return false;
+
+	if (!CreateDisabledDepthStencilState())
 		return false;
 
 	return true;
@@ -354,66 +375,6 @@ bool XD3DRenderer::ClearScene(const D3DXCOLOR& col)
 	return true;
 }
 
-bool XD3DRenderer::Render(XGeomObject* pGeom, XCamera* pCam)
-{	
-	HRESULT hr;
-	unsigned int stride;
-	unsigned int offset;
-
-	// Set vertex buffer stride and offset.
-	stride = sizeof(TexVertex);
-	offset = 0;
-	
-	
-
-	return true;
-}
-
-bool XD3DRenderer::Render(XWorldMap* pMap, XCamera* cam)
-{
-	HRESULT hr;
-	unsigned int stride;
-	unsigned int offset;
-
-	// Set vertex buffer stride and offset.
-	stride = sizeof(TexVertex);
-	offset = 0;
-
-	XD3DShader* pShader = pMap->GetD3DShader(0);
-//	XD3DShader* pShader = pXShader->GetD3DShader();
-
-	std::vector<TextureIndexedFaceData*> visibleFaces = pMap->GetVisibleFaces();
-	
-	for (int i = 0; i < visibleFaces.size(); ++i)
-	{
-		// Set the vertex buffer to active in the input assembler so it can be rendered.
-		ID3D11Buffer* pVB = visibleFaces[i]->pTexVBuffer;
-		m_pDeviceContext->IASetVertexBuffers(0, 1, &pVB, &stride, &offset);
-
-		// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-		m_pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		// Set the vertex input layout.
-		m_pDeviceContext->IASetInputLayout(pMap->GetInputLayout());
-	
-		if(visibleFaces[i]->lightMapIndex < 0)
-			pShader->SetParams(cam->ViewMatrix(), cam->ProjectionMatrix(), visibleFaces[i]->textureIndex);
-		else
-			pShader->SetParams(cam->ViewMatrix(), cam->ProjectionMatrix(), visibleFaces[i]->textureIndex, visibleFaces[i]->lightMapIndex);
-				
-		// Set the vertex and pixel shaders that will be used to render these faces
-		pShader->BindVertexShader();
-		pShader->BindPixelShader();
-
-		ID3D11SamplerState* pSampleState = pMap->GetTextureManager()->GetSamplerState();
-		m_pDeviceContext->PSSetSamplers(0, 1, &pSampleState);
-
-		// Render the faces
-		m_pDeviceContext->Draw(visibleFaces[i]->numVertices, 0);
-	}
-
-	return true;
-}
 
 
 bool XD3DRenderer::ShowScene()

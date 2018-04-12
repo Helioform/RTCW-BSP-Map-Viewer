@@ -1,5 +1,4 @@
 
-#include "stdafx.h"
 #include "XWindow.h"
 #include "XWorldMap.h"
 #include "XInput.h"
@@ -25,7 +24,7 @@ ATOM XWindow::MyRegisterClass(HINSTANCE hInstance)
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_WIN32PROJECT1));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-	wcex.lpszMenuName = nullptr;//MAKEINTRESOURCEW(IDC_WIN32PROJECT1);
+	wcex.lpszMenuName = nullptr;
     wcex.lpszClassName  = m_szWindowClass;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -47,14 +46,7 @@ BOOL XWindow::InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	ShowWindow(m_hWnd, nCmdShow);
 	UpdateWindow(m_hWnd);
-/*
-	MSG msg;
-	while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE))
-	{
-		TranslateMessage(&msg);
-		DispatchMessageW(&msg);
-	}
-*/
+
 
 	return TRUE;
 }

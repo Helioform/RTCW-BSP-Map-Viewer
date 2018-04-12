@@ -1,15 +1,8 @@
-#include "stdafx.h"
+
 #include "XTextureManager.h"
 
 
-XTextureManager::XTextureManager()
-{
-}
-
-
-XTextureManager::~XTextureManager()
-{
-}
+XTextureManager* Singleton<XTextureManager>::ms_singleton = new XTextureManager(XD3DRenderer::GetSingletonPointer());
 
 bool XTextureManager::CreateTexture(unsigned char* imgData, unsigned int height, unsigned int width, bool isLightmap)
 {
@@ -32,13 +25,13 @@ bool XTextureManager::CreateTexture(unsigned char* imgData, unsigned int height,
 	texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	texDesc.MiscFlags = 0;
 
-	hr = m_pD3D->CreateTexture2D(&texDesc, nullptr, &pTex2D);
+	hr = m_pD3D->GetD3DDevice()->CreateTexture2D(&texDesc, nullptr, &pTex2D);
 
 	if (FAILED(hr))
 		return false;
 
 	D3D11_MAPPED_SUBRESOURCE  mappedTex;
-	m_pd3dDeviceContext->Map(pTex2D, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedTex);
+	m_pD3D->GetDeviceContext()->Map(pTex2D, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedTex);
 
 	UCHAR* pTexels = (UCHAR*)mappedTex.pData;
 	int j = 0;
@@ -55,7 +48,7 @@ bool XTextureManager::CreateTexture(unsigned char* imgData, unsigned int height,
 		}
 	}
 
-	m_pd3dDeviceContext->Unmap(pTex2D, D3D11CalcSubresource(0, 0, 1));
+	m_pD3D->GetDeviceContext()->Unmap(pTex2D, D3D11CalcSubresource(0, 0, 1));
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	memset(&srvDesc, 0, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
@@ -63,7 +56,7 @@ bool XTextureManager::CreateTexture(unsigned char* imgData, unsigned int height,
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 	XTextureContainer* texture= new XTextureContainer();
-	hr = m_pD3D->CreateShaderResourceView(pTex2D, &srvDesc, &texture->pTexture);
+	hr = m_pD3D->GetD3DDevice()->CreateShaderResourceView(pTex2D, &srvDesc, &texture->pTexture);
 	
 	if (FAILED(hr))
 		return false;
@@ -109,19 +102,19 @@ bool XTextureManager::CreateWhiteTexture(int width, int height, bool isLightMap)
 	texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	texDesc.MiscFlags = 0;
 
-	hr = m_pD3D->CreateTexture2D(&texDesc, nullptr, &pTex2D);
+	hr = m_pD3D->GetD3DDevice()->CreateTexture2D(&texDesc, nullptr, &pTex2D);
 
 	if (FAILED(hr))
 		return false;
 
 	D3D11_MAPPED_SUBRESOURCE  mappedTex;
-	m_pd3dDeviceContext->Map(pTex2D, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedTex);
+	m_pD3D->GetDeviceContext()->Map(pTex2D, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedTex);
 
 	UCHAR* pTexels = (UCHAR*)mappedTex.pData;
 	
-	memset(pTexels, 0, width*height * 4);
+	memset(pTexels, 255, width*height * 4);
 
-	m_pd3dDeviceContext->Unmap(pTex2D, D3D11CalcSubresource(0, 0, 1));
+	m_pD3D->GetDeviceContext()->Unmap(pTex2D, D3D11CalcSubresource(0, 0, 1));
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	memset(&srvDesc, 0, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
@@ -129,7 +122,7 @@ bool XTextureManager::CreateWhiteTexture(int width, int height, bool isLightMap)
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 	XTextureContainer* texture = new XTextureContainer();
-	hr = m_pD3D->CreateShaderResourceView(pTex2D, &srvDesc, &texture->pTexture);
+	hr = m_pD3D->GetD3DDevice()->CreateShaderResourceView(pTex2D, &srvDesc, &texture->pTexture);
 
 	if (FAILED(hr))
 		return false;
@@ -154,7 +147,7 @@ bool XTextureManager::Load(const std::string & filePath, bool isLightmap)
 	std::wstring wideFileName = std::wstring(filePath.begin(), filePath.end());
 	XTextureContainer* pTex = new XTextureContainer();
 
-	hr = D3DX11CreateShaderResourceViewFromFile(m_pD3D, wideFileName.c_str(), NULL, NULL, &pTex->pTexture, NULL);
+	hr = D3DX11CreateShaderResourceViewFromFile(m_pD3D->GetD3DDevice(), wideFileName.c_str(), NULL, NULL, &pTex->pTexture, NULL);
 	
 	if (FAILED(hr))
 		return false;
@@ -184,7 +177,7 @@ bool XTextureManager::CreateSamplerState()
 	HRESULT hr;
 	D3D11_SAMPLER_DESC samplerDesc;
 	// Create a texture sampler state description.
-	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;//D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -199,7 +192,7 @@ bool XTextureManager::CreateSamplerState()
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 	// Create the texture sampler state.
-	hr = m_pD3D->CreateSamplerState(&samplerDesc, &m_pSampleState);
+	hr = m_pD3D->GetD3DDevice()->CreateSamplerState(&samplerDesc, &m_pSampleState);
 	if (FAILED(hr))
 		return false;
 

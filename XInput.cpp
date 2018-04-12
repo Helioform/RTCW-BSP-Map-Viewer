@@ -1,4 +1,4 @@
-#include "stdafx.h"
+
 #include "XInput.h"
 
 XInput::XInput()
@@ -32,43 +32,42 @@ bool XInput::Initialize(HINSTANCE instance, HWND wnd, int screenWidth, int scree
 		return false;
 
 
-	// Set the data format.  In this case since it is a keyboard we can use the predefined data format.
+	
 	hr = m_pKeyboard->SetDataFormat(&c_dfDIKeyboard);
 	
 	if (FAILED(hr))
 		return false;
 	
-		// Set the cooperative level of the keyboard to not share with other programs.
+		
 	hr = m_pKeyboard->SetCooperativeLevel(wnd, DISCL_FOREGROUND | DISCL_EXCLUSIVE);
 	
 	if (FAILED(hr))
 		return false;
 	
-		// Now acquire the keyboard.
+		
 	hr = m_pKeyboard->Acquire();
 	
 	if (FAILED(hr))
 		return false;
 	
-		// Initialize the direct input interface for the mouse.
+		
 	hr = m_pDirectInput->CreateDevice(GUID_SysMouse, &m_pMouse, NULL);
 	
 	if (FAILED(hr))
 		return false;
 
-	// Set the data format for the mouse using the pre-defined mouse data format.
+	
 	hr = m_pMouse->SetDataFormat(&c_dfDIMouse);
 	
 	if (FAILED(hr))
 		return false;
 	
-	// Set the cooperative level of the mouse to share with other programs.
 	hr = m_pMouse->SetCooperativeLevel(wnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
 	
 	if (FAILED(hr))
 		return false;
 	
-	// Acquire the mouse.
+	
 	hr = m_pMouse->Acquire();
 	
 	if (FAILED(hr))

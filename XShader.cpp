@@ -1,9 +1,10 @@
-#include "stdafx.h"
+
 #include "XShader.h"
 
 
 XD3DShader::XD3DShader()
 {
+	m_pD3D = nullptr;
 	m_pErrorMessage = nullptr;
 	m_pVertexShaderBuffer = nullptr;
 	m_pPixelShaderBuffer = nullptr;
@@ -47,12 +48,12 @@ bool XD3DShader::LoadAndCompile(const std::string & vertexShaderFileName, const 
 		return false;
 
 	// Create the vertex shader from the buffer.
-	hr = m_pD3D->CreateVertexShader(m_pVertexShaderBuffer->GetBufferPointer(), m_pVertexShaderBuffer->GetBufferSize(), NULL, &m_pVertexShader);
+	hr = m_pD3D->GetD3DDevice()->CreateVertexShader(m_pVertexShaderBuffer->GetBufferPointer(), m_pVertexShaderBuffer->GetBufferSize(), NULL, &m_pVertexShader);
 	if (FAILED(hr))
 		return false;
 
 	// Create the pixel shader from the buffer.
-	hr = m_pD3D->CreatePixelShader(m_pPixelShaderBuffer->GetBufferPointer(), m_pPixelShaderBuffer->GetBufferSize(), NULL, &m_pPixelShader);
+	hr = m_pD3D->GetD3DDevice()->CreatePixelShader(m_pPixelShaderBuffer->GetBufferPointer(), m_pPixelShaderBuffer->GetBufferSize(), NULL, &m_pPixelShader);
 
 	if (FAILED(hr))
 		return false;
@@ -74,34 +75,33 @@ bool XD3DShader::SetParams(const D3DXMATRIX & view, const D3DXMATRIX & projectio
 	D3DXMatrixTranspose(&viewTranspose, &view);
 	D3DXMatrixTranspose(&projectionTranspose, &projection);
 
-	// Lock the constant buffer so it can be written to.
-	hr = m_pDeviceContext->Map(m_pMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	
+	hr = m_pD3D->GetDeviceContext()->Map(m_pMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 
 	if (FAILED(hr))
 		return false;
 
-	// Get a pointer to the data in the constant buffer.
+	
 	dataPtr = (MatrixBufferType*)mappedResource.pData;
 
-	// Copy the matrices into the constant buffer.
+	
 	dataPtr->world = worldTranspose;
 	dataPtr->view = viewTranspose;
 	dataPtr->projection = projectionTranspose;
 
-	// Unlock the constant buffer.
-	m_pDeviceContext->Unmap(m_pMatrixBuffer, 0);
-	// Set the position of the constant buffer in the vertex shader.
+	
+	m_pD3D->GetDeviceContext()->Unmap(m_pMatrixBuffer, 0);
+	
 	bufferNumber = 0;
 
-	// Finanly set the constant buffer in the vertex shader with the updated values.
-	m_pDeviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_pMatrixBuffer);
+	m_pD3D->GetDeviceContext()->VSSetConstantBuffers(bufferNumber, 1, &m_pMatrixBuffer);
 
 	
 	// set the texture resource
 	if (lightmapId == -1)
 	{
 		ID3D11ShaderResourceView* pTexture = m_pTextureManager->GetTexture(textureId);
-		m_pDeviceContext->PSSetShaderResources(0, 1, &pTexture);
+		m_pD3D->GetDeviceContext()->PSSetShaderResources(0, 1, &pTexture);
 	}
 	else
 	{
@@ -110,7 +110,7 @@ bool XD3DShader::SetParams(const D3DXMATRIX & view, const D3DXMATRIX & projectio
 		ID3D11ShaderResourceView* pTextureResources[2];
 		pTextureResources[0] = pTexture;
 		pTextureResources[1] = pLightmap;;
-		m_pDeviceContext->PSSetShaderResources(0, 2, pTextureResources);
+		m_pD3D->GetDeviceContext()->PSSetShaderResources(0, 2, pTextureResources);
 	}
 
 	return true;
@@ -127,7 +127,7 @@ bool XD3DShader::CreateMatrixBuffer()
 	matrixBufferDesc.MiscFlags = 0;
 	matrixBufferDesc.StructureByteStride = 0;
 
-	hr = m_pD3D->CreateBuffer(&matrixBufferDesc, NULL, &m_pMatrixBuffer);
+	hr = m_pD3D->GetD3DDevice()->CreateBuffer(&matrixBufferDesc, NULL, &m_pMatrixBuffer);
 
 	if (FAILED(hr))
 		return false;
@@ -146,8 +146,7 @@ bool XD3DShader::CreateLightBuffer()
 	lightBufferDesc.MiscFlags = 0;
 	lightBufferDesc.StructureByteStride = 0;
 
-	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	hr = m_pD3D->CreateBuffer(&lightBufferDesc, NULL, &m_pLightBuffer);
+	hr = m_pD3D->GetD3DDevice()->CreateBuffer(&lightBufferDesc, NULL, &m_pLightBuffer);
 	if (FAILED(hr))
 		return false;
 

@@ -1,9 +1,5 @@
 #pragma once
 
-#pragma comment(lib,"d3d11.lib")
-#pragma comment(lib,"d3dx11.lib")
-#pragma comment(lib,"d3d10.lib")
-
 
 #include "HelperFunctions.h"
 #include "XShader.h"
@@ -46,8 +42,7 @@ struct Vertex
 class XGeomObject
 {
 protected:
-	ID3D11Device*			m_pD3D;
-	ID3D11DeviceContext*	m_pd3dDeviceContext;
+	XD3DRenderer*			m_pD3D;
 	std::vector<FaceData*>	m_Faces;
 	D3DXMATRIX				m_world;
 	D3DXVECTOR3				m_center;
@@ -59,10 +54,9 @@ protected:
 
 public:
 	XGeomObject();
-	XGeomObject(ID3D11DeviceContext* pDevCntxt, ID3D11Device* pD3D, XTextureManager* pTextureManager) {
+	XGeomObject(XD3DRenderer* pD3D, XTextureManager* pTextureManager) {
 		m_pTextureManager = pTextureManager;
 		m_pD3D = pD3D;
-		m_pd3dDeviceContext = pDevCntxt;
 	}
 	~XGeomObject();
 
@@ -122,6 +116,7 @@ public:
 	bool BuildCube(float c, const D3DXVECTOR3& center);
 	bool BuildSphere(float radius, const D3DXVECTOR3& center, int u, int v);
 
+	virtual void Render() { }
 	bool virtual LoadModel(const std::string& fileName);
 };
 

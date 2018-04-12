@@ -1,5 +1,7 @@
 #pragma once
 #include "HelperFunctions.h"
+#include "XD3D.h"
+#include "Singleton.h"
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <D3DX10math.h>
@@ -11,28 +13,41 @@ struct XTextureContainer
 	bool isLightmap;
 };
 
-class XTextureManager
+class XTextureManager : public Singleton<XTextureManager>
 {
 protected:
 	std::vector<XTextureContainer*> m_textures;
 	std::vector<XTextureContainer*> m_lightmaps;
 	ID3D11SamplerState*				m_pSampleState;
-	ID3D11Device*					m_pD3D;
-	ID3D11DeviceContext*			m_pd3dDeviceContext;
+	XD3DRenderer*					m_pD3D;
 	int								m_numTextures;
 	int								m_numLightmaps;
 
 public:
-	XTextureManager();
-	XTextureManager(ID3D11Device* pD3D, ID3D11DeviceContext* pd3dDeviceContext)
+	XTextureManager() { }
+	XTextureManager(XD3DRenderer* pD3D)
 	{
 		m_pD3D = pD3D;
-		m_pd3dDeviceContext = pd3dDeviceContext;
 		m_numTextures = 0;
 		m_numLightmaps = 0;
 	}
 
-	~XTextureManager();
+	void UnloadTextures(void)
+	{
+		for (auto i : m_textures)
+			i->pTexture->Release();
+
+		for (auto i : m_lightmaps)
+			i->pTexture->Release();
+
+		m_numTextures = m_numLightmaps  = 0;
+	}
+
+	~XTextureManager()
+	{
+		UnloadTextures();
+	}
+
 	int GetNumTextures() {
 		return m_numTextures;
 	}
