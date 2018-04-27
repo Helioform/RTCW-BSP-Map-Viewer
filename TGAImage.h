@@ -5,36 +5,35 @@
 #include <vector>
 #include <fstream>
 
-#pragma pack(1)
+#pragma pack(push, 1)
 struct TGAHeader
 {
-	char  idLength;
-	char  colourMapType;
-	char  dataTypeCode;
-	short int colourMapOrigin;
-	short int colourMapLength;
-	char  colourMapDepth;
-	short int xOrigin;
-	short int yOrigin;
-	short width;
-	short height;
-	char  bitsPerPixel;
-	char  imageDescriptor;
+	unsigned char  idLength;
+	unsigned char  colourMapType;
+	unsigned char  dataTypeCode;
+	unsigned short colourMapOrigin;
+	unsigned short colourMapLength;
+	unsigned char  colourMapDepth;
+	unsigned short xOrigin;
+	unsigned short yOrigin;
+	unsigned short width;
+	unsigned short height;
+	unsigned char  bitsPerPixel;
+	unsigned char  imageDescriptor;
 };
+#pragma pack(pop)
 
 struct TGAFooter
 {
-	int extOffset;
-	int dev;	
-	char signature[16];	
-	char dot;		
-	char last;		
+	unsigned short extOffset;
+	unsigned short dev;	
+	char signature[18];		
 };
-#pragma pack()
+
 
 class TGAImage
 {
-	std::vector<unsigned char>	m_imageData;
+	unsigned char*				m_imageData;
 	unsigned int				m_height, m_width;
 	unsigned int				m_bitsPerPixel;
 	int							m_imageSize;
@@ -43,11 +42,11 @@ public:
 	TGAImage();
 	~TGAImage();
 
-	std::vector<unsigned char> GetImageData() { return m_imageData; }
+	unsigned char* GetImageData() { return m_imageData; }
 	unsigned int GetHeight() {return m_height;}
 	unsigned int GetWidth() {return m_width;}
 	int GetImageSize() { return m_imageSize; }
-	static bool Save(std::string fileName, std::vector<unsigned char> imageData, int width, int height, int bpp);
+	static bool Save(std::string fileName, unsigned char* imageData, int width, int height, int bpp);
 	bool Load(std::string fileName);
 	
 };
