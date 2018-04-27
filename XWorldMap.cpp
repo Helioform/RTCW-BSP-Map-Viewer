@@ -309,7 +309,7 @@ bool XWorldMap::LoadShaders()
 		}
 		else // create default shader
 		{
-			XShader* pShader = new XShader(shaderName, nullptr, 0, 0, 0);
+			XShader* pShader = new XShader(shaderName, 0, 0);
 			pShader->AttachD3DShader(m_pD3DShaders[0]);
 			m_pShaders[m_numShaders] = pShader;
 			m_numShaders++;
@@ -513,62 +513,73 @@ bool XWorldMap::OutputShadersToFile(const std::string & fileName)
 
 bool XWorldMap::CreateTextures()
 {
-	/*
-	// load textures and create texture buffers
-	for (int i = 0; i < m_q3Textures.size(); ++i)
-	{
-		std::string jpgTextureFileName;
-		jpgTextureFileName += MapPath;
-		jpgTextureFileName += m_q3Textures[i].name;
-		jpgTextureFileName += ".jpg";
-
-		if (!m_pTextureManager->Load(jpgTextureFileName, false))
-		{
-			TGAImage tgaFile;
-			std::string tgaTextureFileName;
-			tgaTextureFileName += MapPath;
-			tgaTextureFileName += m_q3Textures[i].name;
-			tgaTextureFileName += ".tga";
-			if (tgaFile.Load(tgaTextureFileName))
-			{
-				if (!m_pTextureManager->CreateTexture(tgaFile.GetImageData().data(), tgaFile.GetHeight(), tgaFile.GetWidth(), false))
-					return false;
-			}
-			else
-				 m_pTextureManager->CreateWhiteTexture(128, 128, false);
-		}
-	}
-	*/
 	for (int i = 0; i < m_numShaders; ++i)
 	{
-		int numTextures = m_pShaders[i]->GetNumTextures();
-
-		if (numTextures != 0)
+		if (m_pShaders[i]->GetNumStages())
 		{
-			std::string name = m_pShaders[i]->GetTextureName(0);
-			
-			// if there is a lightmap load the other texture
-			if(name == "$lightmap")
-				name = m_pShaders[i]->GetTextureName(1);
-
-			std::string textureFileName = MapPath + name;
-			TGAImage tgaFile;
-
-			if (tgaFile.Load(textureFileName))
+			for (int j = 0; j < m_pShaders[i]->GetNumStages(); ++j)
 			{
-				if (!m_pTextureManager->CreateTexture(tgaFile.GetImageData().data(), tgaFile.GetHeight(), tgaFile.GetWidth(), false))
-					return false;
-			}
-			else
-			{
-				std::string jpgTextureFileName;
-				jpgTextureFileName += MapPath;
-				jpgTextureFileName += name.substr(0, name.length()-3);
-				jpgTextureFileName += "jpg";
+				TextureStage ts = m_pShaders[i]->GetTextureStages()[j];
 
-				if (!m_pTextureManager->Load(jpgTextureFileName, false))
+				if (ts.animated)
 				{
-					m_pTextureManager->CreateWhiteTexture(128, 128, false);
+					for (int k = 0; k < ts.numAnimTextures; ++k)
+					{
+						std::string name = ts.animTexturesNames[k];
+
+						if (!StrCaseCmp(name.c_str(), "$lightmap"))
+							continue;
+
+						std::string textureFileName = MapPath + name;
+						TGAImage tgaFile;
+
+						if (tgaFile.Load(textureFileName))
+						{
+							if (!m_pTextureManager->CreateTexture(tgaFile.GetImageData(), name, tgaFile.GetHeight(), tgaFile.GetWidth(), false))
+								return false;
+						}
+						else
+						{
+							std::string jpgTextureFileName;
+							jpgTextureFileName += MapPath;
+							jpgTextureFileName += name.substr(0, name.length() - 3);
+							jpgTextureFileName += "jpg";
+
+							if (!m_pTextureManager->Load(jpgTextureFileName, name, false))
+							{
+								m_pTextureManager->CreateWhiteTexture(128, 128, false);
+							}
+						}
+					}
+				}
+				else
+				{
+					std::string name = ts.textureName;
+
+					if (!StrCaseCmp(name.c_str(), "$lightmap"))
+						continue;
+
+					std::string textureFileName = MapPath + name;
+					TGAImage tgaFile;
+
+					if (tgaFile.Load(textureFileName))
+					{
+						if (!m_pTextureManager->CreateTexture(tgaFile.GetImageData(), name, tgaFile.GetHeight(), tgaFile.GetWidth(), false))
+							return false;
+					}
+					else
+					{
+						std::string jpgTextureFileName;
+						jpgTextureFileName += MapPath;
+						jpgTextureFileName += name.substr(0, name.length() - 3);
+						jpgTextureFileName += "jpg";
+
+						if (!m_pTextureManager->Load(jpgTextureFileName, name, false))
+						{
+							m_pTextureManager->CreateWhiteTexture(128, 128, false);
+						}
+					}
+
 				}
 			}
 		}
@@ -579,7 +590,7 @@ bool XWorldMap::CreateTextures()
 			jpgTextureFileName += m_pShaders[i]->GetName();
 			jpgTextureFileName += ".jpg";
 
-			if (!m_pTextureManager->Load(jpgTextureFileName, false))
+			if (!m_pTextureManager->Load(jpgTextureFileName, m_pShaders[i]->GetName(), false))
 			{
 				TGAImage tgaFile;
 				std::string tgaTextureFileName;
@@ -588,7 +599,7 @@ bool XWorldMap::CreateTextures()
 				tgaTextureFileName += ".tga";
 				if (tgaFile.Load(tgaTextureFileName))
 				{
-					if (!m_pTextureManager->CreateTexture(tgaFile.GetImageData().data(), tgaFile.GetHeight(), tgaFile.GetWidth(), false))
+					if (!m_pTextureManager->CreateTexture(tgaFile.GetImageData(), m_pShaders[i]->GetName()+".tga", tgaFile.GetHeight(), tgaFile.GetWidth(), false))
 						return false;
 				}
 				else
@@ -661,6 +672,7 @@ bool XWorldMap::CreatePolygons()
 			TextureIndexedFaceData* newFace = new TextureIndexedFaceData();
 			newFace->numVertices = m_q3Faces[i].nvertices;
 			newFace->textureIndex = m_q3Faces[i].texture;
+			
 			newFace->lightMapIndex = m_q3Faces[i].lmindex;
 			newFace->bspFaceIndex = i;
 			if (!CreateVertexBuffer( &newFace->pTexVBuffer, bezierVertices.data(), m_q3Faces[i].nvertices))
@@ -757,7 +769,7 @@ bool XWorldMap::CreateLightmaps()
 			lightMapData[j * 4 + 3] = 255;
 		}
 
-		if (!m_pTextureManager->CreateTexture(lightMapData, LIGHTMAP_SIZE, LIGHTMAP_SIZE, true))
+		if (!m_pTextureManager->CreateTexture(lightMapData, "lightmap", LIGHTMAP_SIZE, LIGHTMAP_SIZE, true))
 			return false;
 	}
 
@@ -829,6 +841,7 @@ void XWorldMap::AddSurfacesToDraw(XCamera& cam)
 
 }
 
+
 void XWorldMap::Render(XCamera* pCam)
 {
 	HRESULT hr;
@@ -852,10 +865,40 @@ void XWorldMap::Render(XCamera* pCam)
 
 		m_pD3D->GetDeviceContext()->IASetInputLayout(GetInputLayout());
 
-		if (visibleFaces[i]->lightMapIndex < 0)
-			pShader->SetParams(pCam->ViewMatrix(), pCam->ProjectionMatrix(), visibleFaces[i]->textureIndex);
+		XShader* pSh = m_pShaders[visibleFaces[i]->textureIndex];
+
+		if (!pSh->GetNumStages())
+		{
+			if (visibleFaces[i]->lightMapIndex < 0)
+				pShader->SetParams(pCam->ViewMatrix(), pCam->ProjectionMatrix(), pSh->GetName());
+			else
+				pShader->SetParams(pCam->ViewMatrix(), pCam->ProjectionMatrix(), pSh->GetName(), visibleFaces[i]->lightMapIndex);
+		}
 		else
-			pShader->SetParams(pCam->ViewMatrix(), pCam->ProjectionMatrix(), visibleFaces[i]->textureIndex, visibleFaces[i]->lightMapIndex);
+		{
+			for (int j = 0; j < pSh->GetNumStages(); j++)
+			{
+
+				if (!StrCaseCmp(pSh->GetTextureStages()[j].textureName.c_str(), "$lightmap"))
+					continue;
+
+				if (pSh->GetTextureStages()[j].animated)
+				{
+					if (visibleFaces[i]->lightMapIndex < 0)
+						pShader->SetParams(pCam->ViewMatrix(), pCam->ProjectionMatrix(), pSh->GetTextureStages()[j].animTexturesNames[0]);
+					else
+						pShader->SetParams(pCam->ViewMatrix(), pCam->ProjectionMatrix(), pSh->GetTextureStages()[j].animTexturesNames[0], visibleFaces[i]->lightMapIndex);
+				}
+				else
+				{
+					if (visibleFaces[i]->lightMapIndex < 0)
+						pShader->SetParams(pCam->ViewMatrix(), pCam->ProjectionMatrix(), pSh->GetTextureStages()[j].textureName);
+					else
+						pShader->SetParams(pCam->ViewMatrix(), pCam->ProjectionMatrix(), pSh->GetTextureStages()[j].textureName, visibleFaces[i]->lightMapIndex);
+				}
+
+			}
+		}
 
 		pShader->BindVertexShader();
 		pShader->BindPixelShader();
