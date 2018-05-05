@@ -4,7 +4,7 @@
 
 XTextureManager* Singleton<XTextureManager>::ms_singleton = new XTextureManager(XD3DRenderer::GetSingletonPointer());
 
-bool XTextureManager::CreateTexture(unsigned char* imgData, unsigned int height, unsigned int width, bool isLightmap)
+bool XTextureManager::CreateTexture(unsigned char* imgData, const std::string& name, unsigned int height, unsigned int width, bool isLightmap)
 {
 
 	HRESULT hr;
@@ -63,7 +63,7 @@ bool XTextureManager::CreateTexture(unsigned char* imgData, unsigned int height,
 	
 	if (!isLightmap)
 	{
-		m_textures.push_back(texture);
+		m_textures[name] = texture;
 		m_numTextures++;
 	}
 	else
@@ -129,7 +129,7 @@ bool XTextureManager::CreateWhiteTexture(int width, int height, bool isLightMap)
 
 	if (!isLightMap)
 	{
-		m_textures.push_back(texture);
+		m_textures["white_texture"] = texture;
 		m_numTextures++;
 	}
 	else
@@ -141,7 +141,7 @@ bool XTextureManager::CreateWhiteTexture(int width, int height, bool isLightMap)
 	return true;
 }
 
-bool XTextureManager::Load(const std::string & filePath, bool isLightmap)
+bool XTextureManager::Load(const std::string & filePath, const std::string& name, bool isLightmap)
 {
 	HRESULT hr;
 	std::wstring wideFileName = std::wstring(filePath.begin(), filePath.end());
@@ -154,7 +154,7 @@ bool XTextureManager::Load(const std::string & filePath, bool isLightmap)
 	
 	if (!isLightmap)
 	{
-		m_textures.push_back(pTex);
+		m_textures[name] = pTex;
 		m_numTextures++;
 	}
 	else
@@ -167,7 +167,7 @@ bool XTextureManager::Load(const std::string & filePath, bool isLightmap)
 }
 
 
-bool XTextureManager::Save(const std::string & filePath)
+bool XTextureManager::Save(const std::string & filePath, const std::string& name)
 {
 	return true;
 }

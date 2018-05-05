@@ -881,13 +881,16 @@ void XWorldMap::Render(XCamera* pCam)
 
 				if (!StrCaseCmp(pSh->GetTextureStages()[j].textureName.c_str(), "$lightmap"))
 					continue;
-
+				
+				m_pD3D->TurnOnBlending((D3D11_BLEND)pSh->GetTextureStages()[j].srcBlend, (D3D11_BLEND)pSh->GetTextureStages()[j].destBlend);
+				
 				if (pSh->GetTextureStages()[j].animated)
 				{
 					if (visibleFaces[i]->lightMapIndex < 0)
 						pShader->SetParams(pCam->ViewMatrix(), pCam->ProjectionMatrix(), pSh->GetTextureStages()[j].animTexturesNames[0]);
 					else
 						pShader->SetParams(pCam->ViewMatrix(), pCam->ProjectionMatrix(), pSh->GetTextureStages()[j].animTexturesNames[0], visibleFaces[i]->lightMapIndex);
+
 				}
 				else
 				{
@@ -895,6 +898,7 @@ void XWorldMap::Render(XCamera* pCam)
 						pShader->SetParams(pCam->ViewMatrix(), pCam->ProjectionMatrix(), pSh->GetTextureStages()[j].textureName);
 					else
 						pShader->SetParams(pCam->ViewMatrix(), pCam->ProjectionMatrix(), pSh->GetTextureStages()[j].textureName, visibleFaces[i]->lightMapIndex);
+	
 				}
 
 			}
@@ -908,6 +912,8 @@ void XWorldMap::Render(XCamera* pCam)
 
 		// Render the faces
 		m_pD3D->GetDeviceContext()->Draw(visibleFaces[i]->numVertices, 0);
+
+		m_pD3D->TurnOffBlending();
 	}
 }
 

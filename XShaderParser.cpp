@@ -165,7 +165,8 @@ bool XShaderParser::ParseShader(char** text)
 	unsigned int surfaceParams = 0, blendDest = 0, blendSrc = 0;
 	float	animFreq = 0;
 	std::string textureName;
-	char* animTextureNames[8];
+	std::string animTextureNames[8];
+	int numAnimTextures = 0;
 	XShader sh;
 
 	while(!StrCaseCmp(token, ""))
@@ -201,16 +202,21 @@ bool XShaderParser::ParseShader(char** text)
 				if (stack[0])
 				{
 					TextureStage ts;
+					ts.animated = false;
 					ts.destBlend = blendDest;
 					ts.srcBlend = blendSrc;
 					ts.animFrequency = animFreq;
 					ts.textureName = textureName;
-				
+					ts.numAnimTextures = numAnimTextures;
+					if (numAnimTextures)
+						ts.animated = true;
+					for (int i = 0; i < numAnimTextures; i++)
+						ts.animTexturesNames[i] = animTextureNames[i];
 					sh.SetTextureStage(ts);
 					animFreq = 0.0f;
 					blendDest = blendSrc = 0;
 					textureName = "";
-			
+					numAnimTextures = 0;
 				}
 			}
 
@@ -232,14 +238,16 @@ bool XShaderParser::ParseShader(char** text)
 		{
 			// parse frequency
 			token = ParseToken(text, false);
-			
+			animFreq = std::stof(token);
 			// parse first texture name
 			token = ParseToken(text, false);
+			animTextureNames[numAnimTextures++] = token;
 			int i = 0;
 
-			while (token[0] == 't' && i < 8)
+			while (token[0] == 't' && i < 7)
 			{
 				token = ParseToken(text, false);
+				animTextureNames[numAnimTextures++] = token;
 				i++;
 			}
 
@@ -304,19 +312,19 @@ unsigned int XShaderParser::ParseSurfaceParams(const std::string& text)
 unsigned int XShaderParser::ParseBlend(const std::string & text)
 {
 	if (!StrCaseCmp(text.c_str(), "GL_ZERO"))
-		return XD3D_BLEND_ZERO;
+		return D3D11_BLEND_ZERO;
 	else if (!StrCaseCmp(text.c_str(), "GL_ONE"))
-		return XD3D_BLEND_ONE;
+		return D3D11_BLEND_ONE;
 	else if (!StrCaseCmp(text.c_str(), "GL_DST_COLOR"))
-		return XD3D_BLEND_DST_COLOR;
+		return D3D11_BLEND_DEST_COLOR;
 	else if (!StrCaseCmp(text.c_str(), "GL_SRC_COLOR"))
-		return XD3D_BLEND_SRC_COLOR;
+		return D3D11_BLEND_SRC_COLOR;
 	else if (!StrCaseCmp(text.c_str(), "GL_ONE_MINUS_DST_COLOR"))
-		return XD3D_BLEND_ONE_MINUS_DST_COLOR;
+		return D3D11_BLEND_INV_DEST_COLOR;
 	else if (!StrCaseCmp(text.c_str(), "GL_SRC_ALPHA"))
-		return XD3D_BLEND_SRC_ALPHA;
+		return D3D11_BLEND_SRC_ALPHA;
 	else if (!StrCaseCmp(text.c_str(), "GL_ONE_MINUS_SRC_ALPHA"))
-		return XD3D_BLEND_ONE_MINUS_SRC_ALPHA;
+		return D3D11_BLEND_INV_SRC_ALPHA;
 
 	return 0;
 }

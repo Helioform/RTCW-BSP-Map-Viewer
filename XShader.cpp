@@ -62,7 +62,8 @@ bool XD3DShader::LoadAndCompile(const std::string & vertexShaderFileName, const 
 	return true;
 }
 
-bool XD3DShader::SetParams(const D3DXMATRIX & view, const D3DXMATRIX & projection, int textureId, int lightmapId)
+
+bool XD3DShader::SetParams(const D3DXMATRIX & view, const D3DXMATRIX & projection, const std::string & textureName, int lightmapId)
 {
 	HRESULT hr;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -75,37 +76,37 @@ bool XD3DShader::SetParams(const D3DXMATRIX & view, const D3DXMATRIX & projectio
 	D3DXMatrixTranspose(&viewTranspose, &view);
 	D3DXMatrixTranspose(&projectionTranspose, &projection);
 
-	
+
 	hr = m_pD3D->GetDeviceContext()->Map(m_pMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 
 	if (FAILED(hr))
 		return false;
 
-	
+
 	dataPtr = (MatrixBufferType*)mappedResource.pData;
 
-	
+
 	dataPtr->world = worldTranspose;
 	dataPtr->view = viewTranspose;
 	dataPtr->projection = projectionTranspose;
 
-	
+
 	m_pD3D->GetDeviceContext()->Unmap(m_pMatrixBuffer, 0);
-	
+
 	bufferNumber = 0;
 
 	m_pD3D->GetDeviceContext()->VSSetConstantBuffers(bufferNumber, 1, &m_pMatrixBuffer);
 
-	
+
 	// set the texture resource
 	if (lightmapId == -1)
 	{
-		ID3D11ShaderResourceView* pTexture = m_pTextureManager->GetTexture(textureId);
+		ID3D11ShaderResourceView* pTexture = m_pTextureManager->GetTexture(textureName);
 		m_pD3D->GetDeviceContext()->PSSetShaderResources(0, 1, &pTexture);
 	}
 	else
 	{
-		ID3D11ShaderResourceView* pTexture = m_pTextureManager->GetTexture(textureId);
+		ID3D11ShaderResourceView* pTexture = m_pTextureManager->GetTexture(textureName);
 		ID3D11ShaderResourceView* pLightmap = m_pTextureManager->GetLightmap(lightmapId);
 		ID3D11ShaderResourceView* pTextureResources[2];
 		pTextureResources[0] = pTexture;

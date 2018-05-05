@@ -25,6 +25,8 @@ protected:
 	ID3D11DepthStencilState*	m_pDisabledDepthStencilState;
 	ID3D11RasterizerState*		m_pRasterState;
 	ID3D11DepthStencilView*		m_pDepthStencilView;
+	ID3D11BlendState*			m_pEnableBlendingState[10][10];
+	ID3D11BlendState*			m_pDisableBlendingState;
 
 	HWND						m_wnd;
 	int							m_screenWidth, m_screenHeight;
@@ -48,12 +50,15 @@ public:
 	bool CreateDepthBuffer();
 	bool CreateDepthStencilView();
 	bool CreateDisabledDepthStencilState();
-
+	bool CreateBlendState(D3D11_BLEND srcFactor, D3D11_BLEND destFactor, D3D11_BLEND_OP blendOp);
+	bool CreateDisabledBlendingState();
 	bool Setup();
 	bool ClearScene(const D3DXCOLOR& col);
 	bool ShowScene();
 	void TurnOnZBuffer();
 	void TurnOffZBuffer();
+	void TurnOnBlending(D3D11_BLEND srcFactor, D3D11_BLEND destFactor);
+	void TurnOffBlending();
 };
 
 

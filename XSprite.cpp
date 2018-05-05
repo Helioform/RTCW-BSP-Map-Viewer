@@ -114,14 +114,14 @@ bool XSprite::Load(const std::string& fileName)
 	if (!m_pTextureManager)
 		return false;
 
-	m_pShader = new XShader(fileName, nullptr, 0, 0, 0);
+	m_pShader = new XShader(fileName, 0, 0);
 	LoadD3DShader("Sprite.vs", "Sprite.ps");
 
 	const std::string ext = fileName.substr(fileName.find("."), fileName.length());
 
 	if (ext == "jpg")
 	{
-		if (!m_pTextureManager->Load(fileName, false))
+		if (!m_pTextureManager->Load(fileName, fileName, false))
 			return false;
 	}
 	else if (ext == "tga")
@@ -131,7 +131,7 @@ bool XSprite::Load(const std::string& fileName)
 		if (!tgaImg.Load(fileName))
 			return false;
 
-		if (!m_pTextureManager->CreateTexture(tgaImg.GetImageData().data(), tgaImg.GetHeight(), tgaImg.GetWidth(), false))
+		if (!m_pTextureManager->CreateTexture(tgaImg.GetImageData(), fileName, tgaImg.GetHeight(), tgaImg.GetWidth(), false))
 			return false;
 	}
 

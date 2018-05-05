@@ -13,6 +13,12 @@ XD3DRenderer::XD3DRenderer()
 	m_pDepthStencilBuffer = nullptr;
 	m_pDepthStencilView = nullptr;
 
+	for (int i = 0; i < 7; i++)
+		for (int j = 0; j < 7; j++)
+			m_pEnableBlendingState[i][j] = nullptr;
+
+	m_pDisableBlendingState = nullptr;
+
 	m_screenWidth = m_screenHeight = 0;
 	m_fullScreen = false;
 }
@@ -155,6 +161,24 @@ bool XD3DRenderer::InitD3D(HWND wnd, int screenWidth, int screenHeight, bool ful
 	if (!CreateDisabledDepthStencilState())
 		return false;
 
+	if (!CreateDisabledBlendingState())
+		return false;
+
+	if (!CreateBlendState(D3D11_BLEND_ZERO, D3D11_BLEND_ONE, D3D11_BLEND_OP_ADD))
+		return false;
+
+	if (!CreateBlendState(D3D11_BLEND_ONE, D3D11_BLEND_ZERO, D3D11_BLEND_OP_ADD))
+		return false;
+
+	if (!CreateBlendState(D3D11_BLEND_ONE, D3D11_BLEND_ONE, D3D11_BLEND_OP_ADD))
+		return false;
+
+	if (!CreateBlendState(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA, D3D11_BLEND_OP_ADD))
+		return false;
+	
+	if (!CreateBlendState(D3D11_BLEND_DEST_COLOR, D3D11_BLEND_ZERO, D3D11_BLEND_OP_ADD))
+		return false;
+
 	return true;
 }
 
@@ -170,6 +194,11 @@ void XD3DRenderer::ShutdownD3D(void)
 	SAFE_RELEASE(m_pDisabledDepthStencilState);
 	SAFE_RELEASE(m_pRasterState);
 	SAFE_RELEASE(m_pDepthStencilView);
+	for (D3D11_BLEND i = D3D11_BLEND_ZERO; i < 7; ((int&)i)++)
+		for (D3D11_BLEND j = D3D11_BLEND_ZERO; j < 7; ((int&)j)++)
+			SAFE_RELEASE(m_pEnableBlendingState[i][j]);
+
+	SAFE_RELEASE(m_pDisableBlendingState);
 }
 
 bool XD3DRenderer::CreateRenderTargetView()
@@ -357,6 +386,58 @@ bool XD3DRenderer::CreateDisabledDepthStencilState()
 	return true;
 }
 
+bool XD3DRenderer::CreateBlendState(D3D11_BLEND srcFactor, D3D11_BLEND destFactor, D3D11_BLEND_OP blendOp)
+{
+	D3D11_BLEND_DESC blendStateDescription;
+	HRESULT hr;
+
+	ZeroMemory(&blendStateDescription, sizeof(D3D11_BLEND_DESC));
+
+	blendStateDescription.RenderTarget[0].BlendEnable = TRUE;
+	blendStateDescription.RenderTarget[0].SrcBlend = srcFactor;
+	blendStateDescription.RenderTarget[0].DestBlend = destFactor;
+	blendStateDescription.RenderTarget[0].BlendOp = blendOp;
+	blendStateDescription.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendStateDescription.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendStateDescription.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendStateDescription.RenderTarget[0].RenderTargetWriteMask = 0x0f;
+
+	hr = m_pD3DDevice->CreateBlendState(&blendStateDescription, &m_pEnableBlendingState[srcFactor][destFactor]);
+
+	if (FAILED(hr))
+		return false;
+
+//	TurnOnBlending(D3D11_BLEND_ONE, D3D11_BLEND_INV_SRC_ALPHA);
+//	TurnOnBlending(D3D11_BLEND_SRC_ALPHA, D3D11_BLEND_INV_SRC_ALPHA);
+	
+	return true;
+}
+
+bool XD3DRenderer::CreateDisabledBlendingState()
+{
+
+	D3D11_BLEND_DESC blendStateDescription;
+	HRESULT hr;
+
+	ZeroMemory(&blendStateDescription, sizeof(D3D11_BLEND_DESC));
+
+	blendStateDescription.RenderTarget[0].BlendEnable = FALSE;
+	blendStateDescription.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	blendStateDescription.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
+	blendStateDescription.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendStateDescription.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendStateDescription.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendStateDescription.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendStateDescription.RenderTarget[0].RenderTargetWriteMask = 0x0f;
+
+	hr = m_pD3DDevice->CreateBlendState(&blendStateDescription, &m_pDisableBlendingState);
+
+	if (FAILED(hr))
+		return false;
+
+	return true;
+}
+
 
 bool XD3DRenderer::Setup()
 {	
@@ -398,3 +479,30 @@ void XD3DRenderer::TurnOffZBuffer()
 {
 	m_pDeviceContext->OMSetDepthStencilState(m_pDisabledDepthStencilState, 1);
 }
+
+void XD3DRenderer::TurnOnBlending(D3D11_BLEND srcFactor, D3D11_BLEND destFactor)
+{
+	float blendFactor[4];
+
+	// Setup the blend factor.
+	blendFactor[0] = 0.0f;
+	blendFactor[1] = 0.0f;
+	blendFactor[2] = 0.0f;
+	blendFactor[3] = 0.0f;
+
+	m_pDeviceContext->OMSetBlendState(m_pEnableBlendingState[srcFactor][destFactor], blendFactor, 0xffffffff);
+}
+
+void XD3DRenderer::TurnOffBlending()
+{
+	float blendFactor[4];
+
+	// Setup the blend factor.
+	blendFactor[0] = 0.0f;
+	blendFactor[1] = 0.0f;
+	blendFactor[2] = 0.0f;
+	blendFactor[3] = 0.0f;
+
+	m_pDeviceContext->OMSetBlendState( m_pDisableBlendingState, blendFactor, 0xffffffff);
+}
+

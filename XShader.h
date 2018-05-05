@@ -220,7 +220,7 @@ public:
 	}
 
 	bool LoadAndCompile(const std::string& vertexShaderFileName, const std::string& pixelShaderFileName);
-	bool SetParams(const D3DXMATRIX& view, const D3DXMATRIX& projection, int textureId, int lightmapId = -1);
+	bool SetParams(const D3DXMATRIX& view, const D3DXMATRIX& projection, const std::string& textureName, int lightmapId = -1);
 	void BindVertexShader() {
 		m_pD3D->GetDeviceContext()->VSSetShader(m_pVertexShader, nullptr, 0);
 	}	
@@ -238,7 +238,9 @@ struct TextureStage
 {
 	std::string				textureName;
 	std::string				animTexturesNames[MAX_TEXTURE_ANIMS];
+	bool					animated;
 	float					animFrequency;
+	int						numAnimTextures;
 	unsigned int			srcBlend;
 	unsigned int			destBlend;
 	tcMod					tcMod;
@@ -248,9 +250,6 @@ class XShader
 {
 protected:	
 	std::string				m_name;
-	std::string				m_textureNames[8];
-	int						m_numTextures;
-	unsigned int			m_textureBlends[MAX_TEXTURE_BLENDS];
 	int						m_lightmapIndex;
 	int						m_numStates;
 	int						m_numD3DShaders;
@@ -266,23 +265,31 @@ protected:
 	bool					m_noPicMip;
 	TextureStage			m_textureStages[MAX_TEXTURE_STAGES];
 	int						m_numStages;
-
+	int						m_currentFrame;
+	float					m_clampTime;
+	float					m_timeOffset;
 public:
-	XShader() : m_name(""), m_numStages(0), m_numTextures(0), m_lightmapIndex(0), m_numStates(0), m_numD3DShaders(0), m_currentState(0),
+	XShader() :m_clampTime(0), m_timeOffset(0),m_currentFrame(0), m_name(""), m_numStages(0), m_lightmapIndex(0), m_numStates(0), m_numD3DShaders(0), m_currentState(0),
 		m_textureID(0), m_shaderType(0), m_surfaceFlags(0), m_contentFlags(0), m_isSky(false), m_noPicMip(true) {}
 
-	XShader(const std::string name, const std::string* textureNames, int numTextures, int type, int surfParams)
+	XShader(const std::string name, int type, int surfParams)
 	{
-		m_name = name;  m_shaderType = type; m_surfaceFlags = surfParams; m_numD3DShaders = 0; m_numTextures = numTextures;
-		memcpy(m_textureNames, textureNames, numTextures);
+		m_name = name;  m_shaderType = type; m_surfaceFlags = surfParams; m_numD3DShaders = 0;
+		m_numStages = m_currentFrame = 0;
 	}
 
 	~XShader();
 	
+	int GetCurrentFrame() {
+		return m_currentFrame;
+	}
+
+	void AdvanceFrame(void) {
+		m_currentFrame++;
+	}
+
 	void	SetName(const std::string name) { m_name = name; }
 	void	SetSurfaceFlags(int surfParam) { m_surfaceFlags = surfParam; }
-	void	SetTextureName(int i, const std::string name) { m_textureNames[i] = name; m_numTextures++; }
-	void	SetBlendState(int i, unsigned int blendFactor) { m_textureBlends[i] = blendFactor; }
 	void	SetShaderType(int type) { m_shaderType = type;}
 	
 	void SetTextureStage(const TextureStage& stage)
@@ -291,11 +298,10 @@ public:
 		m_textureStages[m_numStages++] = stage;
 	}
 
-	TextureStage& GetTextureStage(int i)
+	TextureStage* GetTextureStages()
 	{
-		assert(i < MAX_TEXTURE_STAGES);
-		return m_textureStages[i];
-	};
+		return m_textureStages;
+	}
 
 	void SetDestBlend(int i, unsigned int destBlend) {
 		assert(i < MAX_TEXTURE_STAGES); m_textureStages[i].destBlend = destBlend;
@@ -324,12 +330,12 @@ public:
 		return m_textureStages[i].tcMod;
 	}
 
+	int			GetNumStages(void) {
+		return m_numStages;
+	}
 	std::string  GetName() { return m_name; }
 	int			 GetSurfaceFlags() { return m_surfaceFlags; }
-	std::string  GetTextureName(int i) { return m_textureStages[i].textureName; }
-	unsigned int GetBlendState(int i) { return m_textureBlends[i]; }
 	int			GetShaderType() { return m_shaderType; }
-	int			GetNumTextures() { return m_numTextures; }
 	XD3DShader* GetD3DShader(int i)
 	{
 		assert(i < MAX_SHADERS);
