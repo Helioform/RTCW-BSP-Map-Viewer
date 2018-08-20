@@ -27,22 +27,37 @@ XD3DShader::~XD3DShader()
 		m_pMatrixBuffer->Release();
 }
 
-bool XD3DShader::LoadAndCompile(const std::string & vertexShaderFileName, const std::string & pixelShaderFileName)
+bool XD3DShader::LoadAndCompile(const std::string & vertexShaderFileName, const std::string & pixelShaderFileName, const std::string& vsFunctionName, const std::string& psFunctionName)
 {
 	HRESULT hr;
 	std::wstring wideVertexFileName = std::wstring(vertexShaderFileName.begin(), vertexShaderFileName.end());
 	std::wstring widePixelFileName = std::wstring(pixelShaderFileName.begin(), pixelShaderFileName.end());
 
-	// Compile the vertex shader code.
-	hr = D3DX11CompileFromFile(wideVertexFileName.c_str(), NULL, NULL, "LightMapVertexShader", "vs_4_0", D3D10_SHADER_ENABLE_STRICTNESS| D3D10_SHADER_DEBUG, 0, NULL,
+	unsigned int shaderParams = D3D10_SHADER_ENABLE_STRICTNESS;
+
+#if defined(DEBUG) || defined(_DEBUG)
+	shaderParams |= D3D10_SHADER_DEBUG;
+#endif
+
+#if defined(ENV64BIT)
+		hr = D3DX11CompileFromFile(wideVertexFileName.c_str(), NULL, NULL, vsFunctionName.c_str(), "vs_4_0", shaderParams , 0, NULL,
 		&m_pVertexShaderBuffer, &m_pErrorMessage, NULL);
+#elif defined(ENV32BIT)
+	hr = D3DX11CompileFromFile(vertexShaderFileName.c_str(), NULL, NULL, vsFunctionName.c_str(), "vs_4_0", shaderParams, 0, NULL,
+		&m_pVertexShaderBuffer, &m_pErrorMessage, NULL);
+#endif
+	
 
 	if (FAILED(hr))
 		return false;
 
-	// Compile the pixel shader code.
-	hr = D3DX11CompileFromFile(widePixelFileName.c_str(), NULL, NULL, "LightMapPixelShader", "ps_4_0", D3D10_SHADER_ENABLE_STRICTNESS | D3D10_SHADER_DEBUG, 0, NULL,
+#if defined(ENV64BIT)	
+	hr = D3DX11CompileFromFile(widePixelFileName.c_str(), NULL, NULL, psFunctionName.c_str(), "ps_4_0", shaderParams, 0, NULL,
 		&m_pPixelShaderBuffer, &m_pErrorMessage, NULL);
+#elif defined(ENV32BIT)
+	hr = D3DX11CompileFromFile(pixelShaderFileName.c_str(), NULL, NULL, psFunctionName.c_str(), "ps_4_0", shaderParams, 0, NULL,
+		&m_pPixelShaderBuffer, &m_pErrorMessage, NULL);
+#endif
 
 	if (FAILED(hr))
 		return false;
@@ -117,6 +132,8 @@ bool XD3DShader::SetParams(const D3DXMATRIX & view, const D3DXMATRIX & projectio
 	return true;
 }
 
+
+
 bool XD3DShader::CreateMatrixBuffer()
 {
 	HRESULT hr;
@@ -153,6 +170,8 @@ bool XD3DShader::CreateLightBuffer()
 
 	return true;
 }
+
+
 
 void XD3DShader::OutputErrorToFile()
 {

@@ -1,8 +1,8 @@
 #pragma once
 #include "XEntity.h"
 
-#define PLAYER_HEIGHT 90.0
-#define PLAYER_RADIUS 90.0
+#define PLAYER_HEIGHT 45.0f
+#define PLAYER_RADIUS 20.0f
 #define PLAYER_VELOCITY 100.0f
 
 

@@ -15,6 +15,7 @@ protected:
 	float		m_velocity;
 	float		m_acceleration[3];
 	float		m_friction[3];
+	D3DXVECTOR3 m_walkVelocity;
 
 public:
 	XEntity();
@@ -33,9 +34,37 @@ public:
 	void SetName(const std::string& name) { m_name = name; }
 	void SetPosition(const D3DXVECTOR3& pos) { m_position = pos; }
 	void SetDirection(const D3DXVECTOR3& dir) { m_direction = dir; }
-	void SetVelocity(float v) { m_velocity = v; }
+	void SetVelocity(float v)
+	{ 
+		m_velocity = v;
+		SetWalkVelocity(v, v);
+	}
+
 	float GetVelocity() { return m_velocity; }
-	D3DXVECTOR3 GetPosition() { return m_position; }
+	D3DXVECTOR3& GetPosition() { return m_position; }
+
+	void SetWalkVelocity(float x, float z)
+	{
+		m_walkVelocity.x = x * m_pCamera->At().x;
+		m_walkVelocity.y = 0.0f;
+		m_walkVelocity.z = z * m_pCamera->At().z;
+	}
+
+	D3DXVECTOR3& GetWalkVelocity(void) {
+		return m_walkVelocity;
+	}
+
+	void WalkForward()
+	{
+		m_pCamera->Walk(m_walkVelocity);
+		m_position = m_pCamera->Eye();
+	}
+
+	void WalkBackward()
+	{
+		m_pCamera->Walk(-m_walkVelocity);
+		m_position = m_pCamera->Eye();
+	}
 
 	void MoveForward()
 	{
@@ -56,5 +85,17 @@ public:
 	}
 
 	virtual XCamera* GetCamera(void) const { return m_pCamera; }
+
+	AABB& GetBoundingBox() {
+		return m_boundingBox;
+	}
+
+	Sphere& GetBoundingSphere() {
+		return m_boundingSphere;
+	}
+
+	virtual void CalculateBoundingBox() { }
+	virtual void CalculateBoundingSphere() { }
+	
 };
 

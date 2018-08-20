@@ -4,7 +4,7 @@
 
 XCamera::XCamera()
 {
-	m_totalPhi = m_totalTheta = 0.0f;
+	
 }
 
 

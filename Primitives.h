@@ -23,6 +23,19 @@ struct Plane
 		n[2] *= invRootL;
 		d *= invRootL;
 	}
+
+	// Projected vector U = V - (V dot N)N
+	float* OrthoProjectedVector(float x, float y, float z)
+	{
+		float u[3];
+		float vDotN = n[0] * x + n[1] * y + n[2] * z;
+		float vN[3] = { vDotN * n[0], vDotN * n[1], vDotN * n[2] };
+		u[0] = x - vN[0];
+		u[1] = y - vN[1];
+		u[2] = z - vN[2];
+
+		return u;
+	}
 };
 
 struct Sphere

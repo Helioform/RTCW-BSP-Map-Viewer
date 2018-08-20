@@ -56,7 +56,6 @@ bool XGeomObject::CreateInputLayout()
 	unsigned int numElements;
 	D3D11_BUFFER_DESC matrixBufferDesc;
 
-	// Now setup the layout of the data that goes into the shader.
 	polygonLayout[0].SemanticName = "POSITION";
 	polygonLayout[0].SemanticIndex = 0;
 	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
@@ -109,7 +108,7 @@ bool XGeomObject::CreateVertexBuffer(ID3D11Buffer** pVB, TexVertex* pVertices, u
 	HRESULT hr; D3D11_BUFFER_DESC vertexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData;
 
-	// Set up the description of the static vertex buffer.
+
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	vertexBufferDesc.ByteWidth = sizeof(pVertices[0]) * numVertices;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -117,12 +116,11 @@ bool XGeomObject::CreateVertexBuffer(ID3D11Buffer** pVB, TexVertex* pVertices, u
 	vertexBufferDesc.MiscFlags = 0;
 	vertexBufferDesc.StructureByteStride = 0;
 
-	// Give the subresource structure a pointer to the vertex data.
+
 	vertexData.pSysMem = pVertices;
 	vertexData.SysMemPitch = 0;
 	vertexData.SysMemSlicePitch = 0;
 
-	// Now create the vertex buffer.
 	hr = m_pD3D->GetD3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexData, pVB);
 	
 	if (FAILED(hr))
@@ -144,12 +142,10 @@ bool XGeomObject::CreateIndexBuffer(ID3D11Buffer** pIB, unsigned long* pIndices,
 	indexBufferDesc.MiscFlags = 0;
 	indexBufferDesc.StructureByteStride = 0;
 
-	// Give the subresource structure a pointer to the index data.
 	indexData.pSysMem = pIndices;
 	indexData.SysMemPitch = 0;
 	indexData.SysMemSlicePitch = 0;
 
-	// Create the index buffer.
 	hr = m_pD3D->GetD3DDevice()->CreateBuffer(&indexBufferDesc, &indexData, pIB);
 	
 	if (FAILED(hr))
@@ -166,7 +162,6 @@ bool XGeomObject::CreateTest(void)
 	unsigned long* pIndices = new unsigned long[numIndices];
 	TexVertex* pVertices = new TexVertex[numVertices];
 
-	// define raw vertex data
 	pVertices[0].pos = D3DXVECTOR3(-1.0f, 1.0f, 5.0f);
 	pVertices[1].pos = D3DXVECTOR3(1.0f, 1.0f, 5.0f);
 	pVertices[2].pos = D3DXVECTOR3(0.0f, -1.0f, 5.0f);
@@ -177,7 +172,6 @@ bool XGeomObject::CreateTest(void)
 	pVertices[1].normal = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
 	pVertices[2].normal = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
 	
-	// tri indices
 	pIndices[0] = 0;
 	pIndices[1] = 1;
 	pIndices[2] = 2;

@@ -35,8 +35,12 @@ XD3DRenderer::~XD3DRenderer()
 
 bool XD3DRenderer::LoadDriver()
 {
+#if defined(ENV64BIT)
 	m_XD3DModule = LoadLibrary(L"d3d11.dll");
-	
+#elif defined(ENV32BIT)
+	m_XD3DModule = LoadLibrary("d3d11.dll");
+#endif
+
 	if(m_XD3DModule == nullptr)
 		return false;
 
@@ -114,10 +118,9 @@ bool XD3DRenderer::CreateD3DDevice(HWND wnd, int screenWidth, int screenHeight, 
 	factory->Release();
 	factory = 0;
 
-	// Initialize the swap chain description.
 	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
 
-	// Set to a single back buffer.
+	
 	swapChainDesc.BufferCount = 1;
 	swapChainDesc.BufferDesc.Width = screenWidth;
 	swapChainDesc.BufferDesc.Height = screenHeight;	
@@ -135,7 +138,13 @@ bool XD3DRenderer::CreateD3DDevice(HWND wnd, int screenWidth, int screenHeight, 
 	swapChainDesc.Flags = 0;
 	featureLevel = D3D_FEATURE_LEVEL_10_0;
 
-	hr = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &featureLevel, 1,
+	UINT createDeviceFlags = 0;
+
+#if defined(DEBUG) || defined(_DEBUG)
+	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+	hr = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, createDeviceFlags, &featureLevel, 1,
 		D3D11_SDK_VERSION, &swapChainDesc, &m_pSwapChain, &m_pD3DDevice, NULL, &m_pDeviceContext);
 
 	if (FAILED(hr))
@@ -165,6 +174,9 @@ bool XD3DRenderer::InitD3D(HWND wnd, int screenWidth, int screenHeight, bool ful
 		return false;
 
 	if (!CreateBlendState(D3D11_BLEND_ZERO, D3D11_BLEND_ONE, D3D11_BLEND_OP_ADD))
+		return false;
+
+	if (!CreateBlendState(D3D11_BLEND_ONE, D3D11_BLEND_INV_SRC_ALPHA, D3D11_BLEND_OP_ADD))
 		return false;
 
 	if (!CreateBlendState(D3D11_BLEND_ONE, D3D11_BLEND_ZERO, D3D11_BLEND_OP_ADD))
@@ -205,19 +217,17 @@ bool XD3DRenderer::CreateRenderTargetView()
 {
 	HRESULT hr;
 
-	// Get the pointer to the back buffer.
 	hr = m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&m_pBackBuffer);
 	
 	if (FAILED(hr))
 		return false;
 
-	// Create the render target view with the back buffer pointer.
+	
 	hr = m_pD3DDevice->CreateRenderTargetView(m_pBackBuffer, NULL, &m_pRenderTargetView);
 	
 	if (FAILED(hr))
 		return false;
 
-	// Release pointer to the back buffer as we no longer need it.
 	m_pBackBuffer->Release();
 	m_pBackBuffer = 0;
 
@@ -229,10 +239,10 @@ bool XD3DRenderer::CreateDepthBuffer()
 	HRESULT hr;
 	D3D11_TEXTURE2D_DESC depthBufferDesc;
 
-		// Initialize the description of the depth buffer.
+		
 	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
 
-	// Set up the description of the depth buffer.
+	
 	depthBufferDesc.Width = m_screenWidth;
 	depthBufferDesc.Height = m_screenHeight;
 	depthBufferDesc.MipLevels = 1;
@@ -245,7 +255,7 @@ bool XD3DRenderer::CreateDepthBuffer()
 	depthBufferDesc.CPUAccessFlags = 0;
 	depthBufferDesc.MiscFlags = 0;
 
-	// Create the texture for the depth buffer using the filled out description.
+	
 	hr = m_pD3DDevice->CreateTexture2D(&depthBufferDesc, NULL, &m_pDepthStencilBuffer);
 	
 	if(FAILED(hr))
@@ -263,10 +273,10 @@ bool XD3DRenderer::CreateDepthStencilView()
 	D3D11_RASTERIZER_DESC rasterDesc;
 	D3D11_VIEWPORT viewport;
 
-	// Initialize the description of the stencil state.
+	
 	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
 
-	// Set up the description of the stencil state.
+	
 	depthStencilDesc.DepthEnable = true;
 	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
@@ -275,45 +285,44 @@ bool XD3DRenderer::CreateDepthStencilView()
 	depthStencilDesc.StencilReadMask = 0xFF;
 	depthStencilDesc.StencilWriteMask = 0xFF;
 
-	// Stencil operations if pixel is front-facing.
+	
 	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
 	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-	// Stencil operations if pixel is back-facing.
 	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
 	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-	// Create the depth stencil state.
+	
 	hr = m_pD3DDevice->CreateDepthStencilState(&depthStencilDesc, &m_pDepthStencilState);
 	
 	if (FAILED(hr))
 		return false;
 
-	// Set the depth stencil state.
+	
 	m_pDeviceContext->OMSetDepthStencilState(m_pDepthStencilState, 1);
 
-	// Initialize the depth stencil view.
+	
 	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
 
-	// Set up the depth stencil view description.
+	
 	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
 
-	// Create the depth stencil view.
+	
 	hr = m_pD3DDevice->CreateDepthStencilView(m_pDepthStencilBuffer, &depthStencilViewDesc, &m_pDepthStencilView);
 	
 	if (FAILED(hr))
 		return false;
 
-	// Bind the render target view and depth stencil buffer to the output render pipeline.
+	
 	m_pDeviceContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
 
-	// Setup the raster description which will determine how and what polygons will be drawn.
+	
 	rasterDesc.AntialiasedLineEnable = false;
 	rasterDesc.CullMode = D3D11_CULL_BACK;
 	rasterDesc.DepthBias = 0;
@@ -325,16 +334,14 @@ bool XD3DRenderer::CreateDepthStencilView()
 	rasterDesc.ScissorEnable = false;
 	rasterDesc.SlopeScaledDepthBias = 0.0f;
 
-	// Create the rasterizer state from the description we just filled out.
+	
 	hr = m_pD3DDevice->CreateRasterizerState(&rasterDesc, &m_pRasterState);
 
 	if (FAILED(hr))
 		return false;
 
-	// Now set the rasterizer state.
 	m_pDeviceContext->RSSetState(m_pRasterState);
 
-	// Setup the viewport for rendering.
 	viewport.Width = (float)m_screenWidth;
 	viewport.Height = (float)m_screenHeight;
 	viewport.MinDepth = 0.0f;
@@ -342,7 +349,6 @@ bool XD3DRenderer::CreateDepthStencilView()
 	viewport.TopLeftX = 0.0f;
 	viewport.TopLeftY = 0.0f;
 
-	// Create the viewport.
 	m_pDeviceContext->RSSetViewports(1, &viewport);
 
 	return true;
@@ -353,10 +359,8 @@ bool XD3DRenderer::CreateDisabledDepthStencilState()
 	HRESULT hr;
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 
-	// Initialize the description of the stencil state.
 	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
 
-	// Set up the description of the stencil state.
 	depthStencilDesc.DepthEnable = false;
 	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
@@ -365,19 +369,16 @@ bool XD3DRenderer::CreateDisabledDepthStencilState()
 	depthStencilDesc.StencilReadMask = 0xFF;
 	depthStencilDesc.StencilWriteMask = 0xFF;
 
-	// Stencil operations if pixel is front-facing.
 	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
 	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-	// Stencil operations if pixel is back-facing.
 	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
 	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-	// Create the depth stencil state.
 	hr = m_pD3DDevice->CreateDepthStencilState(&depthStencilDesc, &m_pDisabledDepthStencilState);
 
 	if (FAILED(hr))
@@ -448,10 +449,8 @@ bool XD3DRenderer::Setup()
 
 bool XD3DRenderer::ClearScene(const D3DXCOLOR& col)
 {
-	// Clear the back buffer.
     m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView, col);
 
-	// Clear the depth buffer.
     m_pDeviceContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	return true;
 }
@@ -484,7 +483,6 @@ void XD3DRenderer::TurnOnBlending(D3D11_BLEND srcFactor, D3D11_BLEND destFactor)
 {
 	float blendFactor[4];
 
-	// Setup the blend factor.
 	blendFactor[0] = 0.0f;
 	blendFactor[1] = 0.0f;
 	blendFactor[2] = 0.0f;
@@ -497,7 +495,6 @@ void XD3DRenderer::TurnOffBlending()
 {
 	float blendFactor[4];
 
-	// Setup the blend factor.
 	blendFactor[0] = 0.0f;
 	blendFactor[1] = 0.0f;
 	blendFactor[2] = 0.0f;

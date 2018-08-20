@@ -133,7 +133,7 @@ bool XIllumin::ParseCFGFile(const std::string & fileName)
 	}
 	else
 	{
-		FAIL_MSG_BOX(L"Unable to open init file.");
+		FAIL_MSG_BOX("Unable to open init file.");
 		return false;
 	}
 
@@ -147,14 +147,23 @@ bool XIllumin::InitGameObjects(const std::string& params)
 {
 	m_pTimer = new XTimer();
 
-	m_pUICamera = new XCamera(D3DXVECTOR3(0.0f, 0.0f, 1.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), SCREEN_WIDTH, SCREEN_HEIGHT, 0.1f, 1000.0f);
+	m_pUICamera = new XCamera(D3DXVECTOR3(0.0f, 0.0f, 1.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, -5.0f), SCREEN_WIDTH, SCREEN_HEIGHT, 0.1f, 1000.0f);
 
 	m_pInput = new XInput();
 	m_pInput->Initialize(m_hInst, m_hWnd, m_screenWidth, m_screenHeight);
-
+	
 	if (!XD3DRenderer::GetSingletonPointer()->InitD3D(m_hWnd, m_screenWidth, m_screenHeight, m_fullScreen))
 	{
-		FAIL_MSG_BOX(L"Error initializing Direct3D.");
+		FAIL_MSG_BOX("Error initializing Direct3D.");
+		return false;
+	}
+
+	XTextureManager::GetSingletonPointer()->CreateSamplerState();
+	
+	m_pFont = new XFont(XD3DRenderer::GetSingletonPointer(), XTextureManager::GetSingletonPointer(), 10, 2500, 20);
+	if(!m_pFont->LoadFontTextureMap("Fonts/sanstransparent.png"))
+	{
+		FAIL_MSG_BOX("Error loading font");
 		return false;
 	}
 
@@ -162,23 +171,23 @@ bool XIllumin::InitGameObjects(const std::string& params)
 
 	if (!m_pMap->LoadLightmapShader())
 	{
-		FAIL_MSG_BOX(L"Error loading lightmap shader");
+		FAIL_MSG_BOX("Error loading lightmap shader");
 		return false;
 	}
 
 	if (!m_pMap->CreateInputLayout())
 	{
-		FAIL_MSG_BOX(L"Error creating input layout");
+		FAIL_MSG_BOX("Error creating input layout");
 		return false;
 	}
 
 	if (!m_pMap->Load(m_currentMapName))
 	{
-		FAIL_MSG_BOX(L"Error loading map");
+		FAIL_MSG_BOX("Error loading map");
 		return false;
 	}
 	
-	XTextureManager::GetSingletonPointer()->CreateSamplerState();
+	
 	m_pMap->LoadEntities();
 
 	m_pCollisionHandler = new CollisionSystem(m_pMap);
@@ -190,7 +199,10 @@ bool XIllumin::InitGameObjects(const std::string& params)
 bool XIllumin::RenderAll(const std::string& args)
 {
 	XD3DRenderer::GetSingletonPointer()->ClearScene(D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f));
-
+	
+	int numFaces = m_pMap->GetVisibleFaces().size();
+	m_pFont->WriteText(100, 100, "Number of triangles drawn: " + std::to_string(numFaces), D3DXVECTOR4(0.0,1.0,0.0,0.0), m_pUICamera);
+	
 	m_pMap->Render(m_pMap->GetPlayer()->GetCamera());
 
 	XD3DRenderer::GetSingletonPointer()->ShowScene();
@@ -210,15 +222,15 @@ bool XIllumin::GameMain(const std::string& args)
 	double deltaT = 0.001*m_pTimer->GetElapsedTime();
 	m_pMap->GetPlayer()->GetCamera()->Pitch(my*0.01);
 	m_pMap->GetPlayer()->GetCamera()->RotateAtAroundY(mx*0.01);
-	m_pMap->GetPlayer()->SetVelocity(deltaT * PLAYER_VELOCITY);
+	m_pMap->GetPlayer()->SetVelocity(deltaT * 5*PLAYER_VELOCITY);
 	
-//	m_pCollisionHandler->HandlePlayerCollisions();
+	//m_pCollisionHandler->HandlePlayerCollisions();
 	
 	if (m_pInput->IsKeyPressed(DIK_W))
-		m_pMap->GetPlayer()->MoveForward();
+		m_pMap->GetPlayer()->WalkForward();
 	
 	if (m_pInput->IsKeyPressed(DIK_S))
-		m_pMap->GetPlayer()->MoveBackward();
+		m_pMap->GetPlayer()->WalkBackward();
 	
 	m_pMap->GetPlayer()->GetCamera()->UpdateViewMatrix();
 
@@ -227,7 +239,8 @@ bool XIllumin::GameMain(const std::string& args)
 	m_pMap->AddSurfacesToDraw(*m_pMap->GetPlayer()->GetCamera());
 
 	RenderAll(" ");
-
+	
+	
 	m_pTimer->CalculateElapsedTime();
 
 	return 1;
@@ -247,7 +260,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	
 	if (!g_pMainGameWindow->ParseCFGFile("Config/GameInit.txt"))
 	{
-		g_pMainGameWindow->FAIL_MSG_BOX(L"Error loading init file.");
+		g_pMainGameWindow->FAIL_MSG_BOX("Error loading init file.");
 		return FALSE;
 	}
 
@@ -266,13 +279,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
 	if (!g_pMainGameWindow->MyRegisterClass(hInstance))
 	{
-		g_pMainGameWindow->FAIL_MSG_BOX(L"Failed to create window.");
+		g_pMainGameWindow->FAIL_MSG_BOX("Failed to create window.");
 		return FALSE;
 	}
 
 	if (!g_pMainGameWindow->InitInstance(hInstance, nCmdShow))
 	{
-		g_pMainGameWindow->FAIL_MSG_BOX(L"Failed to create instance.");
+		g_pMainGameWindow->FAIL_MSG_BOX("Failed to create instance.");
 		return FALSE;
 	}
 	
@@ -280,7 +293,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	
 	if (!g_pMainGameWindow->InitGameObjects(" "))
 	{
-		g_pMainGameWindow->FAIL_MSG_BOX(L"Failed to create game objects.");
+		g_pMainGameWindow->FAIL_MSG_BOX("Failed to create game objects.");
 		return FALSE;
 	}
 

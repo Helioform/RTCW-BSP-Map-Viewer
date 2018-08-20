@@ -243,7 +243,7 @@ bool XWorldMap::LoadLightmapShader()
 {
 	m_pD3DShaders[0] = new XD3DShader(m_pD3D, m_pTextureManager);
 
-	if (!m_pD3DShaders[0]->LoadAndCompile("Effects/lightmap.vs", "Effects/lightmap.ps"))
+	if (!m_pD3DShaders[0]->LoadAndCompile("Effects/lightmap.vs", "Effects/lightmap.ps", "LightMapVertexShader", "LightMapPixelShader"))
 	{
 		m_pD3DShaders[0]->OutputErrorToFile();
 		return false;
@@ -363,7 +363,7 @@ bool XWorldMap::LoadEntities()
 		if (entName == "info_player_start\"" || entName == "info_player_deathmatch\"")
 		{
 			m_playerEntityIndex = m_numEntities;
-			m_mapEntities.push_back(new XPlayer(entName, D3DXVECTOR3(x, z, y), D3DXVECTOR3(0, 0, 1), SCREEN_WIDTH, SCREEN_HEIGHT, 90, 0.1, 10000));
+			m_mapEntities.push_back(new XPlayer(entName, D3DXVECTOR3(x, z+PLAYER_HEIGHT, y), D3DXVECTOR3(0, 0, 1), SCREEN_WIDTH, SCREEN_HEIGHT, 90, 0.1, 10000));
 		}
 		else
 		{
@@ -417,9 +417,8 @@ bool XWorldMap::CreateInputLayout()
 	polygonLayout[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[3].InstanceDataStepRate = 0;
 
-	// Get a count of the elements in the layout.
 	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
-	// Create the vertex input layout.
+
 	hr = m_pD3D->GetD3DDevice()->CreateInputLayout(polygonLayout, numElements, m_pD3DShaders[0]->GetVertexShaderBuffer()->GetBufferPointer(),
 		m_pD3DShaders[0]->GetVertexShaderBuffer()->GetBufferSize(), &m_pLayout);
 
@@ -848,7 +847,6 @@ void XWorldMap::Render(XCamera* pCam)
 	unsigned int stride;
 	unsigned int offset;
 
-	// Set vertex buffer stride and offset.
 	stride = sizeof(TexVertex);
 	offset = 0;
 
@@ -910,7 +908,6 @@ void XWorldMap::Render(XCamera* pCam)
 		ID3D11SamplerState* pSampleState = GetTextureManager()->GetSamplerState();
 		m_pD3D->GetDeviceContext()->PSSetSamplers(0, 1, &pSampleState);
 
-		// Render the faces
 		m_pD3D->GetDeviceContext()->Draw(visibleFaces[i]->numVertices, 0);
 
 		m_pD3D->TurnOffBlending();

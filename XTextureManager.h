@@ -54,6 +54,8 @@ public:
 		return m_numTextures;
 	}
 
+	bool GetTextureData(const std::string name, unsigned char** pData, unsigned int& width, unsigned int& height, unsigned int& rowPitch);
+
 	int GetNumLightmaps() {
 		return m_numLightmaps;
 	}

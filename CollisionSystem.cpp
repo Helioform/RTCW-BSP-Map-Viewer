@@ -25,9 +25,9 @@ int CollisionSystem::AABBPlaneIntersect(const Plane& p, const AABB& b)
 
 void CollisionSystem::HandlePlayerCollisions()
 {
-	const float nextPos[3] = {	m_pMap->GetPlayer()->GetPosition().x + PLAYER_VELOCITY,
-								m_pMap->GetPlayer()->GetPosition().y + PLAYER_VELOCITY,
-								m_pMap->GetPlayer()->GetPosition().z + PLAYER_VELOCITY };
+	const float nextPos[3] = {	m_pMap->GetPlayer()->GetPosition().x + m_pMap->GetPlayer()->GetWalkVelocity().x,
+								m_pMap->GetPlayer()->GetPosition().y + m_pMap->GetPlayer()->GetWalkVelocity().y,
+								m_pMap->GetPlayer()->GetPosition().z + m_pMap->GetPlayer()->GetWalkVelocity().z };
 	const Sphere s = Sphere(PLAYER_RADIUS, nextPos);
 	const std::vector<Q3MapPlane> planes = m_pMap->GetPlanes();
 	const std::vector<Q3MapLeaf> leaves = m_pMap->GetLeaves();
@@ -51,7 +51,8 @@ void CollisionSystem::HandlePlayerCollisions()
 
 			if (CollisionSystem::SpherePlaneIntersect(p, s))
 			{
-				m_pMap->GetPlayer()->SetVelocity(0.0f);
+			//	float* newSpeed = p.OrthoProjectedVector(m_pMap->GetPlayer()->GetWalkVelocity().x, m_pMap->GetPlayer()->GetWalkVelocity().y, m_pMap->GetPlayer()->GetWalkVelocity().z);				
+				m_pMap->GetPlayer()->SetWalkVelocity(-m_pMap->GetPlayer()->GetWalkVelocity().x, -m_pMap->GetPlayer()->GetWalkVelocity().z);
 			}		
 		}
 	}

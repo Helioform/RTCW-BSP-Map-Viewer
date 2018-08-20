@@ -4,6 +4,62 @@
 
 XTextureManager* Singleton<XTextureManager>::ms_singleton = new XTextureManager(XD3DRenderer::GetSingletonPointer());
 
+
+bool XTextureManager::GetTextureData(const std::string name, unsigned char** pData, unsigned int & width, unsigned int & height, unsigned int & rowPitch)
+{
+	HRESULT hr;
+	ID3D11ShaderResourceView* pResourceView;;
+
+	pResourceView = m_textures[name]->pTexture;
+	
+	if (pResourceView == nullptr)
+	{
+		pData = nullptr;
+		return false;
+	}
+
+	ID3D11Resource* pRes;
+	ID3D11Texture2D* pTex;
+	D3D11_TEXTURE2D_DESC tex2DDesc;
+	
+	pResourceView->GetResource(&pRes);
+	pRes->QueryInterface(&pTex);
+	pTex->GetDesc(&tex2DDesc);
+
+	width = tex2DDesc.Width;
+	height = tex2DDesc.Height;
+
+	ID3D11Texture2D* pTex2 = nullptr;
+	D3D11_TEXTURE2D_DESC texDesc;
+	memset(&texDesc, 0, sizeof(D3D11_TEXTURE2D_DESC));
+	texDesc.Width = tex2DDesc.Width;
+	texDesc.Height = tex2DDesc.Height;
+	texDesc.MipLevels = tex2DDesc.MipLevels;
+	texDesc.ArraySize = tex2DDesc.ArraySize;
+	texDesc.Format = tex2DDesc.Format;
+	texDesc.SampleDesc.Count = tex2DDesc.SampleDesc.Count;
+	texDesc.SampleDesc.Quality = tex2DDesc.SampleDesc.Quality;
+	texDesc.Usage = D3D11_USAGE_STAGING;
+	//texDesc.BindFlags = tex2DDesc.BindFlags;
+	texDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	texDesc.MiscFlags = tex2DDesc.MiscFlags;
+
+	hr = m_pD3D->GetD3DDevice()->CreateTexture2D(&texDesc, nullptr, &pTex2);
+
+	if (FAILED(hr))
+		return false;
+
+	m_pD3D->GetDeviceContext()->CopyResource(pTex2, pTex);
+	D3D11_MAPPED_SUBRESOURCE  mappedTex;
+	m_pD3D->GetDeviceContext()->Map(pTex2, 0, D3D11_MAP_READ, 0, &mappedTex);
+	*pData = new unsigned char[mappedTex.RowPitch * height];
+	memcpy(*pData, (UCHAR*)mappedTex.pData, mappedTex.RowPitch * height * sizeof(unsigned char));
+	rowPitch = mappedTex.RowPitch;
+	m_pD3D->GetDeviceContext()->Unmap(pTex2, D3D11CalcSubresource(0, 0, 1));
+
+	return true;
+}
+
 bool XTextureManager::CreateTexture(unsigned char* imgData, const std::string& name, unsigned int height, unsigned int width, bool isLightmap)
 {
 
@@ -147,8 +203,12 @@ bool XTextureManager::Load(const std::string & filePath, const std::string& name
 	std::wstring wideFileName = std::wstring(filePath.begin(), filePath.end());
 	XTextureContainer* pTex = new XTextureContainer();
 
+#if defined(ENV64BIT)
 	hr = D3DX11CreateShaderResourceViewFromFile(m_pD3D->GetD3DDevice(), wideFileName.c_str(), NULL, NULL, &pTex->pTexture, NULL);
-	
+#elif defined(ENV32BIT)
+	hr = D3DX11CreateShaderResourceViewFromFile(m_pD3D->GetD3DDevice(), filePath.c_str(), NULL, NULL, &pTex->pTexture, NULL);
+#endif
+
 	if (FAILED(hr))
 		return false;
 	

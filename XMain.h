@@ -6,6 +6,7 @@
 #include "XInput.h"
 #include "XTimer.h"
 #include "CollisionSystem.h"
+#include "XFont.h"
 
 class XIllumin : public XWindow
 {
@@ -14,6 +15,7 @@ private:
 	static XIllumin		m_instance;
 
 protected:
+	XFont*				m_pFont;
 	XTimer*				m_pTimer;
 	XGeomObject*		m_pGeom;
 	XCamera*			m_pUICamera;
@@ -28,7 +30,7 @@ public:
 	XIllumin() { }
 	XIllumin(WCHAR* title, int width, int height) : XWindow(title, width, height)
 	{
-		m_pMap = nullptr; m_pTimer = nullptr; m_pCollisionHandler = nullptr;
+		m_pMap = nullptr; m_pTimer = nullptr; m_pCollisionHandler = nullptr; m_pFont = nullptr;
 	}
 
 	~XIllumin()
@@ -36,6 +38,7 @@ public:
 		if (m_pMap) delete m_pMap;
 		if (m_pTimer) delete m_pTimer;
 		if (m_pCollisionHandler) delete m_pCollisionHandler;
+		if (m_pFont) delete m_pFont;
 	}
 
 	void SetHeight(int h) {

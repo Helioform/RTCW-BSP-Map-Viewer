@@ -49,10 +49,10 @@ public:
 	bool CreateInputLayout(void);
 	void LoadD3DShader(const std::string& vertexShaderFileName, const std::string& pixelShaderFileName)
 	{
-		if (m_numD3DShaders == 8) return;
-		m_pD3DShaders[m_numD3DShaders] = new XD3DShader(m_pD3D, m_pTextureManager);
-		m_pD3DShaders[m_numD3DShaders]->LoadAndCompile(vertexShaderFileName, pixelShaderFileName);
-		m_numD3DShaders++;
+	//	if (m_numD3DShaders == 8) return;
+	//	m_pD3DShaders[m_numD3DShaders] = new XD3DShader(m_pD3D, m_pTextureManager);
+	//	m_pD3DShaders[m_numD3DShaders]->LoadAndCompile(vertexShaderFileName, pixelShaderFileName);
+	//	m_numD3DShaders++;
 	}
 	bool Load(const std::string& fileName);
 

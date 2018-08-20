@@ -23,14 +23,14 @@ protected:
 	float		m_height, m_width, m_aspectRatio;
 	float		m_fov;
 	float		m_nearPlane, m_farPlane;
-	float		m_totalPhi, m_totalTheta;
+	float		m_pitch;
 	bool		m_isOrtho;
 	bool		m_isPerspective;
 public:
 	XCamera();
 	XCamera(const D3DXVECTOR3& at, const D3DXVECTOR3& up, const D3DXVECTOR3& eye, const D3DXVECTOR3& right, float width, float height, float fov, float nearPlane, float farPlane)
 	{
-		m_totalPhi = m_totalTheta = 0.0f;
+		m_pitch = 0.0f;
 		m_at = at;
 		m_eye = eye;
 		m_up = up;
@@ -47,7 +47,7 @@ public:
 
 	XCamera(const D3DXVECTOR3& at, const D3DXVECTOR3& up, const D3DXVECTOR3& eye, float width, float height, float nearPlane, float farPlane)
 	{
-		m_at = at - eye;
+		m_at = at;
 		m_up = up;
 		m_eye = eye;
 		m_width = width;
@@ -73,6 +73,12 @@ public:
 	D3DXMATRIX & ViewMatrix(void) { return m_view; }
 	D3DXMATRIX & ProjectionMatrix(void) { return m_projection; }
 
+	void MapToScreen(float* screenX, float* screenY, float x, float y)
+	{
+		*screenX = (float)((m_width / 2) * -1) + (float)x;
+		*screenY = (float)(m_height / 2) - (float)y;
+	}
+
 	D3DXVECTOR3 GetPosition()
 	{
 		return D3DXVECTOR3(m_view(3, 0), m_view(3, 1), m_view(3, 2));
@@ -80,30 +86,21 @@ public:
 
 	void UpdateViewMatrix()
 	{
-		//
-		// Orthonormalize the right, up and look vectors.
-		//
-		// Make look vector unit length.
+	
 		D3DXVECTOR3 L, U, R;
 		L = m_at;
 		U = m_up;
 		R = m_right;
-		D3DXVec3Normalize(&L, &L);
-		// Compute a new corrected "up" vector and normalize it.	
+		D3DXVec3Normalize(&L, &L);	
 		D3DXVec3Cross(&U, &L, &R);
 		D3DXVec3Normalize(&U, &U);
-		// Compute a new corrected "right" vector. U and L are
-		// already ortho-normal, so no need to normalize cross product.
-		// ||up × look|| = ||up|| ||look|| sin90° = 1
+	
 		D3DXVec3Cross(&R, &U, &L);
 
 		m_right = R;
 		m_up = U;
 		m_at = L;
 
-		//
-		// Fill in the view matrix entries.
-		//
 		float x = -D3DXVec3Dot(&m_eye, &m_right);
 		float y = -D3DXVec3Dot(&m_eye, &m_up);
 		float z = -D3DXVec3Dot(&m_eye, &m_at);
@@ -133,19 +130,9 @@ public:
 		D3DXMatrixOrthoLH(&m_projection, width, height, zNear, zFar);
 	}
 
-	void UpdateProjectionMatrix()
+	void UpdateProjectionMatrix() 
 	{
 		D3DXMatrixPerspectiveFovLH(&m_projection, PI*m_fov / 180.0f, m_aspectRatio, m_nearPlane, m_farPlane);
-	}
-
-	void OrientAt(float phi, float theta)
-	{
-		
-		m_totalTheta += theta;
-
-		m_at.x = sin(m_totalPhi)*cos(m_totalTheta);
-		m_at.z = sin(m_totalPhi)*sin(m_totalTheta);
-		m_at.y = cos(m_totalPhi);
 	}
 
 	void Move(float delta) 
@@ -153,9 +140,27 @@ public:
 		m_eye += delta * m_at;
 	}
 
+	void Walk(D3DXVECTOR3& vel)
+	{
+		m_eye += vel;
+	}
+
 	void Pitch(float angle) 
 	{
 		D3DXMATRIX R;
+		m_pitch += angle;
+
+		if (m_pitch > PI / 2.0f)
+		{
+			m_pitch = PI / 2.0f;
+			return;
+		}
+
+		if (m_pitch < -PI / 2.0f)
+		{
+			m_pitch = -PI / 2.0f;
+			return;
+		}
 
 		D3DXMatrixRotationAxis(&R, &m_right, angle);
 		D3DXVec3TransformNormal(&m_up, &m_up, &R);
@@ -178,7 +183,7 @@ public:
 
 	void ExtractFrustumPlanes();
 
-	bool IsInFrustum(int* mins, int* maxs) 
+	bool IsInFrustum(int* mins, int* maxs) const
 	{
 		D3DXVECTOR3 box[] = { D3DXVECTOR3(mins[0], mins[1], mins[2]), D3DXVECTOR3(maxs[0],maxs[1],maxs[2]) };
 
@@ -187,19 +192,13 @@ public:
 
 		for (int i = 0; i < 6; ++i)
 		{
-			// This is the current plane
 			const Plane &p = *planes[i];
 
-			// p-vertex selection (with the index trick)
-			// According to the plane normal we can know the
-			// indices of the positive vertex
 			const int px = static_cast<int>(p.n[0] > 0.0f);
 			const int py = static_cast<int>(p.n[1] > 0.0f);
 			const int pz = static_cast<int>(p.n[2] > 0.0f);
-
-			// Dot product
+			
 			// project p-vertex on plane normal
-			// (How far is p-vertex from the origin)
 			const float dp = (p.n[0]*box[px].x) + (p.n[1]*box[py].y) + (p.n[2]*box[pz].z);
 
 			// Doesn't intersect if it is behind the plane

@@ -165,6 +165,8 @@ struct MatrixBufferType
 	D3DXMATRIX projection;
 };
 
+
+
 struct LightBufferType
 {
 	D3DXVECTOR4 diffuseColor;
@@ -179,6 +181,7 @@ protected:
 	XD3DRenderer*			m_pD3D;
 	ID3D11Buffer*			m_pMatrixBuffer;
 	ID3D11Buffer*			m_pLightBuffer;
+	ID3D11Buffer*			m_pPixelBuffer;
 	D3DXMATRIX				m_world;
 	ID3D10Blob*				m_pErrorMessage;
 	ID3D10Blob*				m_pVertexShaderBuffer;
@@ -219,8 +222,10 @@ public:
 		return m_pErrorMessage;
 	}
 
-	bool LoadAndCompile(const std::string& vertexShaderFileName, const std::string& pixelShaderFileName);
+	bool LoadAndCompile(const std::string& vertexShaderFileName, const std::string& pixelShaderFileName, const std::string& vsFunctionName, const std::string& psFunctionName);
 	bool SetParams(const D3DXMATRIX& view, const D3DXMATRIX& projection, const std::string& textureName, int lightmapId = -1);
+	
+
 	void BindVertexShader() {
 		m_pD3D->GetDeviceContext()->VSSetShader(m_pVertexShader, nullptr, 0);
 	}	
