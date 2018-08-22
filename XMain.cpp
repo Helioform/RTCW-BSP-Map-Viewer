@@ -167,6 +167,12 @@ bool XIllumin::InitGameObjects(const std::string& params)
 		return false;
 	}
 
+	XD3DRenderer::GetSingletonPointer()->ClearScene(D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f));
+
+	m_pFont->WriteText(0, 10, "Loading map...", D3DXVECTOR4(1.0, 1.0, 1.0, 1.0), m_pUICamera);
+
+	XD3DRenderer::GetSingletonPointer()->ShowScene();
+
 	m_pMap = new XWorldMap(XD3DRenderer::GetSingletonPointer(), XTextureManager::GetSingletonPointer());
 
 	if (!m_pMap->LoadLightmapShader())
@@ -201,7 +207,7 @@ bool XIllumin::RenderAll(const std::string& args)
 	XD3DRenderer::GetSingletonPointer()->ClearScene(D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f));
 	
 	int numFaces = m_pMap->GetVisibleFaces().size();
-	m_pFont->WriteText(100, 100, "Number of triangles drawn: " + std::to_string(numFaces), D3DXVECTOR4(0.0,1.0,0.0,0.0), m_pUICamera);
+	//m_pFont->WriteText(100, 100, "Number of triangles drawn: " + std::to_string(numFaces), D3DXVECTOR4(0.0,1.0,0.0,0.0), m_pUICamera);
 	
 	m_pMap->Render(m_pMap->GetPlayer()->GetCamera());
 
