@@ -203,11 +203,7 @@ bool XTextureManager::Load(const std::string & filePath, const std::string& name
 	std::wstring wideFileName = std::wstring(filePath.begin(), filePath.end());
 	XTextureContainer* pTex = new XTextureContainer();
 
-#if defined(ENV64BIT)
 	hr = D3DX11CreateShaderResourceViewFromFile(m_pD3D->GetD3DDevice(), wideFileName.c_str(), NULL, NULL, &pTex->pTexture, NULL);
-#elif defined(ENV32BIT)
-	hr = D3DX11CreateShaderResourceViewFromFile(m_pD3D->GetD3DDevice(), filePath.c_str(), NULL, NULL, &pTex->pTexture, NULL);
-#endif
 
 	if (FAILED(hr))
 		return false;

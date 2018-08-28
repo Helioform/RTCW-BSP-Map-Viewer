@@ -40,12 +40,9 @@ public:
 	{
 		std::wstring wideString = std::wstring(msg.begin(), msg.end());
 		LPCWSTR wmsg = wideString.c_str();
-#if defined(ENV64BIT)
 		MessageBox(m_hWnd, wmsg, L"Error", MB_OK);
-#elif defined(ENV32BIT)
-		MessageBox(m_hWnd, msg.c_str(), "Error", MB_OK);
-#endif
 	}
+
 	static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 	virtual ATOM MyRegisterClass(HINSTANCE hInstance);
 	virtual int InitInstance(HINSTANCE, int);

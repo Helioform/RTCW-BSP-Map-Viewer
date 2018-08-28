@@ -228,10 +228,16 @@ public:
 	void Unload(void)
 	{
 		for (auto i : m_faceData)
-			i->pTexVBuffer->Release();
+		{
+			if (i)
+				i->pTexVBuffer->Release();
+		}
 
 		for (auto i : m_visibleFaces)
-			i->pTexVBuffer->Release();
+		{
+			if (i)
+				i->pTexVBuffer->Release();
+		}
 
 		m_q3Textures.clear();
 		delete [] m_q3Entities.ents;

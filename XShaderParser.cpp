@@ -10,12 +10,13 @@ char* XShaderParser::SkipWhites(char* text, bool & hasNewLines)
 {
 	char c = text[0];
 
-	while (c <= ' ') 
+	while (c <= ' ' && c != '\0') 
 	{
 		if (c == '\n')
 			hasNewLines = true;
 
 		text++;
+	
 		c = *text;
 	}
 

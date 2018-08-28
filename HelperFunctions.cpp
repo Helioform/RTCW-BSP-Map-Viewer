@@ -95,13 +95,8 @@ bool GetFileNames(const std::string& path, std::vector<std::string>& fileNames)
 
 	std::wstring wideString = std::wstring(path.begin(), path.end());
 	LPCWSTR wpath = wideString.c_str();
-	LPCSTR wpath2 = path.c_str();
-
-#if defined(ENV64BIT)
+	
 	hFind = FindFirstFile(wpath, &ffd);
-#elif defined(ENV32BIT)
-	hFind = FindFirstFile(wpath2, &ffd);
-#endif
 
 	if (INVALID_HANDLE_VALUE == hFind)
 		return false;
@@ -115,11 +110,8 @@ bool GetFileNames(const std::string& path, std::vector<std::string>& fileNames)
 		else
 		{
 			std::string fileName;
-#if defined(ENV64BIT)
-		fileName = CW2A(ffd.cFileName);
-#elif defined(ENV32BIT)
-		fileName = ffd.cFileName;
-#endif
+
+			fileName = CW2A(ffd.cFileName);
 
 			fileNames.push_back(fileName);
 		}

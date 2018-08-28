@@ -35,11 +35,9 @@ XD3DRenderer::~XD3DRenderer()
 
 bool XD3DRenderer::LoadDriver()
 {
-#if defined(ENV64BIT)
+
 	m_XD3DModule = LoadLibrary(L"d3d11.dll");
-#elif defined(ENV32BIT)
-	m_XD3DModule = LoadLibrary("d3d11.dll");
-#endif
+
 
 	if(m_XD3DModule == nullptr)
 		return false;
@@ -501,5 +499,10 @@ void XD3DRenderer::TurnOffBlending()
 	blendFactor[3] = 0.0f;
 
 	m_pDeviceContext->OMSetBlendState( m_pDisableBlendingState, blendFactor, 0xffffffff);
+}
+
+void XD3DRenderer::ScreenFadeIn(XCamera & cam)
+{
+
 }
 

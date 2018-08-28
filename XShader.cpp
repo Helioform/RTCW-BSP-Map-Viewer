@@ -39,25 +39,17 @@ bool XD3DShader::LoadAndCompile(const std::string & vertexShaderFileName, const 
 	shaderParams |= D3D10_SHADER_DEBUG;
 #endif
 
-#if defined(ENV64BIT)
-		hr = D3DX11CompileFromFile(wideVertexFileName.c_str(), NULL, NULL, vsFunctionName.c_str(), "vs_4_0", shaderParams , 0, NULL,
-		&m_pVertexShaderBuffer, &m_pErrorMessage, NULL);
-#elif defined(ENV32BIT)
-	hr = D3DX11CompileFromFile(vertexShaderFileName.c_str(), NULL, NULL, vsFunctionName.c_str(), "vs_4_0", shaderParams, 0, NULL,
-		&m_pVertexShaderBuffer, &m_pErrorMessage, NULL);
-#endif
-	
+#
+	hr = D3DX11CompileFromFile(wideVertexFileName.c_str(), NULL, NULL, vsFunctionName.c_str(), "vs_4_0", shaderParams , 0, NULL,
+	&m_pVertexShaderBuffer, &m_pErrorMessage, NULL);
 
+	
 	if (FAILED(hr))
 		return false;
 
-#if defined(ENV64BIT)	
 	hr = D3DX11CompileFromFile(widePixelFileName.c_str(), NULL, NULL, psFunctionName.c_str(), "ps_4_0", shaderParams, 0, NULL,
 		&m_pPixelShaderBuffer, &m_pErrorMessage, NULL);
-#elif defined(ENV32BIT)
-	hr = D3DX11CompileFromFile(pixelShaderFileName.c_str(), NULL, NULL, psFunctionName.c_str(), "ps_4_0", shaderParams, 0, NULL,
-		&m_pPixelShaderBuffer, &m_pErrorMessage, NULL);
-#endif
+
 
 	if (FAILED(hr))
 		return false;

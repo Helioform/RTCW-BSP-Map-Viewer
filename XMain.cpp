@@ -198,6 +198,11 @@ bool XIllumin::InitGameObjects(const std::string& params)
 
 	m_pCollisionHandler = new CollisionSystem(m_pMap);
 
+	//Model model;
+	//model.LoadBVHFile("karate-04-back spin kick 1-yokoyama.bvh");
+
+	//m_models.push_back(model);
+
 	return true;
 }
 
