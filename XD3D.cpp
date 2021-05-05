@@ -501,8 +501,4 @@ void XD3DRenderer::TurnOffBlending()
 	m_pDeviceContext->OMSetBlendState( m_pDisableBlendingState, blendFactor, 0xffffffff);
 }
 
-void XD3DRenderer::ScreenFadeIn(XCamera & cam)
-{
-
-}
 
