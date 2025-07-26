@@ -15,159 +15,252 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="HelperFunctions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TGAImage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XCamera.cpp">
+    <ClCompile Include="RTCWGame\Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XD3D.cpp">
+    <ClCompile Include="Library\BSPMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XEntity.cpp">
+    <ClCompile Include="Library\D3DShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XFont.cpp">
+    <ClCompile Include="Library\Graphics\Buffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XGeomObject.cpp">
+    <ClCompile Include="Library\Graphics\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XInput.cpp">
+    <ClCompile Include="Library\Graphics\D3D11GraphicsAPI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XPlayer.cpp">
+    <ClCompile Include="Library\Graphics\D3D11Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XShader.cpp">
+    <ClCompile Include="Library\Graphics\D3DBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XSprite.cpp">
+    <ClCompile Include="Library\Graphics\Entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XTextureManager.cpp">
+    <ClCompile Include="Library\Graphics\jpgd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XWindow.cpp">
+    <ClCompile Include="Library\Graphics\Primitives.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XWorldMap.cpp">
+    <ClCompile Include="Library\Graphics\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XMain.cpp">
+    <ClCompile Include="Library\Graphics\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XTimer.cpp">
+    <ClCompile Include="Library\Light.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XLight.cpp">
+    <ClCompile Include="Library\Math\SHMath\DirectXSH.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="XShaderParser.cpp">
+    <ClCompile Include="Library\Math\SHMath\DirectXSHD3D11.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CollisionSystem.cpp">
+    <ClCompile Include="Library\Math\SHMath\DirectXSHD3D12.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
+    <ClCompile Include="Library\Math\Stereo3D\Stereo3DMatrixHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Singleton.cpp">
+    <ClCompile Include="Library\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Library\Utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="HelperFunctions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TGAImage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="XCamera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XD3D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XEntity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XFont.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XGeomObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XInput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XPlayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XShader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XSprite.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XTextureManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XWindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XWorldMap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource1.h">
+    <ClInclude Include="RTCWGame\framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="XMain.h">
+    <ClInclude Include="RTCWGame\Game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="XTimer.h">
+    <ClInclude Include="RTCWGame\Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="XLight.h">
+    <ClInclude Include="RTCWGame\targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="XShaderParser.h">
+    <ClInclude Include="Library\BSPMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CollisionSystem.h">
+    <ClInclude Include="Library\D3DShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Primitives.h">
+    <ClInclude Include="Library\Graphics\Buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
+    <ClInclude Include="Library\Graphics\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Singleton.h">
+    <ClInclude Include="Library\Graphics\CommonHeaders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Graphics\Components.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Graphics\D3D11GraphicsAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Graphics\D3DBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Graphics\D3DTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Graphics\Defines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Graphics\Entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Graphics\GraphicsAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Graphics\jpgd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Graphics\OBJ_Loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Graphics\Primitives.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Graphics\Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Graphics\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Math\Extensions\DirectXMathAVX.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Math\Extensions\DirectXMathAVX2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Math\Extensions\DirectXMathBE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Math\Extensions\DirectXMathF16C.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Math\Extensions\DirectXMathFMA3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Math\Extensions\DirectXMathFMA4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Math\Extensions\DirectXMathSSE3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Math\Extensions\DirectXMathSSE4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Math\Inc\DirectXCollision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Math\Inc\DirectXColors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Math\Inc\DirectXMath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Math\Inc\DirectXPackedVector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Math\MatrixStack\DirectXMatrixStack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Math\SHMath\DirectXSH.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Math\Stereo3D\Stereo3DMatrixHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Math\XDSP\XDSP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Q3BSPStructs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Library\Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="X3DEngine.rc">
+    <ResourceCompile Include="RTCWGame\RacingGame.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
+    <None Include="Library\Math\Inc\DirectXCollision.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Library\Math\Inc\DirectXMathConvert.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Library\Math\Inc\DirectXMathMatrix.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Library\Math\Inc\DirectXMathMisc.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Library\Math\Inc\DirectXMathVector.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Library\Math\Inc\DirectXPackedVector.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

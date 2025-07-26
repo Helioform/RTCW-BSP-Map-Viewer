@@ -23,6 +23,7 @@
     <ProjectGuid>{57425FEC-B513-4B80-8C5F-A59BB23A1F12}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>RTCWMapViewer</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -79,7 +80,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir)/DirectX/Include;$(SolutionDir)\Assimp\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)/DirectX/lib/x64;$(SolutionDir)\Assimp\lib\x64\Debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>.\DirectX\Include;.\Assimp\Include;$(IncludePath)</IncludePath>
@@ -125,10 +126,11 @@
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <ShowIncludes>false</ShowIncludes>
       <AdditionalIncludeDirectories>$(SolutionDir)\Assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>d3dx10.lib;d3d11.lib;d3dx11.lib;d3d10.lib;DXGI.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Assimp\lib\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;DXGI.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -145,62 +147,93 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CollisionSystem.cpp" />
-    <ClCompile Include="HelperFunctions.cpp" />
-    <ClCompile Include="Model.cpp" />
-    <ClCompile Include="Singleton.cpp" />
-    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="Library\BSPMap.cpp" />
+    <ClCompile Include="Library\D3DShader.cpp" />
+    <ClCompile Include="Library\Graphics\Buffer.cpp" />
+    <ClCompile Include="Library\Graphics\Camera.cpp" />
+    <ClCompile Include="Library\Graphics\D3D11GraphicsAPI.cpp" />
+    <ClCompile Include="Library\Graphics\D3D11Renderer.cpp" />
+    <ClCompile Include="Library\Graphics\D3DBuffer.cpp" />
+    <ClCompile Include="Library\Graphics\Entity.cpp" />
+    <ClCompile Include="Library\Graphics\jpgd.cpp" />
+    <ClCompile Include="Library\Graphics\Primitives.cpp" />
+    <ClCompile Include="Library\Graphics\Shader.cpp" />
+    <ClCompile Include="Library\Graphics\Texture.cpp" />
+    <ClCompile Include="Library\Light.cpp" />
+    <ClCompile Include="Library\Math\SHMath\DirectXSH.cpp" />
+    <ClCompile Include="Library\Math\SHMath\DirectXSHD3D11.cpp" />
+    <ClCompile Include="Library\Math\SHMath\DirectXSHD3D12.cpp" />
+    <ClCompile Include="Library\Math\Stereo3D\Stereo3DMatrixHelper.cpp" />
+    <ClCompile Include="Library\Mesh.cpp" />
+    <ClCompile Include="Library\pch.cpp" />
+    <ClCompile Include="Library\Player.cpp" />
+    <ClCompile Include="Library\Renderer.cpp" />
+    <ClCompile Include="Library\Scene.cpp" />
+    <ClCompile Include="Library\Utils.cpp" />
+    <ClCompile Include="RTCWGame\Game.cpp" />
     <ClCompile Include="TGAImage.cpp" />
-    <ClCompile Include="XCamera.cpp" />
-    <ClCompile Include="XD3D.cpp" />
-    <ClCompile Include="XEntity.cpp" />
-    <ClCompile Include="XFont.cpp" />
-    <ClCompile Include="XGeomObject.cpp" />
-    <ClCompile Include="XInput.cpp" />
-    <ClCompile Include="XLight.cpp" />
-    <ClCompile Include="XMain.cpp" />
-    <ClCompile Include="XPlayer.cpp" />
-    <ClCompile Include="XShader.cpp" />
-    <ClCompile Include="XShaderParser.cpp" />
-    <ClCompile Include="XSprite.cpp" />
-    <ClCompile Include="XTextureManager.cpp" />
-    <ClCompile Include="XTimer.cpp" />
-    <ClCompile Include="XWindow.cpp" />
-    <ClCompile Include="XWorldMap.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CollisionSystem.h" />
-    <ClInclude Include="HelperFunctions.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="Primitives.h" />
+    <ClInclude Include="Library\BSPMap.h" />
+    <ClInclude Include="Library\D3DShader.h" />
+    <ClInclude Include="Library\Graphics\Buffer.h" />
+    <ClInclude Include="Library\Graphics\Camera.h" />
+    <ClInclude Include="Library\Graphics\CommonHeaders.h" />
+    <ClInclude Include="Library\Graphics\Components.h" />
+    <ClInclude Include="Library\Graphics\D3D11GraphicsAPI.h" />
+    <ClInclude Include="Library\Graphics\D3DBuffer.h" />
+    <ClInclude Include="Library\Graphics\D3DTexture.h" />
+    <ClInclude Include="Library\Graphics\Defines.h" />
+    <ClInclude Include="Library\Graphics\Entity.h" />
+    <ClInclude Include="Library\Graphics\GraphicsAPI.h" />
+    <ClInclude Include="Library\Graphics\jpgd.h" />
+    <ClInclude Include="Library\Graphics\OBJ_Loader.h" />
+    <ClInclude Include="Library\Graphics\Primitives.h" />
+    <ClInclude Include="Library\Graphics\Shader.h" />
+    <ClInclude Include="Library\Graphics\Texture.h" />
+    <ClInclude Include="Library\Light.h" />
+    <ClInclude Include="Library\Math\Extensions\DirectXMathAVX.h" />
+    <ClInclude Include="Library\Math\Extensions\DirectXMathAVX2.h" />
+    <ClInclude Include="Library\Math\Extensions\DirectXMathBE.h" />
+    <ClInclude Include="Library\Math\Extensions\DirectXMathF16C.h" />
+    <ClInclude Include="Library\Math\Extensions\DirectXMathFMA3.h" />
+    <ClInclude Include="Library\Math\Extensions\DirectXMathFMA4.h" />
+    <ClInclude Include="Library\Math\Extensions\DirectXMathSSE3.h" />
+    <ClInclude Include="Library\Math\Extensions\DirectXMathSSE4.h" />
+    <ClInclude Include="Library\Math\Inc\DirectXCollision.h" />
+    <ClInclude Include="Library\Math\Inc\DirectXColors.h" />
+    <ClInclude Include="Library\Math\Inc\DirectXMath.h" />
+    <ClInclude Include="Library\Math\Inc\DirectXPackedVector.h" />
+    <ClInclude Include="Library\Math\MatrixStack\DirectXMatrixStack.h" />
+    <ClInclude Include="Library\Math\SHMath\DirectXSH.h" />
+    <ClInclude Include="Library\Math\Stereo3D\Stereo3DMatrixHelper.h" />
+    <ClInclude Include="Library\Math\XDSP\XDSP.h" />
+    <ClInclude Include="Library\Mesh.h" />
+    <ClInclude Include="Library\pch.h" />
+    <ClInclude Include="Library\Player.h" />
+    <ClInclude Include="Library\Q3BSPStructs.h" />
+    <ClInclude Include="Library\Renderer.h" />
+    <ClInclude Include="Library\Scene.h" />
+    <ClInclude Include="Library\Utils.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="resource1.h" />
-    <ClInclude Include="Singleton.h" />
-    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="RTCWGame\framework.h" />
+    <ClInclude Include="RTCWGame\Game.h" />
+    <ClInclude Include="RTCWGame\Resource.h" />
+    <ClInclude Include="RTCWGame\targetver.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TGAImage.h" />
-    <ClInclude Include="XCamera.h" />
-    <ClInclude Include="XD3D.h" />
-    <ClInclude Include="XEntity.h" />
-    <ClInclude Include="XFont.h" />
-    <ClInclude Include="XGeomObject.h" />
-    <ClInclude Include="XInput.h" />
-    <ClInclude Include="XLight.h" />
-    <ClInclude Include="XMain.h" />
-    <ClInclude Include="XPlayer.h" />
-    <ClInclude Include="XShader.h" />
-    <ClInclude Include="XShaderParser.h" />
-    <ClInclude Include="XSprite.h" />
-    <ClInclude Include="XTextureManager.h" />
-    <ClInclude Include="XTimer.h" />
-    <ClInclude Include="XWindow.h" />
-    <ClInclude Include="XWorldMap.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="X3DEngine.rc" />
+    <ResourceCompile Include="RTCWGame\RacingGame.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
+    <None Include="Library\Math\Inc\DirectXCollision.inl" />
+    <None Include="Library\Math\Inc\DirectXMathConvert.inl" />
+    <None Include="Library\Math\Inc\DirectXMathMatrix.inl" />
+    <None Include="Library\Math\Inc\DirectXMathMisc.inl" />
+    <None Include="Library\Math\Inc\DirectXMathVector.inl" />
+    <None Include="Library\Math\Inc\DirectXPackedVector.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

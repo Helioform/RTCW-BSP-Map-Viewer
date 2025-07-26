@@ -1,0 +1,29 @@
+﻿  Game.cpp
+E:\_Projects\_3DEngineProjects\Basic3DEngine\Basic-3D-Engine\Library\D3DShader.h(6,7): warning C4099: 'ID3D11VertexShader': type name first seen using 'struct' now seen using 'class'
+  (compiling source file 'Game.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um\d3d11.h(5084,5):
+      see declaration of 'ID3D11VertexShader'
+  
+E:\_Projects\_3DEngineProjects\Basic3DEngine\Basic-3D-Engine\Library\D3DShader.h(7,7): warning C4099: 'ID3D11PixelShader': type name first seen using 'struct' now seen using 'class'
+  (compiling source file 'Game.cpp')
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um\d3d11.h(5564,5):
+      see declaration of 'ID3D11PixelShader'
+  
+E:\_Projects\_3DEngineProjects\Basic3DEngine\Basic-3D-Engine\Library\Graphics\GraphicsAPI.h(14,9): warning C4099: 'Helios::Shader': type name first seen using 'class' now seen using 'struct'
+  (compiling source file 'Game.cpp')
+      E:\_Projects\_3DEngineProjects\Basic3DEngine\Basic-3D-Engine\Library\Graphics\Shader.h(27,9):
+      see declaration of 'Helios::Shader'
+  
+E:\_Projects\_3DEngineProjects\Basic3DEngine\Basic-3D-Engine\Library\Mesh.h(48,11): warning C4244: 'return': conversion from 'uint64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'Game.cpp')
+  
+E:\_Projects\_3DEngineProjects\Basic3DEngine\Basic-3D-Engine\Library\Mesh.h(60,11): warning C4244: 'return': conversion from 'uint64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'Game.cpp')
+  
+E:\_Projects\_3DEngineProjects\Basic3DEngine\Basic-3D-Engine\Library\Mesh.h(64,11): warning C4244: 'return': conversion from 'uint64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'Game.cpp')
+  
+E:\_Projects\_3DEngineProjects\Basic3DEngine\Basic-3D-Engine\Game\Game.cpp(172,1): warning C4002: too many arguments for function-like macro invocation 'CreateWindowW'
+E:\_Projects\_3DEngineProjects\Basic3DEngine\Basic-3D-Engine\Game\Game.cpp(255,34): warning C4305: 'argument': truncation from 'double' to 'float'
+E:\_Projects\_3DEngineProjects\Basic3DEngine\Basic-3D-Engine\Game\Game.cpp(261,33): warning C4305: 'argument': truncation from 'double' to 'float'
+  Game.vcxproj -> E:\_Projects\_3DEngineProjects\Basic3DEngine\Basic-3D-Engine\x64\Debug\Game.exe

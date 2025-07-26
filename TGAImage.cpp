@@ -119,7 +119,7 @@ bool TGAImage::Save(std::string fileName, unsigned char* imageData, int width, i
 	tgaFile.write((char*)&header, sizeof(header));
 	tgaFile.write((char*)&imageData, size);
 
-	char* signature = "TRUEVISION-XFILE";
+	const char* signature = "TRUEVISION-XFILE";
 	memcpy(&footer.signature, signature, strlen(signature));
 	footer.extOffset = sizeof(header) +  + sizeof(footer);
 	footer.dev = 0;
