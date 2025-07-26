@@ -405,12 +405,12 @@ namespace Helios
 
 			HRESULT hr;
 
-			std::wstring path = GetEXEPath() + L"//" + shaderFileName;
+			std::wstring path = L".\\Library\\Shaders\\" + shaderFileName;
 
 			if (type == SHADER_TYPE::VERTEX_SHADER)
 			{
 				//hr = D3DReadFileToBlob(L"ColorVS.cso", &shaderBlob);
-				hr = D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+				hr = D3DCompileFromFile( path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
 					"main", profile,
 					flags, 0, &shaderBlob, &errorBlob);
 				

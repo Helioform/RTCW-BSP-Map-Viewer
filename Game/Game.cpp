@@ -248,20 +248,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         // A
         if (wParam == 0x41) {
-            scene->RotatePlayer(-0.01);
+            scene->RotatePlayer(-0.09);
          
           
         }
         //D
         if (wParam == 0x44) {
-            scene->RotatePlayer(0.01);
+            scene->RotatePlayer(0.09);
      
        
         }
 
         //S
         if (wParam == 0x53) {
-            scene->MovePlayer(-0.16f);
+            scene->MovePlayer(-0.26f);
       
             
         }
