@@ -44,17 +44,14 @@ namespace Helios
 			virtual void CreatePixelShader(Shader* shader, const std::wstring& shaderFileName, bool isCompiled) = 0;
 			virtual void CreateBuffer(Buffer* buffer, BufferDesc& desc, uint32_t numElements, const std::vector<Vertex>& vertices = { Vertex(DirectX::XMFLOAT3(0.0f,0.0f,0.0f),  DirectX::XMFLOAT4(0.0f,0.0f,0.0f,0.0f)) }, std::vector<uint32_t> indices = { 0 }) = 0;
 			virtual void RenderQuad() = 0;
-			virtual void RenderMeshesIndexed(std::vector<Mesh>& meshes, std::vector<Buffer*>& buffers, std::vector<Buffer*>& indexBuffers, std::vector<Shader>& shaders) = 0;
+			virtual void RenderMeshesIndexed(std::vector<Mesh>& meshes, std::vector<Buffer*>& buffers, std::vector<Buffer*>& indexBuffers, std::vector<Shader*>& shaders) = 0;
 			virtual void RenderSceneIndexed( Scene* scene) = 0;
 			virtual bool CreateSampler() = 0;
 			virtual bool CreateTexture(Texture* texture, const std::string& texFileName) = 0;
 			virtual bool DrawText(uint32_t posX, uint32_t posY, const std::string& text) = 0;
 			virtual void TurnOffZBuffer() = 0;
 			virtual void TurnOnZBuffer() = 0;
-			virtual void SetCameraConstantBuffer(const DirectX::XMMATRIX& model, const DirectX::XMMATRIX& view, const DirectX::XMMATRIX& proj, Buffer* cbuffer) = 0;
-			virtual void SetDirectionalLightBuffer(Buffer* cbuffer, const DirectX::XMFLOAT3& direction, const DirectX::XMFLOAT4& color) = 0;
-			virtual void SetDepthShaderLightSpaceMatrixBuffer(Buffer* cbuffer, const DirectX::XMMATRIX& model, const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up) = 0;
-
+		
 		private:
 			
 			uint32_t m_screenWidth, m_screenHeight;

@@ -185,9 +185,9 @@
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="D3DShader.cpp" />
     <ClCompile Include="Graphics\Camera.cpp" />
     <ClCompile Include="Graphics\D3D11GraphicsAPI.cpp" />
+    <ClCompile Include="Graphics\D3DTexture.cpp" />
     <ClCompile Include="Graphics\Entity.cpp" />
     <ClCompile Include="Graphics\jpgd.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />

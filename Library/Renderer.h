@@ -13,11 +13,6 @@ namespace Helios
 			gfxAPI = api;
 		}
 
-		GraphicsAPI* GetAPI() const
-		{
-			return gfxAPI;
-		}
-
 		void Initialize(HWND hWnd, uint32_t w, uint32_t h, bool fullScreen) const;
 		void RenderSceneIndexed(Scene* scene) const;
 		void SetClearColor(float col[4]) const;
@@ -27,9 +22,7 @@ namespace Helios
 		void CreateVertexShader(Shader* shader, const std::wstring& shaderFileName, bool isCompiled) const;
 	    void CreatePixelShader(Shader* shader, const std::wstring& shaderFileName, bool isCompiled) const;
 		void CreateTexture(Texture* tex, const std::string& texFileName) const;
-		void SetCameraConstantBuffer(const DirectX::XMMATRIX& model, const DirectX::XMMATRIX& view, const DirectX::XMMATRIX& proj, Buffer* cbuffer)const;
-		void SetDirectionalLightBuffer(Buffer* cbuffer, const DirectX::XMFLOAT3& direction, const DirectX::XMFLOAT4& color) const;
-		void SetDepthShaderLightSpaceMatrixBuffer(Buffer* cbuffer, const DirectX::XMMATRIX& model, const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
+		
 	private:
 
 		inline static GraphicsAPI* gfxAPI = nullptr;

@@ -4,18 +4,16 @@
 
 void Helios::Player::Move(float dt)
 {
-	if (playerMesh != nullptr)
-	{
-
-		
-		
-	}
+	XMFLOAT3 f;
+	XMVECTOR p = XMLoadFloat3(&m_position);
+	p += GetForward() * dt;
+	XMStoreFloat3(&m_position, p);
+	T = XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
 }
 
 void Helios::Player::Yaw(float dt)
 {
-	if (playerMesh != nullptr)
-	{
+	
 		// Create a rotation matrix around the up vector
 		XMMATRIX rotation = XMMatrixRotationY(dt);
 
@@ -23,5 +21,5 @@ void Helios::Player::Yaw(float dt)
 		SetForward(XMVector3TransformNormal(GetForward(), rotation));
 		SetRight(XMVector3TransformNormal(GetRight(), rotation));
 
-	}
+	
 }

@@ -1,13 +1,17 @@
 #include "Scene.h"
 #include "Graphics/OBJ_Loader.h"
 #include <chrono>
-#include "./Graphics/D3DBuffer.h"
 
 Helios::Scene::Scene(HWND hWnd, uint32_t w, uint32_t h, bool fullscreen)
 {
-	gfxAPI = std::make_unique<Renderer>(new D3D11GraphicsAPI());
 
-	gfxAPI->Initialize(hWnd, w, h, fullscreen);
+}
+
+void Helios::Scene::Init(HWND hwnd, uint32_t w, uint32_t h, bool fullscreen)
+{
+	gfxAPI = std::make_unique<D3D11GraphicsAPI>();
+
+	gfxAPI->Init(hwnd, w, h, fullscreen);
 	float cc[4] = { 0.52f,0.8,0.92f,1.0f }; // sky blue
 	gfxAPI->SetClearColor(cc);
 
@@ -17,7 +21,7 @@ Helios::Scene::Scene(HWND hWnd, uint32_t w, uint32_t h, bool fullscreen)
 	desc.usage = DYNAMIC;
 	desc.cpuAccess = WRITE;
 	desc.resType = GPU;
-	desc.byteWidth = sizeof(LightSpaceMatrixBuffer); // for lightspace shading
+	desc.byteWidth = sizeof(LightSpaceMatrixBuffer);
 	D3DBuffer* cBuffer = new D3DBuffer();
 
 	gfxAPI->CreateBuffer(cBuffer, desc, 1);
@@ -26,7 +30,7 @@ Helios::Scene::Scene(HWND hWnd, uint32_t w, uint32_t h, bool fullscreen)
 	// create constant buffer for light
 	BufferDesc lightBufferDesc;
 	lightBufferDesc.usage = DYNAMIC;
-	lightBufferDesc.byteWidth = sizeof(LightBuffer);
+	lightBufferDesc.byteWidth = sizeof(ShadowMatrixBuffer);
 	lightBufferDesc.type = CONSTANT_BUFFER;
 	lightBufferDesc.cpuAccess = WRITE;
 	D3DBuffer* lBuffer = new D3DBuffer();
@@ -34,22 +38,17 @@ Helios::Scene::Scene(HWND hWnd, uint32_t w, uint32_t h, bool fullscreen)
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
 	gfxAPI->CreateBuffer(lBuffer, lightBufferDesc, 1);
 	constantBuffer.push_back(lBuffer);
-	gfxAPI->SetDirectionalLightBuffer(constantBuffer[1], XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f));
 
-	std::vector<std::wstring> shaderNames{ L"ColorVS.hlsl", L"ColorPS.hlsl" };
-	//std::vector<std::wstring> pixelShaderNames{ L"DepthShaderVS.hlsl", L"DepthShaderPS.hlsl" };
+	std::vector<std::wstring> shaderNames{ L"LightSpaceDepthVS.hlsl", L"ShadowVS.hlsl", L"ShadowPS.hlsl" };
 
+	LoadShader(shaderNames[0], SHADER_TYPE::VERTEX_SHADER);
+	LoadShader(shaderNames[1], SHADER_TYPE::VERTEX_SHADER);
+	LoadShader(shaderNames[2], SHADER_TYPE::PIXEL_SHADER);
 
-	LoadShaders(shaderNames);
-	
 	camera = std::make_unique<Camera>(PROJECTION_TYPE::PERSPECTIVE, 90.0f, XMFLOAT3(0.0f,1.0f,0.0f), XMFLOAT3(0.0f,0.0f,1.0f), XMFLOAT3(0.0f,1.0f,-2.0f), 0.1f, 1000.0f, w, h);
 	
-
-	
-
-	
-
-	
+	SetLightBuffer();
+	SetCameraConstantBufferParams();
 	//Mesh m;
 	//m.CreateQuad(DirectX::XMFLOAT3(-2.0, 2.0f, 4.0f), DirectX::XMFLOAT3(2.0, 2.0f, 4.0f), DirectX::XMFLOAT3(2.0, -2.0f, 4.0f), DirectX::XMFLOAT3(-2.0, -2.0f, 4.0f), DirectX::XMFLOAT4(1.0f,1.0f,1.0f,1.0f));
 	//meshes.push_back(m);
@@ -75,58 +74,88 @@ Helios::Scene::Scene(HWND hWnd, uint32_t w, uint32_t h, bool fullscreen)
 	//D3DBuffer* d3dib = new D3DBuffer();
 	//gfxAPI->CreateBuffer(d3dib, ibdesc, m.GetNumIndices(), {}, m.GetIndices());
 	//indexBuffers.push_back(d3dib);
-	D3DTexture* tex1 = new D3DTexture();
-	gfxAPI->CreateTexture(tex1, "ShipTexture.jpg");
-	textures.push_back(tex1);
-
-	D3DTexture* tex2 = new D3DTexture();
-	gfxAPI->CreateTexture(tex2, "TrackTexture.jpg");
-	textures.push_back(tex2);
+	textures.push_back(new D3DTexture());
+	textures[0]->Register(gfxAPI->D3DDevice(), gfxAPI->DeviceContext());
+	textures.push_back(new D3DTexture());
+	textures[0]->CreateFromJPGFile("ShipTexture.jpg");
 	
-	D3DTexture* tex3 = new D3DTexture();
-	gfxAPI->CreateTexture(tex3, "GemTexture.jpg");
-	textures.push_back(tex3);
+	textures[1]->Register(gfxAPI->D3DDevice(), gfxAPI->DeviceContext());
+	textures[1]->CreateFromJPGFile("TrackTexture.jpg");
+
+	textures.push_back(new D3DTexture());
+	textures[2]->Register(gfxAPI->D3DDevice(), gfxAPI->DeviceContext());
+	textures[2]->CreateFromJPGFile("GemTexture.jpg");
+
+	LoadMeshes("TestScene.obj");
+	//LoadMeshes("Track+Ship+Gems.obj");
 	
-
-	LoadMeshes("RacingShip.obj");
-	LoadMeshes("Track+Ship+Gems.obj");
-
-
 	player = new Player();
-	player->playerMesh = &meshes[0];
+	/*player->playerMesh = &meshes[0];*/
 	player->playerCam = camera.get();
-	player->playerMesh->SetWorldMatrix(XMMatrixIdentity());
+	//player->playerMesh->SetWorldMatrix(XMMatrixIdentity());
 
 }
 
-void Helios::Scene::Init(HWND hwnd, uint32_t w, uint32_t h, bool fullscreen)
+void Helios::Scene::LoadShader(const std::wstring& shaderName, SHADER_TYPE type)
 {
-	gfxAPI->Initialize(hwnd, w, h, fullscreen);
-	
-	
+	std::shared_ptr<D3DShader> sh = std::make_shared<D3DShader>();
 
+	if (type == SHADER_TYPE::PIXEL_SHADER)
+		gfxAPI->CreatePixelShader(sh.get(), shaderName, false);
+	else if (type == SHADER_TYPE::VERTEX_SHADER)
+		gfxAPI->CreateVertexShader(sh.get(), shaderName, false);
+	
+	shaders.emplace(shaderName, sh);
 }
-
-void Helios::Scene::LoadShaders(const std::vector<std::wstring>& shaderNames)
-{
-	for (auto it = shaderNames.begin(); it != shaderNames.end(); ++++it) {
-	
-		D3DShader sh((D3D11GraphicsAPI*)gfxAPI->GetAPI());
-		sh.Compile(it->c_str(), std::next(it)->c_str());
-		shaders.push_back(sh);
-	}
-}
-
 
 void Helios::Scene::Update(float dt)
 {
 
-	CheckForCollisions(*player);
-	player->UpdatePosition();
+	//CheckForCollisions(*player);
+	
 	player->UpdateWorldMatrix();
 	gfxAPI->RenderSceneIndexed(this);
+	
 }
 
+void Helios::Scene::SetCameraConstantBufferParams()
+{
+	ID3D11DeviceContext* pDeviceContext = gfxAPI->DeviceContext();
+
+	D3DBuffer* pCBuffer = (D3DBuffer*) (constantBuffer[1]);
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	ShadowMatrixBuffer* dataPtr;
+
+
+	DirectX::XMFLOAT3 e(-2.0f, 0.0f, 1.0f);
+	DirectX::XMFLOAT3 f(0.0f, 0.0f, 0.0f);
+	DirectX::XMFLOAT3 u(0.0f, 1.0f, 0.0f);
+	XMVECTOR EyePos = DirectX::XMLoadFloat3(&e);
+	XMVECTOR Up = DirectX::XMLoadFloat3(&u);
+	XMVECTOR Focus = DirectX::XMLoadFloat3(&f);
+
+	DirectX::XMMATRIX LV = XMMatrixLookAtLH(EyePos, Focus, Up );
+	//camera->GetViewMatrix();
+	DirectX::XMMATRIX LP = XMMatrixOrthographicLH(10.0f, 10.0f, 1.0f, 10.0f);//camera->GetProjectionMatrix();
+
+	DirectX::XMMATRIX LVP = DirectX::XMMatrixTranspose( LV * LP);
+
+	DirectX::XMMATRIX WVP = DirectX::XMMatrixTranspose(camera->GetViewMatrix()*camera->GetProjectionMatrix());
+
+	HRESULT result = pDeviceContext->Map(pCBuffer->pD3DBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+
+	if (FAILED(result))
+		OutputDebugString(L"Cannot set constant buffer\n");
+
+	dataPtr = (ShadowMatrixBuffer*)mappedResource.pData;
+
+	DirectX::XMStoreFloat4x4(&dataPtr->lightVP, LVP);
+	DirectX::XMStoreFloat4x4(&dataPtr->WVP, WVP);
+	DirectX::XMStoreFloat3(&dataPtr->lightPos, EyePos);
+
+	pDeviceContext->Unmap(pCBuffer->pD3DBuffer, 0);
+	pDeviceContext->VSSetConstantBuffers(1, 1, &pCBuffer->pD3DBuffer);
+}
 
 bool Helios::Scene::LoadMeshes(const std::string& filename)
 {
@@ -237,6 +266,41 @@ bool Helios::Scene::LoadMeshes(const std::string& filename)
 		return false;
 }
 
+void Helios::Scene::SetLightBuffer()
+{
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	unsigned int bufferNumber = 0;
+
+	LightSpaceMatrixBuffer* dataPtr;
+	D3DBuffer* pCBuffer = (D3DBuffer*)(constantBuffer[0]);
+
+	gfxAPI->DeviceContext()->Map(pCBuffer->pD3DBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (LightSpaceMatrixBuffer*)mappedResource.pData;
+
+	DirectX::XMFLOAT3 e(-2.0f, 0.0f, 1.0f);
+	DirectX::XMFLOAT3 f(0.0f, 0.0f, 0.0f);
+	DirectX::XMFLOAT3 u(0.0f, 1.0f, 0.0f);
+	XMVECTOR EyePos = DirectX::XMLoadFloat3(&e);
+	XMVECTOR Up = DirectX::XMLoadFloat3(&u);
+	XMVECTOR Focus = DirectX::XMLoadFloat3(&f);
+
+	DirectX::XMMATRIX LV = XMMatrixLookAtLH(EyePos, Focus, Up);
+	//camera->GetViewMatrix();
+	DirectX::XMMATRIX LP = XMMatrixOrthographicLH(10.0f, 10.0f, 1.0f, 10.0f);//camera->GetProjectionMatrix();
+
+	DirectX::XMMATRIX LVP = DirectX::XMMatrixTranspose(LV * LP);
+
+	DirectX::XMStoreFloat4x4(&dataPtr->lightVP, LVP);
+	
+	// Unlock the constant buffer.
+	gfxAPI->DeviceContext()->Unmap(pCBuffer->pD3DBuffer, 0);
+
+	bufferNumber = 0;
+
+	gfxAPI->DeviceContext()->VSSetConstantBuffers(bufferNumber, 1, &pCBuffer->pD3DBuffer);
+}
 
 void Helios::Scene::RotatePlayer(float dt)
 {

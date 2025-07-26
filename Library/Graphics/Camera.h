@@ -5,17 +5,18 @@
 
 namespace Helios
 {
-		struct ConstantMatrixBuffer
+		struct ShadowMatrixBuffer
 		{
-			XMFLOAT4X4 WVP;		
+			XMFLOAT4X4 WVP;
+			XMFLOAT4X4 lightVP;
+			XMFLOAT3 lightPos;
+			float padding;
 		};
 
 		struct LightSpaceMatrixBuffer
 		{
-			XMFLOAT4X4 lightSpaceMatrix;
-			XMFLOAT4X4 modelMatrix;
+			XMFLOAT4X4 lightVP;
 		};
-
 
 		struct Frustum
 		{
@@ -69,21 +70,21 @@ namespace Helios
 			void Yaw(float angle);
 
 			void UpdateViewMatrix();
-			ConstantMatrixBuffer& GetConstantBuffer() {
+			ShadowMatrixBuffer& GetConstantBuffer() {
 				return m_buffer;
 			}
 			
 			XMMATRIX GetViewMatrix() const {
-				return XMLoadFloat4x4(&m_viewMatrix);
+				return DirectX::XMLoadFloat4x4(&m_viewMatrix);
 			}
 		
 			void SetViewMatrix(XMMATRIX m)
 			{
-				XMStoreFloat4x4(&m_viewMatrix, m);
+				DirectX::XMStoreFloat4x4(&m_viewMatrix, m);
 			}
 
 			XMMATRIX GetProjectionMatrix() const {
-				return XMLoadFloat4x4(&m_projectionMatrix);	
+				return DirectX::XMLoadFloat4x4(&m_projectionMatrix);
 			}
 
 			void SetForward(XMFLOAT3 f)
@@ -101,7 +102,7 @@ namespace Helios
 			XMFLOAT4X4			m_projectionMatrix;
 			float				m_fovY;
 			bool				m_viewDirty = true;
-			ConstantMatrixBuffer m_buffer;
+			ShadowMatrixBuffer m_buffer;
 		};
 }
 

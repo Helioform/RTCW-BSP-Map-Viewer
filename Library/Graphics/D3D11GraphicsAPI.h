@@ -3,6 +3,8 @@
 
 
 #define WIN32_LEAN_AND_MEAN             
+
+#include "GraphicsAPI.h"
 #include <wrl.h>
 #include <d3d11.h>
 #include <d3d11_1.h>
@@ -10,15 +12,13 @@
 #include <dxgi1_4.h>
 #include <d3dcommon.h>
 #include <d3dcompiler.h>
-
-#include "CommonHeaders.h"
-#include "GraphicsAPI.h"
+#include "D3DBuffer.h"
+#include "../D3DShader.h"
 
 namespace Helios
 {
 		class GraphicsAPI;
 		class Scene;
-		struct Buffer;
 
 		class  D3D11GraphicsAPI : public GraphicsAPI
 		{	
@@ -72,28 +72,23 @@ namespace Helios
 		
 		//	void CreateInputLayout(const Shader& shader);
 			void CreateTexture() override;
+			bool CreateTexture(Texture* texture, const std::string& texFileName) override;
 			virtual void CreateVertexShader(Shader* shader, const std::wstring& shaderFileName, bool isCompiled) override;
 			virtual void CreatePixelShader(Shader* shader, const std::wstring& shaderFileName, bool isCompiled)  override;
-			void CompileShader(ID3D11VertexShader*& vertexShader, ID3D11PixelShader*& pixelShader, const std::wstring& shaderFileName, SHADER_TYPE type);
+			void CompileShader(Shader* shader, const std::wstring& shaderFileName, SHADER_TYPE type);
 			virtual void RenderQuad() override;
-			virtual void RenderMeshesIndexed(std::vector<Mesh>& meshes, std::vector<Buffer*>& buffers, std::vector<Buffer*>& indexBuffers, std::vector<Shader>& shaders) override;
+			virtual void RenderMeshesIndexed(std::vector<Mesh>& meshes, std::vector<Buffer*>& buffers, std::vector<Buffer*>& indexBuffers, std::vector<Shader*>& shaders) override;
 			virtual void RenderSceneIndexed( Scene* scene) override;
 			virtual void CreateBuffer(Buffer* buffer, BufferDesc& desc, uint32_t numElements, const std::vector<Vertex>& vertices = { Vertex(DirectX::XMFLOAT3(0.0f,0.0f,0.0f),  DirectX::XMFLOAT4(0.0f,0.0f,0.0f,0.0f)) }, const std::vector<uint32_t> indices = { 0 }) override;
 			virtual bool CreateSampler() override;
-			virtual bool CreateTexture(Texture* texture, const std::string& texFileName) override;
 		    bool CreateBlendState();
 			virtual void TurnOffZBuffer() override;
 			virtual void TurnOnZBuffer() override;
 			virtual bool DrawText(uint32_t posX, uint32_t posY, const std::string& text) override;
-			virtual void SetCameraConstantBuffer(const DirectX::XMMATRIX& model, const DirectX::XMMATRIX& view, const DirectX::XMMATRIX& proj, Buffer* cbuffer) override;
-			virtual void SetDirectionalLightBuffer(Buffer* cbuffer, const DirectX::XMFLOAT3& direction, const DirectX::XMFLOAT4& color) override;
-			virtual void SetDepthShaderLightSpaceMatrixBuffer(Buffer* cbuffer, const DirectX::XMMATRIX& model, const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up) override;
-			inline void SetVSShader(ID3D11VertexShader* vertexShader) { m_pDeviceContext->VSSetShader(vertexShader, nullptr, 0); }
-			inline void SetPSShader(ID3D11PixelShader* pixelShader) { m_pDeviceContext->PSSetShader(pixelShader, nullptr, 0); }
+			void CreateShadowTargetView();
 
 protected:
-	
-		ID3D11Device* m_pD3D11Device = nullptr;
+		 ID3D11Device* m_pD3D11Device = nullptr;
 		ID3D11Device1* m_pD3D11Device1 = nullptr;
 		ID3D11DeviceContext* m_pDeviceContext = nullptr;
 		IDXGIFactory* m_pFactory = nullptr;
@@ -111,7 +106,8 @@ protected:
 		IDXGIFactory2* m_pDXGIFactory = nullptr;
 		IDXGIAdapter* m_pAdapter = nullptr;
 		std::vector<ID3D11InputLayout*> m_inputLayouts;
-		ID3D11SamplerState* m_sampleState;
+		ID3D11SamplerState* m_sampleStateClamp;
+		ID3D11SamplerState* m_sampleStateWrap;
 		ID3D11DepthStencilState* m_depthStencilState;
 		ID3D11DepthStencilState* m_depthDisabledStencilState;
 		ID3D11BlendState* m_alphaEnableBlendingState;
@@ -121,6 +117,12 @@ protected:
 
 		HWND								m_hWnd;
 		D3D_FEATURE_LEVEL					m_maxSupportedFeatureLevel;
+		ID3D11RenderTargetView*				m_shadowTargetView;
+		ID3D11Texture2D*					m_shadowMap;
+		ID3D11ShaderResourceView*			m_shadowSRV;
+		ID3D11DepthStencilView*				m_shadowDSV;
+		ID3D11Texture2D* m_shadowDSB;
+
 		};
 
 }

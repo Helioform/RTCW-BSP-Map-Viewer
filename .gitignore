@@ -1,5 +1,6 @@
 # Prerequisites
 *.d
+/WorldMaps
 /.vs
 # Compiled Object files
 *.slo

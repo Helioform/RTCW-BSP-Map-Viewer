@@ -131,6 +131,7 @@
     <Link>
       <AdditionalDependencies>d3dcompiler.lib;d3d11.lib;DXGI.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -147,16 +148,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\Game.cpp" />
     <ClCompile Include="Library\BSPMap.cpp" />
     <ClCompile Include="Library\D3DShader.cpp" />
     <ClCompile Include="Library\Graphics\Buffer.cpp" />
     <ClCompile Include="Library\Graphics\Camera.cpp" />
     <ClCompile Include="Library\Graphics\D3D11GraphicsAPI.cpp" />
-    <ClCompile Include="Library\Graphics\D3D11Renderer.cpp" />
     <ClCompile Include="Library\Graphics\D3DBuffer.cpp" />
+    <ClCompile Include="Library\Graphics\D3DTexture.cpp" />
     <ClCompile Include="Library\Graphics\Entity.cpp" />
     <ClCompile Include="Library\Graphics\jpgd.cpp" />
-    <ClCompile Include="Library\Graphics\Primitives.cpp" />
     <ClCompile Include="Library\Graphics\Shader.cpp" />
     <ClCompile Include="Library\Graphics\Texture.cpp" />
     <ClCompile Include="Library\Light.cpp" />
@@ -170,10 +171,10 @@
     <ClCompile Include="Library\Renderer.cpp" />
     <ClCompile Include="Library\Scene.cpp" />
     <ClCompile Include="Library\Utils.cpp" />
-    <ClCompile Include="RTCWGame\Game.cpp" />
     <ClCompile Include="TGAImage.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\Game.h" />
     <ClInclude Include="Library\BSPMap.h" />
     <ClInclude Include="Library\D3DShader.h" />
     <ClInclude Include="Library\Graphics\Buffer.h" />
@@ -217,14 +218,10 @@
     <ClInclude Include="Library\Utils.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RTCWGame\framework.h" />
-    <ClInclude Include="RTCWGame\Game.h" />
     <ClInclude Include="RTCWGame\Resource.h" />
     <ClInclude Include="RTCWGame\targetver.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TGAImage.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="RTCWGame\RacingGame.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
@@ -234,6 +231,9 @@
     <None Include="Library\Math\Inc\DirectXMathMisc.inl" />
     <None Include="Library\Math\Inc\DirectXMathVector.inl" />
     <None Include="Library\Math\Inc\DirectXPackedVector.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="RacingGame\RacingGame.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

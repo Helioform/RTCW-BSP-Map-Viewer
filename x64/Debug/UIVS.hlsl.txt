@@ -1,0 +1,29 @@
+cbuffer MatrixBuffer : register(b0)
+{
+    float4x4 wvp;   
+};
+
+
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float4 color : COLOR;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
+};
+
+
+PixelInputType main(VertexInputType input)
+{
+    PixelInputType output;
+    input.position.w = 1.0f;		
+    output.position = mul(input.position, wvp);
+	// Store the input color for the pixel shader to use.
+    output.color = input.color;
+    
+    return output;
+}

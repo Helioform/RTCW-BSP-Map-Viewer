@@ -1,13 +1,13 @@
+C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Game\Game.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\Game.obj
 C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\BSPMap.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\BSPMap.obj
 C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\D3DShader.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\D3DShader.obj
 C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Graphics\Buffer.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\Buffer.obj
 C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Graphics\Camera.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\Camera.obj
 C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Graphics\D3D11GraphicsAPI.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\D3D11GraphicsAPI.obj
-C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Graphics\D3D11Renderer.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\D3D11Renderer.obj
 C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Graphics\D3DBuffer.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\D3DBuffer.obj
+C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Graphics\D3DTexture.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\D3DTexture.obj
 C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Graphics\Entity.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\Entity.obj
 C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Graphics\jpgd.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\jpgd.obj
-C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Graphics\Primitives.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\Primitives.obj
 C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Graphics\Shader.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\Shader.obj
 C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Graphics\Texture.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\Texture.obj
 C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Light.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\Light.obj
@@ -21,5 +21,4 @@ C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Player.cpp;C:\Users
 C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Renderer.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\Renderer.obj
 C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Scene.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\Scene.obj
 C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Utils.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\Utils.obj
-C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWGame\Game.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\Game.obj
 C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\TGAImage.cpp;C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\RTCWMapViewer\x64\Debug\TGAImage.obj

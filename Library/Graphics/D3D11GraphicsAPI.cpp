@@ -1,8 +1,7 @@
 
 #include "D3D11GraphicsAPI.h"
-#include "D3DBuffer.h"
+#include "Shader.h"
 #include "../Scene.h"
-
 
 namespace Helios
 {
@@ -63,6 +62,7 @@ namespace Helios
 			CreateRasterizerState();
 			CreateSampler();
 			CreateBlendState();
+			CreateShadowTargetView();
 
 		}
 
@@ -228,7 +228,7 @@ namespace Helios
 			depthStencilDesc.Height = GetScreenHeight();
 			depthStencilDesc.MipLevels = 1;
 			depthStencilDesc.ArraySize = 1;
-			depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			depthStencilDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
 
 			/*
 			// Use 4X MSAA? --must match swap chain MSAA values.
@@ -242,7 +242,7 @@ namespace Helios
 			depthStencilDesc.SampleDesc.Count = 1;
 			depthStencilDesc.SampleDesc.Quality = 0;
 			depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-			depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+			depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 			depthStencilDesc.CPUAccessFlags = 0;
 			depthStencilDesc.MiscFlags = 0;
 			ID3D11Texture2D* depthStencilBuffer;
@@ -252,7 +252,11 @@ namespace Helios
 			if (FAILED(hr))
 				OutputDebugString(L"Cannot create depth stencil buffer");
 
-			hr = m_pD3D11Device->CreateDepthStencilView(depthStencilBuffer, 0, &m_pDepthStencilView);
+			D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+			dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+
+			hr = m_pD3D11Device->CreateDepthStencilView(depthStencilBuffer, &dsvDesc, &m_pDepthStencilView);
 
 			if (FAILED(hr))
 			{
@@ -260,11 +264,18 @@ namespace Helios
 				return;
 			}
 
+			D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+			srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+			srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			srvDesc.Texture2D.MostDetailedMip = 0;
+			srvDesc.Texture2D.MipLevels = 1;
+			m_pD3D11Device->CreateShaderResourceView(depthStencilBuffer, &srvDesc, &m_shadowSRV);
+
 			if (m_pDeviceContext != nullptr)
 			{
 				m_pDeviceContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
 			}
-			//m_pDeviceContext->OM
+
 		}
 
 		void D3D11GraphicsAPI::CreateViewport(uint32_t topLeftX, uint32_t topLeftY, uint32_t width, uint32_t height)
@@ -331,9 +342,14 @@ namespace Helios
 		{
 		}
 
+		bool D3D11GraphicsAPI::CreateTexture(Texture* texture, const std::string& texFileName)
+		{
+			return true;
+		}
+
 		void D3D11GraphicsAPI::CreateVertexShader( Shader* shader, const std::wstring& shaderFileName, bool isCompiled)
 		{
-			/*if(!isCompiled)
+			if(!isCompiled)
 				CompileShader(shader, shaderFileName, SHADER_TYPE::VERTEX_SHADER);
 			else
 			{
@@ -351,23 +367,23 @@ namespace Helios
 													};
 
 				m_inputLayouts.push_back(nullptr);
-				hr = m_pD3D11Device->CreateInputLayout(inputDescs, 4, shader->GetShaderByteData(), shader->GetSize(), &m_inputLayouts.back());*/
+				hr = m_pD3D11Device->CreateInputLayout(inputDescs, 4, shader->GetShaderByteData(), shader->GetSize(), &m_inputLayouts.back());
 
-			//}
+			}
 		}
 
-		void D3D11GraphicsAPI::CreatePixelShader( Helios::Shader* shader, const std::wstring& shaderFileName, bool isCompiled)
+		void D3D11GraphicsAPI::CreatePixelShader( Shader* shader, const std::wstring& shaderFileName, bool isCompiled)
 		{
-			/*if(!isCompiled)
+			if(!isCompiled)
 				CompileShader(shader, shaderFileName, SHADER_TYPE::PIXEL_SHADER);
 			else
 			{
 				ID3D11PixelShader* ps = (ID3D11PixelShader*)shader->GetPixelShaderData();
 				m_pD3D11Device->CreatePixelShader(reinterpret_cast<const void*>(shader->GetShaderByteData()), shader->GetSize(), nullptr, &ps);
-			}*/
+			}
 		}
 
-		void D3D11GraphicsAPI::CompileShader(ID3D11VertexShader*& vertexShader, ID3D11PixelShader*& pixelShader, const std::wstring& shaderFileName, SHADER_TYPE type)
+		void D3D11GraphicsAPI::CompileShader(Shader* shader, const std::wstring& shaderFileName, SHADER_TYPE type)
 		{
 			UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if defined( DEBUG ) || defined( _DEBUG )
@@ -393,6 +409,7 @@ namespace Helios
 
 			if (type == SHADER_TYPE::VERTEX_SHADER)
 			{
+				//hr = D3DReadFileToBlob(L"ColorVS.cso", &shaderBlob);
 				hr = D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
 					"main", profile,
 					flags, 0, &shaderBlob, &errorBlob);
@@ -411,9 +428,9 @@ namespace Helios
 				}
 				else
 				{
+					D3DShader* d3dShader = (D3DShader*)shader;
 					
-					
-					HRESULT hr = m_pD3D11Device->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &vertexShader);
+					HRESULT hr = m_pD3D11Device->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &d3dShader->m_vertexShader);
 
 					D3D11_INPUT_ELEMENT_DESC inputDescs[] = { {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0 , D3D11_INPUT_PER_VERTEX_DATA, 0},
 															{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -446,69 +463,109 @@ namespace Helios
 						shaderBlob->Release();
 					return;
 				}
+				
+				D3DShader* d3dShader = (D3DShader*)shader;
 
-				m_pD3D11Device->CreatePixelShader(reinterpret_cast<const void*>(shaderBlob->GetBufferPointer()), shaderBlob->GetBufferSize(), nullptr, &pixelShader);
+				m_pD3D11Device->CreatePixelShader(reinterpret_cast<const void*>(shaderBlob->GetBufferPointer()), shaderBlob->GetBufferSize(), nullptr, &d3dShader->m_pixelShader);
 
 			}	
 
+		//	shaderBlob->Release();
 		}
 
 		void D3D11GraphicsAPI::RenderQuad()
 		{
 		}
 
-		void D3D11GraphicsAPI::RenderMeshesIndexed(std::vector<Mesh>& meshes, std::vector<Buffer*>& buffers, std::vector<Buffer*>& indexBuffers, std::vector<Shader>& shaders)
+		void D3D11GraphicsAPI::RenderMeshesIndexed(std::vector<Mesh>& meshes, std::vector<Buffer*>& buffers, std::vector<Buffer*>& indexBuffers, std::vector<Shader*>& shaders)
 		{		
-			m_pDeviceContext->IASetInputLayout(m_inputLayouts[0]);
-			m_pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			m_pDeviceContext->RSSetState(m_rasterizerStates[0]);
+			//m_pDeviceContext->IASetInputLayout(m_inputLayouts[0]);
+			//m_pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			//m_pDeviceContext->RSSetState(m_rasterizerStates[0]);
 
-			UINT stride = sizeof(Vertex);
-			UINT offset = 0;
+			//UINT stride = sizeof(Vertex);
+			//UINT offset = 0;
 
-			for (auto& m : meshes)
-			{
-				
-				D3DBuffer* pBuffer = (D3DBuffer*)buffers[m.GetVertexBufferID()];
-				D3DBuffer* pIndexBuffer = (D3DBuffer*)indexBuffers[m.GetVertexBufferID()];
-				Shader pShader = shaders[m.GetShaderID()];
+			//for (auto& m : meshes)
+			//{
+			//	
+			//	D3DBuffer* pBuffer = (D3DBuffer*)buffers[m.GetVertexBufferID()];
+			//	D3DBuffer* pIndexBuffer = (D3DBuffer*)indexBuffers[m.GetVertexBufferID()];
+			//	D3DShader* pShader = (D3DShader*)shaders[m.GetShaderID()];
 
-				m_pDeviceContext->IASetVertexBuffers(0, 1, &pBuffer->pD3DBuffer, &stride, &offset);
-				m_pDeviceContext->IASetIndexBuffer(pIndexBuffer->pD3DBuffer, DXGI_FORMAT_R32_UINT, offset);
-				pShader.Bind();
-
-			//	m_pDeviceContext->PSSetShaderResources(0,1, &m.GetTextures()[0]->m_pShaderResourceView);
-				m_pDeviceContext->DrawIndexed(m.GetNumIndices(),0, 0);
-			}
+			//	m_pDeviceContext->IASetVertexBuffers(0, 1, &pBuffer->pD3DBuffer, &stride, &offset);
+			//	m_pDeviceContext->IASetIndexBuffer(pIndexBuffer->pD3DBuffer, DXGI_FORMAT_R32_UINT, offset);
+			//	m_pDeviceContext->VSSetShader(pShader->m_vertexShader, nullptr, 0);
+			//	m_pDeviceContext->PSSetShader(pShader->m_pixelShader, nullptr, 0);
+			////	m_pDeviceContext->PSSetShaderResources(0,1, &m.GetTextures()[0]->m_pShaderResourceView);
+			//	m_pDeviceContext->DrawIndexed(m.GetNumIndices(),0, 0);
+			//}
 		}
 
 		void D3D11GraphicsAPI::RenderSceneIndexed(Scene* scene)
 		{
+			m_pDeviceContext->OMSetRenderTargets(0, nullptr, m_shadowDSV);
+			m_pDeviceContext->ClearDepthStencilView(m_shadowDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
+			scene->SetLightBuffer();
+
+			// render the depth from light point fo view first
 			m_pDeviceContext->IASetInputLayout(m_inputLayouts[0]);
 			m_pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			m_pDeviceContext->RSSetState(m_rasterizerStates[0]);
 
 			UINT stride = sizeof(Vertex);
 			UINT offset = 0;
-			m_pDeviceContext->PSSetSamplers(0, 1, &m_sampleState);
+			m_pDeviceContext->PSSetSamplers(0, 1, &m_sampleStateClamp);
+			m_pDeviceContext->PSSetSamplers(1, 1, &m_sampleStateWrap);
 
 			for (auto& m : scene->GetMeshes())
 			{
 				if (!m.GetIsDestroyed())
 				{
-					SetCameraConstantBuffer(m.GetWorld(), scene->GetCamera()->GetViewMatrix(), scene->GetCamera()->GetProjectionMatrix(), scene->GetConstantBuffers()[0]);
-
 					D3DBuffer* pBuffer = (D3DBuffer*)scene->GetBuffers()[m.GetVertexBufferID()];
 					D3DBuffer* pIndexBuffer = (D3DBuffer*)scene->GetIndexBuffers()[m.GetVertexBufferID()];
-					Shader pShader = scene->GetShaders()[m.GetShaderID()];
+					D3DShader* pShader = (D3DShader*)scene->GetShaders()[L"LightSpaceDepthVS.hlsl"].get();
 
 					m_pDeviceContext->IASetVertexBuffers(0, 1, &pBuffer->pD3DBuffer, &stride, &offset);
 					m_pDeviceContext->IASetIndexBuffer(pIndexBuffer->pD3DBuffer, DXGI_FORMAT_R32_UINT, offset);
-					pShader.Bind();
-					m_pDeviceContext->PSSetShaderResources(0, 1, &m.GetTextures()[0]->m_pShaderResourceView);
+					m_pDeviceContext->VSSetShader(pShader->m_vertexShader, nullptr, 0);
 					m_pDeviceContext->DrawIndexed(m.GetNumIndices(), 0, 0);
 				}
 
+			}
+
+			// second pass, render all geomtry with shadows
+			m_clearColor[0] = 0.0f;
+			m_clearColor[1] = 0.0f;
+			m_clearColor[2] = 0.0f;
+			m_clearColor[3] = 1.0f;
+
+			m_pDeviceContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
+			m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView, m_clearColor);
+			m_pDeviceContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+			scene->SetCameraConstantBufferParams();
+
+			for (auto& m : scene->GetMeshes())
+			{
+				if (!m.GetIsDestroyed())
+				{
+					
+
+					D3DBuffer* pBuffer = (D3DBuffer*)scene->GetBuffers()[m.GetVertexBufferID()];
+					D3DBuffer* pIndexBuffer = (D3DBuffer*)scene->GetIndexBuffers()[m.GetVertexBufferID()];
+					D3DShader* pVShader = (D3DShader*)scene->GetShaders()[L"ShadowVS.hlsl"].get();
+					D3DShader* pPShader = (D3DShader*)scene->GetShaders()[L"ShadowPS.hlsl"].get();
+
+
+					m_pDeviceContext->IASetVertexBuffers(0, 1, &pBuffer->pD3DBuffer, &stride, &offset);
+					m_pDeviceContext->IASetIndexBuffer(pIndexBuffer->pD3DBuffer, DXGI_FORMAT_R32_UINT, offset);
+					m_pDeviceContext->VSSetShader(pVShader->m_vertexShader, nullptr, 0);
+					m_pDeviceContext->PSSetShader(pPShader->m_pixelShader, nullptr, 0);
+					m_pDeviceContext->PSSetShaderResources(0, 1, &m.GetTextures()[0]->m_pShaderResourceView);
+					m_pDeviceContext->PSSetShaderResources(1, 1, &m_shadowSRV);
+					m_pDeviceContext->DrawIndexed(m.GetNumIndices(), 0, 0);
+				}
 			}
 
 		}
@@ -584,94 +641,32 @@ namespace Helios
 			samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 			// Create the texture sampler state.
-			HRESULT result = m_pD3D11Device->CreateSamplerState(&samplerDesc, &m_sampleState);
+			HRESULT result = m_pD3D11Device->CreateSamplerState(&samplerDesc, &m_sampleStateWrap);
 			if (FAILED(result))
 			{
 				return false;
 			}
 
+			samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.MipLODBias = 0.0f;
+			samplerDesc.MaxAnisotropy = 1;
+			samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+			samplerDesc.BorderColor[0] = 0;
+			samplerDesc.BorderColor[1] = 0;
+			samplerDesc.BorderColor[2] = 0;
+			samplerDesc.BorderColor[3] = 0;
+			samplerDesc.MinLOD = 0;
+			samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
+			// Create the clamp texture sampler state.
+			result = m_pD3D11Device->CreateSamplerState(&samplerDesc, &m_sampleStateClamp);
 			
-
-			return true;
-		}
-
-		bool D3D11GraphicsAPI::CreateTexture(Texture* tex, const std::string& texFileName)
-		{
-			D3DTexture* texture = static_cast<D3DTexture*>(tex);
-			std::wstring path = GetEXEPath();
-			uint32_t comps = 1;
-
-			texture->m_name = texFileName;
-			std::string textureFilesPath(path.begin(), path.end());
-
-			auto pData = jpgd::decompress_jpeg_image_from_file((textureFilesPath + "/" + texFileName).c_str(),
-				reinterpret_cast<int*>(&texture->m_width),
-				reinterpret_cast<int*>(&texture->m_height),
-				reinterpret_cast<int*>(&comps),
-				4); //  request a 32 bit image
-			texture->m_pImageData = std::make_unique<uint8_t[]>(texture->m_width * texture->m_height * 4);
-			std::memcpy(texture->m_pImageData.get(), pData, texture->m_width * texture->m_height * 4);
-
-			HRESULT hr;
-			ID3D11Texture2D* pTex2D = nullptr;
-			D3D11_TEXTURE2D_DESC texDesc;
-			memset(&texDesc, 0, sizeof(D3D11_TEXTURE2D_DESC));
-			texDesc.Width = texture->m_width;
-			texDesc.Height = texture->m_height;
-			texDesc.MipLevels = 0;
-			texDesc.ArraySize = 1;
-			texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			texDesc.SampleDesc.Count = 1;
-			texDesc.SampleDesc.Quality = 0;
-			texDesc.Usage = D3D11_USAGE_DEFAULT;
-			texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-			texDesc.CPUAccessFlags = 0;
-			texDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
-
-			hr = m_pD3D11Device->CreateTexture2D(&texDesc, nullptr, &pTex2D);
-
-			if (FAILED(hr))
-			{
-				OutputDebugString(L"Cannot create texture\n");
+			if (FAILED(result))
 				return false;
-			}
-
-			D3D11_MAPPED_SUBRESOURCE  mappedTex;
-			uint32_t rowPitch = (texture->m_width * 4) * sizeof(uint8_t);
-			m_pDeviceContext->UpdateSubresource(pTex2D, 0, NULL, pData, rowPitch, 0);
-			/*m_pD3D11DeviceContext->Map(pTex2D, 0, D3D11_MAP_READ, 0, &mappedTex);
-
-			UCHAR* pTexels = (UCHAR*)mappedTex.pData;
-			int j = 0;
-			for (UINT row = 0; row < texDesc.Height; row++)
-			{
-				UINT rowStart = row * mappedTex.RowPitch;
-				for (UINT col = 0; col < texDesc.Width; col++)
-				{
-					UINT colStart = col * 4;
-					pTexels[rowStart + colStart + 0] = m_pImageData[j++];
-					pTexels[rowStart + colStart + 1] = m_pImageData[j++];
-					pTexels[rowStart + colStart + 2] = m_pImageData[j++];
-					pTexels[rowStart + colStart + 3] = m_pImageData[j++];
-				}
-			}
-
-			m_pD3D11DeviceContext->Unmap(pTex2D, D3D11CalcSubresource(0, 0, 1));*/
-
-			D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-			memset(&srvDesc, 0, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
-			srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-			srvDesc.Texture2D.MostDetailedMip = 0;
-			srvDesc.Texture2D.MipLevels = -1;
-
-			hr = m_pD3D11Device->CreateShaderResourceView(pTex2D, &srvDesc, &texture->m_pShaderResourceView);
 			
-			if (FAILED(hr))
-				return false;
-
-			m_pDeviceContext->GenerateMips(texture->m_pShaderResourceView);
 			return true;
 		}
 
@@ -725,77 +720,62 @@ namespace Helios
 
 		}
 
-		void D3D11GraphicsAPI::SetCameraConstantBuffer(const DirectX::XMMATRIX& model, const DirectX::XMMATRIX& view, const DirectX::XMMATRIX& proj, Buffer* cbuffer)
+		void D3D11GraphicsAPI::CreateShadowTargetView()
 		{
+			HRESULT hr;
+			D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
+			D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
+			D3D11_TEXTURE2D_DESC texDesc;
+			
+			memset(&texDesc, 0, sizeof(D3D11_TEXTURE2D_DESC));
+			texDesc.Width =	1024;
+			texDesc.Height = 1024; 
+			texDesc.MipLevels = 1;
+			texDesc.ArraySize = 1;
+			texDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+			texDesc.SampleDesc.Count = 1;
+			texDesc.SampleDesc.Quality = 0;
+			texDesc.Usage = D3D11_USAGE_DEFAULT;
+			texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_DEPTH_STENCIL;
+			//texDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
-			D3DBuffer* pCBuffer = (D3DBuffer*)cbuffer;
-			D3D11_MAPPED_SUBRESOURCE mappedResource;
-			ConstantMatrixBuffer* dataPtr;
+			hr = m_pD3D11Device->CreateTexture2D(&texDesc, nullptr, &m_shadowMap);
 
-			DirectX::XMMATRIX WVP = DirectX::XMMatrixTranspose(model * view * proj);
+			if (FAILED(hr))
+			{
+				OutputDebugString(L"Cannot create shadow map\n");
+				return;
+			}
 
-			HRESULT result = m_pDeviceContext->Map(pCBuffer->pD3DBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+			
+			shaderResourceViewDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+			shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+			shaderResourceViewDesc.Texture2D.MipLevels = 1;
 
-			if (FAILED(result))
-				OutputDebugString(L"Cannot set constant buffer\n");
+			// Create the shader resource view.
+			hr = m_pD3D11Device->CreateShaderResourceView(m_shadowMap, &shaderResourceViewDesc, &m_shadowSRV);
+			
+			if (FAILED(hr))
+			{
+				OutputDebugString(L"Cannot create shader resrouce view\n");
+				return;
+			} 
 
-			dataPtr = (ConstantMatrixBuffer*)mappedResource.pData;
+			// Set up the depth stencil view description.
+			depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+			
 
-			XMStoreFloat4x4(&dataPtr->WVP, WVP);
-			m_pDeviceContext->Unmap(pCBuffer->pD3DBuffer, 0);
-			m_pDeviceContext->VSSetConstantBuffers(0, 1, &pCBuffer->pD3DBuffer);
-		}
+			// Create the depth stencil view.
+			hr = m_pD3D11Device->CreateDepthStencilView(m_shadowMap, &depthStencilViewDesc, &m_shadowDSV);
+			if (FAILED(hr))
+			{
+				OutputDebugString(L"Cannot create depth stencil view\n");
+				return;
+			}
 
-		void D3D11GraphicsAPI::SetDirectionalLightBuffer(Buffer* cbuffer, const XMFLOAT3& direction, const XMFLOAT4& color)
-		{
-			D3D11_MAPPED_SUBRESOURCE mappedResource;
-			unsigned int bufferNumber = 0;
-
-			LightBuffer* dataPtr;
-			D3DBuffer* pCBuffer = (D3DBuffer*)(cbuffer);
-
-			m_pDeviceContext->Map(pCBuffer->pD3DBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-
-			// Get a pointer to the data in the constant buffer.
-			dataPtr = (LightBuffer*)mappedResource.pData;
-
-			// Copy the lighting variables into the constant buffer.
-			dataPtr->color = color;
-			dataPtr->direction = direction;
-			dataPtr->padding = 0.0f;
-
-			// Unlock the constant buffer.
-			m_pDeviceContext->Unmap(pCBuffer->pD3DBuffer, 0);
-
-			// Set the position of the light constant buffer in the pixel shader.
-			bufferNumber = 0;
-
-			// Finally set the light constant buffer in the pixel shader with the updated values.
-			m_pDeviceContext->PSSetConstantBuffers(bufferNumber, 1, &pCBuffer->pD3DBuffer);
-		}
-
-		void D3D11GraphicsAPI::SetDepthShaderLightSpaceMatrixBuffer(Buffer* cbuffer, const DirectX::XMMATRIX& model, const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up)
-		{
-			D3DBuffer* pCBuffer = (D3DBuffer*)cbuffer;
-			D3D11_MAPPED_SUBRESOURCE mappedResource;
-			LightSpaceMatrixBuffer* dataPtr;
-
-			DirectX::XMMATRIX lightSpaceProjection = DirectX::XMMatrixOrthographicLH(10.0f, 10.0f, 1.0f, 10.0f);
-			DirectX::XMMATRIX lightView = DirectX::XMMatrixLookAtLH(DirectX::XMLoadFloat3(&position), DirectX::XMLoadFloat3(&target), DirectX::XMLoadFloat3(&up));
-
-			DirectX::XMMATRIX lightMatrix = DirectX::XMMatrixTranspose(lightView * lightSpaceProjection);
-
-			HRESULT result = m_pDeviceContext->Map(pCBuffer->pD3DBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-
-			if (FAILED(result))
-				OutputDebugString(L"Cannot set constant buffer\n");
-
-			dataPtr = (LightSpaceMatrixBuffer*)mappedResource.pData;
-
-			XMStoreFloat4x4(&dataPtr->lightSpaceMatrix, lightMatrix);
-			XMStoreFloat4x4(&dataPtr->modelMatrix, model);
-			m_pDeviceContext->Unmap(pCBuffer->pD3DBuffer, 0);
-			m_pDeviceContext->VSSetConstantBuffers(0, 1, &pCBuffer->pD3DBuffer);
+			//m_pDeviceContext->OMSetRenderTargets(0, nullptr, m_shadowDSV);
 		}
 
 		void D3D11GraphicsAPI::EnumerateComponents()
@@ -891,12 +871,19 @@ namespace Helios
 
 		void D3D11GraphicsAPI::ClearScreen()
 		{
-			ID3D11DeviceContext* pDeviceContext = DeviceContext();
-
-			pDeviceContext->ClearRenderTargetView(m_pRenderTargetView, m_clearColor);
-			pDeviceContext->ClearDepthStencilView(m_pDepthStencilView,D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
 			
+			
+			//pDeviceContext->ClearDepthStencilView(m_pDepthStencilView,D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+			/*m_clearColor[0] = 1.0f;
+			m_clearColor[1] = 0.0f;
+			m_clearColor[2] = 0.0f;
+			m_clearColor[3] = 1.0f;
+
+
+			pDeviceContext->ClearRenderTargetView(m_shadowTargetView, m_clearColor);
+			pDeviceContext->ClearDepthStencilView(m_shadowDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);*/
+
 		}
 		
 		void D3D11GraphicsAPI::PresentToScreen()

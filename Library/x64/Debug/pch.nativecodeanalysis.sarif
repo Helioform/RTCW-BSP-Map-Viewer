@@ -1,0 +1,51 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+  "runs": [
+    {
+      "results": [],
+      "tool": {
+        "driver": {
+          "name": "PREfast",
+          "fullName": "PREfast Code Analysis",
+          "version": "14.40.33812.0",
+          "informationUri": "https://aka.ms/cpp/ca"
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "artifacts": [
+        {
+          "location": {
+            "uri": "file:///d:/_projects/_3dengineprojects/basic3dengine/basic-3d-engine/library/pch.cpp"
+          },
+          "roles": [
+            "analysisTarget"
+          ],
+          "hashes": {
+            "sha-256": "b1dfc417ce748ffeec95311109dae13142c638e58cfa86eb6e5a0865082428aa"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///d:/_projects/_3dengineprojects/basic3dengine/basic-3d-engine/library/pch.h"
+          },
+          "hashes": {
+            "sha-256": "c2d8c468b0dd828eaa49a609c5e54ebca95ea4d2de3cd390e968e01c5d7f79ed"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///d:/_projects/_3dengineprojects/basic3dengine/basic-3d-engine/library/framework.h"
+          },
+          "hashes": {
+            "sha-256": "fbc08209832783724237533898bf670375d32f54103c39c4fe67f29d1f45e8d8"
+          }
+        }
+      ]
+    }
+  ]
+}

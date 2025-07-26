@@ -19,8 +19,8 @@ HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 HWND hWnd;
-const int WindowHeight = 600;
-const int WindowWidth = 800;
+const int WINDOW_HEIGHT = 600;
+const int WINDOW_WIDTH = 800;
 std::unique_ptr<Scene> scene;
 uint32_t mouseX=0, mouseY=0;
 bool gameStarted = false;
@@ -61,8 +61,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_GAME));
     
-    scene = std::make_unique<Scene>(hWnd, 800, 600, false);
-    
+    scene = std::unique_ptr<Scene>(new Scene(hWnd, WINDOW_WIDTH, WINDOW_HEIGHT, false));
+    scene->Init(hWnd, WINDOW_WIDTH, WINDOW_HEIGHT, false);
     
 
 
@@ -91,9 +91,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             // save current time
             const auto start{ std::chrono::steady_clock::now() };
 
-            scene->ClearScreen();
-
-
             RECT r;
 
             GetWindowRect(hWnd, &r);
@@ -102,9 +99,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
              scene->SetCameraConstantBufferParams();*/
 
             scene->Update(0.001f);
+            scene->GetGFXAPI()->PresentToScreen();
 
-
-            scene->PresentToScreen();
 
             // save frame end time
             const auto end{ std::chrono::steady_clock::now() };
@@ -169,7 +165,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // Store instance handle in our global variable
 
    hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-       CW_USEDEFAULT, 0, WindowWidth, WindowHeight, 0, nullptr, nullptr, hInstance, nullptr);
+       CW_USEDEFAULT, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {

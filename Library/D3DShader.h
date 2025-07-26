@@ -1,29 +1,30 @@
 #pragma once
-
-#include <string>
-
+#include "../Library/Graphics/Shader.h"
 
 class ID3D11VertexShader;
 class ID3D11PixelShader;
 
 namespace Helios
 {
-    class D3D11GraphicsAPI;
-
-    class D3DShader 
+    struct D3DShader :
+        public Shader
     {
-    public:
+  
         D3DShader() = default;
-        D3DShader(D3D11GraphicsAPI* _gfxAPI) : gfxAPI(_gfxAPI) {}
+        D3DShader(const std::wstring& name) : Shader(name) {}
 
-        void Compile(const std::wstring& vertexShaderName, const std::wstring& pixelShaderName);
-        void Bind();
-        void CleanUp();
+        virtual void* GetVertexShaderData() override {
+            return (void*)m_vertexShader;
+        }
 
-    protected:
+        virtual void* GetPixelShaderData() override {
+            return (void*)m_pixelShader;
+        }
+   
         ID3D11VertexShader* m_vertexShader = nullptr;
         ID3D11PixelShader* m_pixelShader = nullptr;
-        D3D11GraphicsAPI* gfxAPI;
+
+
     };
 
 }

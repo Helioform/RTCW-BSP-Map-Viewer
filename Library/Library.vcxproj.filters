@@ -194,7 +194,7 @@
     <ClCompile Include="Renderer.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="D3DShader.cpp">
+    <ClCompile Include="Graphics\D3DTexture.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
   </ItemGroup>

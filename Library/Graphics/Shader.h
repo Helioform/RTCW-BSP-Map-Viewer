@@ -1,17 +1,13 @@
 #pragma once
-
-
-#include <variant>
+#include <stdint.h>
+#include <memory.h>
 #include <string>
-#include "../D3DShader.h"
-
-class D3DShader;
-class OpenGLShader;
-
+#include <algorithm>
+#include "GraphicsAPI.h"
 
 namespace Helios
 {
-	using ShaderVariant = std::variant<D3DShader>;
+
 
 		enum class SHADER_TYPE : uint8_t
 		{
@@ -24,31 +20,39 @@ namespace Helios
 		};
 
 
-		class Shader
-		{	
-		public:
+		struct Shader
+		{
+		
 			Shader() = default;
-			Shader(const D3DShader& d3dShader);
-			
-			void Compile(const std::wstring& vertexSource, const std::wstring& pixelSource) {
-				std::visit([&](auto&& shaderInstance) {
-					shaderInstance.Compile(vertexSource, pixelSource);
-					}, m_shader);
+			Shader(const std::wstring& shaderName);
+			virtual ~Shader()
+			{
+				if (shaderBytes)
+					delete [] shaderBytes;
 			}
 
-			void Bind() {
-				std::visit([](auto&& shaderInstance) {
-					shaderInstance.Bind();
-					}, m_shader);
+			virtual void* GetVertexShaderData() = 0;
+			virtual void* GetPixelShaderData() = 0;
+			inline uint8_t* GetShaderByteData() const
+			{
+				return shaderBytes;
 			}
 
-			void CleanUp() {
-				std::visit([](auto&& shaderInstance) {
-					shaderInstance.CleanUp();
-					}, m_shader);
+			void LoadFromFile(const std::wstring& name);
+			uint64_t GetSize() const {
+				return shaderBytesSize;
 			}
+
+			uint64_t GetInputLayoutIndex() const { return inputLayoutIndex; }
+
 		private:
-			ShaderVariant m_shader;
-
+			
+		
+			uint8_t* shaderBytes {nullptr};
+		
+			uint64_t shaderBytesSize;
+			uint64_t ID;
+			std::wstring name;
+			uint64_t inputLayoutIndex;
 		};
 }

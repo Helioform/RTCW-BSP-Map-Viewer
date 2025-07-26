@@ -61,7 +61,6 @@ namespace Helios
 			Plane() = default;
 			Plane(DirectX::XMFLOAT3 center, float_t width, float_t height, DirectX::XMFLOAT4 color);
 		
-		private:
 			DirectX::XMFLOAT3 m_normal;
 			DirectX::XMFLOAT3 m_center;
 			float m_width, m_height;

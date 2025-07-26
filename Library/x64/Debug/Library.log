@@ -1,0 +1,12 @@
+﻿  Player.cpp
+D:\_Projects\_3DEngineProjects\Basic3DEngine\Basic-3D-Engine\Library\Mesh.h(48,11): warning C4244: 'return': conversion from 'uint64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'Player.cpp')
+  
+D:\_Projects\_3DEngineProjects\Basic3DEngine\Basic-3D-Engine\Library\Mesh.h(60,11): warning C4244: 'return': conversion from 'uint64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'Player.cpp')
+  
+D:\_Projects\_3DEngineProjects\Basic3DEngine\Basic-3D-Engine\Library\Mesh.h(64,11): warning C4244: 'return': conversion from 'uint64_t' to 'uint32_t', possible loss of data
+  (compiling source file 'Player.cpp')
+  
+D:\_Projects\_3DEngineProjects\Basic3DEngine\Basic-3D-Engine\Library\Player.cpp(7,11): warning C4101: 'f': unreferenced local variable
+  Library.vcxproj -> D:\_Projects\_3DEngineProjects\Basic3DEngine\Basic-3D-Engine\x64\Debug\Library.lib

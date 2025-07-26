@@ -42,7 +42,7 @@ namespace Helios
 			XMMATRIX invCamPos = XMMatrixInverse(nullptr, XMMatrixTranslation(playerCam->GetPosition3f().x, playerCam->GetPosition3f().y, playerCam->GetPosition3f().z));
 			playerCam->SetViewMatrix(invT * invR * invCamPos);
 
-			playerMesh->SetWorldMatrix(T * R);
+			//playerMesh->SetWorldMatrix(T * R);
 		}
 		
 		void UpdatePosition()

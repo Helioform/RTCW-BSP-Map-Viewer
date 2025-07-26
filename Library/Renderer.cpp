@@ -47,23 +47,11 @@ void Helios::Renderer::CreateTexture(Texture* tex, const std::string& texFileNam
 	gfxAPI->CreateTexture(tex, texFileName);
 }
 
-void Helios::Renderer::SetCameraConstantBuffer(const DirectX::XMMATRIX& model, const DirectX::XMMATRIX& view, const DirectX::XMMATRIX& proj, Buffer* cbuffer) const
-{
-	gfxAPI->SetCameraConstantBuffer(model, view, proj, cbuffer);
-}
 
 
 
-void Helios::Renderer::SetDirectionalLightBuffer(Buffer* cbuffer, const DirectX::XMFLOAT3& direction, const DirectX::XMFLOAT4& color) const
-{
-	gfxAPI->SetDirectionalLightBuffer(cbuffer, direction, color);
 
-}
 
-void Helios::Renderer::SetDepthShaderLightSpaceMatrixBuffer(Buffer* cbuffer, const DirectX::XMMATRIX& model, const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up)
-{
-	gfxAPI->SetDepthShaderLightSpaceMatrixBuffer(cbuffer, model, position, target, up);
-}
 
 
 

@@ -6,10 +6,11 @@
 #include "../Library/D3DShader.h"
 #include "Player.h"
 #include "Light.h"
-#include "Renderer.h"
 
 namespace Helios
 {
+	struct D3DBuffer;
+	class D3D11GraphicsAPI;
 
 	struct MousePosition
 	{
@@ -25,18 +26,21 @@ namespace Helios
 		Scene() = default;
 		Scene(HWND hwnd, uint32_t w, uint32_t h, bool fullscreen);
 		void Init(HWND hwnd, uint32_t w, uint32_t h, bool fullscreen);
-		void LoadShaders(const std::vector<std::wstring>& shaderNames);
+		void LoadShader(const std::wstring& shaderName, SHADER_TYPE type);
 		void Update(float dt);
+		void SetCameraConstantBufferParams();
 		bool LoadMeshes(const std::string& filename);
 		void CheckForCollisions(const Player& player); // naive approach that checks each object in relation with the player
 
+
+		void SetLightBuffer();
 
 		inline Camera* GetCamera() {
 			return camera.get();
 		}
 
 		inline D3D11GraphicsAPI* GetGFXAPI() {
-			return (D3D11GraphicsAPI*)gfxAPI.get();
+			return gfxAPI.get();
 		}
 
 		inline void SetMousePos(uint32_t x, uint32_t y)
@@ -53,12 +57,8 @@ namespace Helios
 
 		inline MousePosition CalculateMouseDelta()
 		{
-			return MousePosition{ mousePos.x - lastMouse.x, mousePos.y - lastMouse.y };
-		}
-
-		inline std::vector<Buffer*>& GetConstantBuffers()
-		{
-			return constantBuffer;
+			return MousePosition{mousePos.x - lastMouse.x, mousePos.y - lastMouse.y
+		};
 		}
 
 		inline std::vector<Buffer*>& GetBuffers() {
@@ -70,7 +70,7 @@ namespace Helios
 			return indexBuffers;
 		}
 
-		inline std::vector<Shader>& GetShaders() {
+		inline std::unordered_map<std::wstring, std::shared_ptr<Shader>>& GetShaders() {
 			return shaders;
 		}
 
@@ -95,24 +95,15 @@ namespace Helios
 		
 		void RotatePlayer(float dt);
 		
-		void ClearScreen() const
-		{
-			gfxAPI->ClearScreen();
-		}
-
-		void PresentToScreen() const
-		{
-			gfxAPI->PresentToScreen();
-		}
-
 	private:
 		std::unique_ptr<Camera> camera;
 		std::vector<Mesh> meshes;
-		std::vector<Shader> shaders;
+		std::unordered_map<std::wstring, std::shared_ptr<Shader>> shaders;
 		std::vector<Buffer*> buffers;
 		std::vector<Buffer*> indexBuffers;
 		std::vector<Buffer*> constantBuffer; 
-		std::unique_ptr<Renderer> gfxAPI;
+		std::unique_ptr<D3D11GraphicsAPI> gfxAPI;
+		D3DTexture* texture;
 		Player*			player;
 		MousePosition mousePos;
 		MousePosition lastMouse;

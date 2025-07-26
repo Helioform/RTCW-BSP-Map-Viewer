@@ -1,1 +1,65 @@
-﻿  X3DEngine.vcxproj -> C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\x64\Debug\RTCWMapViewer.exe
+﻿  Game.cpp
+  Buffer.cpp
+  D3D11GraphicsAPI.cpp
+  D3DBuffer.cpp
+  D3DTexture.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244: 'argument': conversion from 'wchar_t' to 'const _Elem', possible loss of data
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244:         with
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244:         [
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244:             _Elem=char
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244:         ]
+  (compiling source file 'Library/Graphics/D3DTexture.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53):
+      the template instantiation context (the oldest one first) is
+          C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Graphics\D3DTexture.cpp(13,31):
+          see reference to function template instantiation 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)' being compiled
+          with
+          [
+              _Elem=wchar_t,
+              _Iter=std::_String_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
+              _Alloc=std::allocator<char>
+          ]
+              C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Graphics\D3DTexture.cpp(13,31):
+              see the first reference to 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string' in 'Helios::D3DTexture::CreateFromJPGFile'
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2590,17):
+          see reference to function template instantiation 'void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<wchar_t*,wchar_t*,_Size_type>(_Iter,const _Sent,_Size)' being compiled
+          with
+          [
+              _Size_type=unsigned __int64,
+              _Iter=wchar_t *,
+              _Sent=wchar_t *,
+              _Size=unsigned __int64
+          ]
+  
+  Scene.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244: 'argument': conversion from 'wchar_t' to 'const _Elem', possible loss of data
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244:         with
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244:         [
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244:             _Elem=char
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244:         ]
+  (compiling source file 'Library/Scene.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53):
+      the template instantiation context (the oldest one first) is
+          C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Scene.cpp(163,31):
+          see reference to function template instantiation 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)' being compiled
+          with
+          [
+              _Elem=wchar_t,
+              _Iter=std::_String_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
+              _Alloc=std::allocator<char>
+          ]
+              C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\Library\Scene.cpp(163,18):
+              see the first reference to 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string' in 'Helios::Scene::LoadMeshes'
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2590,17):
+          see reference to function template instantiation 'void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<wchar_t*,wchar_t*,_Size_type>(_Iter,const _Sent,_Size)' being compiled
+          with
+          [
+              _Size_type=unsigned __int64,
+              _Iter=wchar_t *,
+              _Sent=wchar_t *,
+              _Size=unsigned __int64
+          ]
+  
+  TGAImage.cpp
+  Generating Code...
+  X3DEngine.vcxproj -> C:\Users\Karl T\Documents\GitHub\RTCW-BSP-Map-Viewer\x64\Debug\RTCWMapViewer.exe
