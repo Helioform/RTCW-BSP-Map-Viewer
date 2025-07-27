@@ -35,7 +35,7 @@ PixelInputType main(VertexInputType input)
     output.tex = input.tex;
     output.normal = input.normal;
 
-    output.lightViewPosition = mul(output.position, lightVP);
+    output.lightViewPosition = mul(input.position, lightVP);
     output.lightPos = lightPos;
     
     return output;

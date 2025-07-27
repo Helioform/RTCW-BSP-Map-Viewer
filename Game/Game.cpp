@@ -62,8 +62,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_GAME));
     
     scene = std::unique_ptr<Scene>(new Scene(hWnd, WINDOW_WIDTH, WINDOW_HEIGHT, false));
-    scene->Init(hWnd, WINDOW_WIDTH, WINDOW_HEIGHT, false);
     
+    if (!scene->Init(hWnd, WINDOW_WIDTH, WINDOW_HEIGHT, false))
+    {
+        MessageBoxA(hWnd, "FAILED TO INIT RENDERER", "ERROR", MB_YESNOCANCEL | MB_ICONWARNING);
+        return FALSE;
+    }
 
 
     MSG msg;
@@ -83,6 +87,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         if (state == GAME_STATE::MENU)
         {
+            gameStarted = true;
             if(gameStarted)
                 state = GAME_STATE::GAME;
         }
@@ -212,16 +217,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            RECT r;
-            r.left = 0;
-            r.right = 800;
-            r.bottom = 600;
-            r.top = 0;
-            
-                // TODO: Add any drawing code that uses hdc here...
-            DrawTextA(hdc, "Click to Play",13, &r, DT_CENTER);
-            EndPaint(hWnd, &ps);
+            //HDC hdc = BeginPaint(hWnd, &ps);
+            //RECT r;
+            //r.left = 0;
+            //r.right = 800;
+            //r.bottom = 600;
+            //r.top = 0;
+            //
+            //    // TODO: Add any drawing code that uses hdc here...
+            //DrawTextA(hdc, "Click to Play",13, &r, DT_CENTER);
+            //EndPaint(hWnd, &ps);
         }
         break;
     case WM_DESTROY:

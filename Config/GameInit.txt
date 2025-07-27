@@ -1,4 +1,0 @@
-rfullscreen 0
-rwidth 1280
-rheight 1024
-map WorldMaps/maps/testroom.bsp

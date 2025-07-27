@@ -12,7 +12,7 @@ namespace Helios
 
 		}
 
-		void D3D11GraphicsAPI::Init(HWND hWnd, uint32_t w, uint32_t h, bool fs) 
+		bool D3D11GraphicsAPI::Init(HWND hWnd, uint32_t w, uint32_t h, bool fs) 
 		{
 			HRESULT hr;
 
@@ -21,13 +21,18 @@ namespace Helios
 			if (FAILED(hr))
 			{
 				OutputDebugString(L"DXGI Factory Creation Failed.");
-				return;
+				return false;
 			}
 
-			FindBestFeatureLevel();
+			if (!FindBestFeatureLevel())
+				return false;
 
-			EnumerateComponents();
-			EnumerateDisplayResolutions(w, h, fs);
+			if (!EnumerateComponents())
+				return false;
+
+			if (!EnumerateDisplayResolutions(w, h, fs))
+				return false;
+
 			UINT createDeviceFlags = 0;
 
 
@@ -49,38 +54,55 @@ namespace Helios
 			if (FAILED(hr))
 			{
 				OutputDebugString(L"Direct3D11 Device Creation Failed");
-				return;
+				return false;
 			}
 
-	
+			bool success = false;
 				        	
 			SetWindowHandle(hWnd);
-			CreateSwapChain();
-			CreateRenderTargetView();
-			CreateDepthStencil();
+			
+			if (!CreateSwapChain())
+				return false;
+			
+			if (!CreateRenderTargetView())
+				return false;
+			
+			if (!CreateDepthStencil())
+				return false;
+			
 			CreateViewport(0, 0, GetScreenWidth(), GetScreenHeight());
-			CreateRasterizerState();
-			CreateSampler();
-			CreateBlendState();
-			CreateShadowTargetView();
+			
+			if (!CreateRasterizerState())
+				return false;
+			
+			if (!CreateSampler())
+				return false;
 
+			if (!CreateBlendState())
+				return false;
+
+			if (!CreateShadowTargetView())
+				return false;
+
+			return true;
 		}
 
-		void D3D11GraphicsAPI::Init(ID3D11Device* device, ID3D11DeviceContext* deviceContext, uint32_t w, uint32_t h)
+		bool D3D11GraphicsAPI::Init(ID3D11Device* device, ID3D11DeviceContext* deviceContext, uint32_t w, uint32_t h)
 		{
 			m_pD3D11Device = device;
 			m_pDeviceContext = deviceContext;
 			SetScreenDimensions(w, h);
-
+			return true;
 		}
 
-		void D3D11GraphicsAPI::EnumerateFeatureLevels()
+		bool D3D11GraphicsAPI::EnumerateFeatureLevels()
 		{
+			return true;
 		}
 
-		void D3D11GraphicsAPI::FindBestFeatureLevel()
+		bool D3D11GraphicsAPI::FindBestFeatureLevel()
 		{
-			{
+			
 				HRESULT hr = E_FAIL;
 				const D3D_FEATURE_LEVEL featureLevels[] = {
 					D3D_FEATURE_LEVEL_11_1,
@@ -108,13 +130,15 @@ namespace Helios
 				if (FAILED(hr))
 				{
 					OutputDebugString(L"Could not determine feature level");
+					return false;
 				}
 
-			}
+			
+				return true;
 
 		}
 
-		void D3D11GraphicsAPI::EnumerateDisplayResolutions(uint32_t screenWidth, uint32_t screenHeight, bool fullScreen)
+		bool D3D11GraphicsAPI::EnumerateDisplayResolutions(uint32_t screenWidth, uint32_t screenHeight, bool fullScreen)
 		{
 			SetFullScreen(fullScreen);
 
@@ -132,13 +156,19 @@ namespace Helios
 				hr = pOutput->GetDisplayModeList(format, 0, &numModes, nullptr);
 
 				if (FAILED(hr))
+				{
 					OutputDebugString(L"Can't get number of display modes");
+					return false;
+				}
 
 				displayModes = new DXGI_MODE_DESC[numModes];
 				hr = pOutput->GetDisplayModeList(format, 0, &numModes, displayModes);
 
 				if (FAILED(hr))
+				{
 					OutputDebugString(L"Can't get list of display modes");
+					return false;
+				}
 
 				m_videoCardInfo.numResolutionModes = numModes;
 
@@ -158,10 +188,14 @@ namespace Helios
 				}
 
 				delete[] displayModes;
+
+				return true;
 			}
+
+			return false;
 		}
 
-		void D3D11GraphicsAPI::CreateSwapChain()
+		bool D3D11GraphicsAPI::CreateSwapChain()
 		{
 			if (m_pD3D11Device != nullptr)
 			{
@@ -192,13 +226,19 @@ namespace Helios
 					HRESULT hr = m_pDXGIFactory->CreateSwapChain(m_pD3D11Device, &swapChainDesc, &m_pSwapChain);
 
 					if (FAILED(hr))
+					{
 						OutputDebugString(L"Swap chain creation failed");
+						return false;
+					}
+
+					return true;
 				}
 			}
 
+			return false;
 		}
 
-		void D3D11GraphicsAPI::CreateRenderTargetView()
+		bool D3D11GraphicsAPI::CreateRenderTargetView()
 		{
 			if (m_pSwapChain != nullptr)
 			{
@@ -207,21 +247,26 @@ namespace Helios
 				if (FAILED(hr))
 				{
 					OutputDebugString(L"Cannot get swapchain buffer");
-					return;
+					return false;
 				}
 
 				if (m_pD3D11Device != nullptr)
 					hr = m_pD3D11Device->CreateRenderTargetView(m_pBackBuffer, 0, &m_pRenderTargetView);
 
 				if (FAILED(hr))
+				{
 					OutputDebugString(L"Cannot create render target view");
+					return false;
+				}
 
-
+				return true;
 			}
+
+			return false;
 		}
 
 
-		void D3D11GraphicsAPI::CreateDepthStencil()
+		bool D3D11GraphicsAPI::CreateDepthStencil()
 		{
 			D3D11_TEXTURE2D_DESC depthStencilDesc;
 			depthStencilDesc.Width = GetScreenWidth();
@@ -250,7 +295,10 @@ namespace Helios
 			HRESULT hr = m_pD3D11Device->CreateTexture2D(&depthStencilDesc, 0, &depthStencilBuffer);
 
 			if (FAILED(hr))
+			{
 				OutputDebugString(L"Cannot create depth stencil buffer");
+				return false;
+			}
 
 			D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
 			dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -261,7 +309,7 @@ namespace Helios
 			if (FAILED(hr))
 			{
 				OutputDebugString(L"Cannot create depth stencil view");
-				return;
+				return false;
 			}
 
 			D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -269,13 +317,17 @@ namespace Helios
 			srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 			srvDesc.Texture2D.MostDetailedMip = 0;
 			srvDesc.Texture2D.MipLevels = 1;
-			m_pD3D11Device->CreateShaderResourceView(depthStencilBuffer, &srvDesc, &m_shadowSRV);
+			hr = m_pD3D11Device->CreateShaderResourceView(depthStencilBuffer, &srvDesc, &m_shadowSRV);
+
+			if (hr != S_OK)
+				return false;
 
 			if (m_pDeviceContext != nullptr)
 			{
 				m_pDeviceContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
 			}
 
+			return true;
 		}
 
 		void D3D11GraphicsAPI::CreateViewport(uint32_t topLeftX, uint32_t topLeftY, uint32_t width, uint32_t height)
@@ -292,7 +344,7 @@ namespace Helios
 		}
 
 
-		void D3D11GraphicsAPI::CreateRasterizerState()
+		bool D3D11GraphicsAPI::CreateRasterizerState()
 		{
 			D3D11_RASTERIZER_DESC rsDesc;
 			ZeroMemory(&rsDesc, sizeof(D3D11_RASTERIZER_DESC));
@@ -311,11 +363,15 @@ namespace Helios
 			HRESULT hr = m_pD3D11Device->CreateRasterizerState(&rsDesc, &pCullBackRS);
 
 			if (FAILED(hr))
+			{
 				OutputDebugString(L"Cannot create rasterrizer state\n");
+				return false;
+			}
 
 			m_rasterizerStates.push_back(pCullBackRS);
 
 			m_pDeviceContext->RSSetState(m_rasterizerStates[0]);
+			return true;
 		}
 
 		void D3D11GraphicsAPI::SetClearColor(float col[4])
@@ -347,10 +403,10 @@ namespace Helios
 			return true;
 		}
 
-		void D3D11GraphicsAPI::CreateVertexShader( Shader* shader, const std::wstring& shaderFileName, bool isCompiled)
+		bool D3D11GraphicsAPI::CreateVertexShader( Shader* shader, const std::wstring& shaderFileName, bool isCompiled)
 		{
 			if(!isCompiled)
-				CompileShader(shader, shaderFileName, SHADER_TYPE::VERTEX_SHADER);
+				return CompileShader(shader, shaderFileName, SHADER_TYPE::VERTEX_SHADER);
 			else
 			{
 				ID3D11VertexShader* vs = (ID3D11VertexShader*)shader->GetVertexShaderData();
@@ -369,21 +425,30 @@ namespace Helios
 				m_inputLayouts.push_back(nullptr);
 				hr = m_pD3D11Device->CreateInputLayout(inputDescs, 4, shader->GetShaderByteData(), shader->GetSize(), &m_inputLayouts.back());
 
+				if (hr != S_OK)
+					return false;
 			}
+
+			return true;
 		}
 
-		void D3D11GraphicsAPI::CreatePixelShader( Shader* shader, const std::wstring& shaderFileName, bool isCompiled)
+		bool D3D11GraphicsAPI::CreatePixelShader( Shader* shader, const std::wstring& shaderFileName, bool isCompiled)
 		{
 			if(!isCompiled)
-				CompileShader(shader, shaderFileName, SHADER_TYPE::PIXEL_SHADER);
+				return CompileShader(shader, shaderFileName, SHADER_TYPE::PIXEL_SHADER);
 			else
 			{
 				ID3D11PixelShader* ps = (ID3D11PixelShader*)shader->GetPixelShaderData();
-				m_pD3D11Device->CreatePixelShader(reinterpret_cast<const void*>(shader->GetShaderByteData()), shader->GetSize(), nullptr, &ps);
+				HRESULT hr = m_pD3D11Device->CreatePixelShader(reinterpret_cast<const void*>(shader->GetShaderByteData()), shader->GetSize(), nullptr, &ps);
+			
+				if (hr != S_OK)
+					return false;
 			}
+
+			return true;
 		}
 
-		void D3D11GraphicsAPI::CompileShader(Shader* shader, const std::wstring& shaderFileName, SHADER_TYPE type)
+		bool D3D11GraphicsAPI::CompileShader(Shader* shader, const std::wstring& shaderFileName, SHADER_TYPE type)
 		{
 			UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if defined( DEBUG ) || defined( _DEBUG )
@@ -416,15 +481,40 @@ namespace Helios
 				
 				if (hr != S_OK)
 				{
-					if (errorBlob)
+
+					path = GetEXEPath() + L"\\" + shaderFileName;
+					// try current working directory
+					hr = D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+						"main", profile,
+						flags, 0, &shaderBlob, &errorBlob);
+
+					if (hr != S_OK)
 					{
-						OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-						errorBlob->Release();
+
+						if (errorBlob)
+						{
+							OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+							errorBlob->Release();
+						}
+
+						if (shaderBlob)
+							shaderBlob->Release();
+						return false;
 					}
 
-					if (shaderBlob)
-						shaderBlob->Release();
-					return;
+					D3DShader* d3dShader = (D3DShader*)shader;
+
+					HRESULT hr = m_pD3D11Device->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &d3dShader->m_vertexShader);
+
+					D3D11_INPUT_ELEMENT_DESC inputDescs[] = { {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0 , D3D11_INPUT_PER_VERTEX_DATA, 0},
+															{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+															{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,  D3D11_INPUT_PER_VERTEX_DATA, 0},
+															{"COLOR", 0,DXGI_FORMAT_R32G32B32A32_FLOAT, 0 ,D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0}
+					};
+
+					m_inputLayouts.push_back(nullptr);
+					hr = m_pD3D11Device->CreateInputLayout(inputDescs, 4, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), &m_inputLayouts.back());
+
 				}
 				else
 				{
@@ -453,24 +543,39 @@ namespace Helios
 
 				if (hr != S_OK)
 				{
-					if (errorBlob)
+					path = GetEXEPath() + L"\\" + shaderFileName;
+
+					hr = D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+						"main", profile,
+						flags, 0, &shaderBlob, &errorBlob);
+
+					if (hr != S_OK)
 					{
-						OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-						errorBlob->Release();
+						if (errorBlob)
+						{
+							OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+							errorBlob->Release();
+						}
+
+						if (shaderBlob)
+							shaderBlob->Release();
+						return false;
 					}
 
-					if (shaderBlob)
-						shaderBlob->Release();
-					return;
+					D3DShader* d3dShader = (D3DShader*)shader;
+
+					m_pD3D11Device->CreatePixelShader(reinterpret_cast<const void*>(shaderBlob->GetBufferPointer()), shaderBlob->GetBufferSize(), nullptr, &d3dShader->m_pixelShader);
+
 				}
-				
-				D3DShader* d3dShader = (D3DShader*)shader;
-
-				m_pD3D11Device->CreatePixelShader(reinterpret_cast<const void*>(shaderBlob->GetBufferPointer()), shaderBlob->GetBufferSize(), nullptr, &d3dShader->m_pixelShader);
-
+				else
+				{
+					D3DShader* d3dShader = (D3DShader*)shader;
+					m_pD3D11Device->CreatePixelShader(reinterpret_cast<const void*>(shaderBlob->GetBufferPointer()), shaderBlob->GetBufferSize(), nullptr, &d3dShader->m_pixelShader);
+				}
 			}	
 
-		//	shaderBlob->Release();
+			return true;
+		
 		}
 
 		void D3D11GraphicsAPI::RenderQuad()
@@ -509,7 +614,12 @@ namespace Helios
 			scene->SetLightBuffer();
 
 			// render the depth from light point fo view first
-			m_pDeviceContext->IASetInputLayout(m_inputLayouts[0]);
+
+			if (m_inputLayouts.size() > 0)
+				m_pDeviceContext->IASetInputLayout(m_inputLayouts[0]);
+			else
+				return;
+			
 			m_pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			m_pDeviceContext->RSSetState(m_rasterizerStates[0]);
 
@@ -570,7 +680,7 @@ namespace Helios
 
 		}
 
-		void D3D11GraphicsAPI::CreateBuffer(Buffer* buffer, BufferDesc& desc, uint32_t numElements, const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices)
+		bool D3D11GraphicsAPI::CreateBuffer(Buffer* buffer, BufferDesc& desc, uint32_t numElements, const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices)
 		{
 			D3D11_BUFFER_DESC vbd;
 			vbd.Usage = static_cast<D3D11_USAGE>(desc.usage);
@@ -595,9 +705,13 @@ namespace Helios
 			HRESULT hr;
 
 			D3DBuffer* pBuffer = (D3DBuffer*)buffer;
-			
+
 			if (desc.type == CONSTANT_BUFFER)
+			{
 				hr = m_pD3D11Device->CreateBuffer(&vbd, nullptr, &pBuffer->pD3DBuffer);
+				if (hr != S_OK)
+					return false;
+			}
 			else
 			{
 				D3D11_SUBRESOURCE_DATA vinitData;
@@ -617,9 +731,12 @@ namespace Helios
 				}
 
 				hr = m_pD3D11Device->CreateBuffer(&vbd, &vinitData, &pBuffer->pD3DBuffer);
+
+				if (hr != S_OK)
+					return false;
 			}
 
-
+			return true;
 		}
 
 		bool D3D11GraphicsAPI::CreateSampler()
@@ -720,7 +837,7 @@ namespace Helios
 
 		}
 
-		void D3D11GraphicsAPI::CreateShadowTargetView()
+		bool D3D11GraphicsAPI::CreateShadowTargetView()
 		{
 			HRESULT hr;
 			D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc = {};
@@ -744,7 +861,7 @@ namespace Helios
 			if (FAILED(hr))
 			{
 				OutputDebugString(L"Cannot create shadow map\n");
-				return;
+				return false;
 			}
 
 			
@@ -758,8 +875,8 @@ namespace Helios
 			
 			if (FAILED(hr))
 			{
-				OutputDebugString(L"Cannot create shader resrouce view\n");
-				return;
+				OutputDebugString(L"Cannot create shader resource view\n");
+				return false;
 			} 
 
 			// Set up the depth stencil view description.
@@ -772,21 +889,24 @@ namespace Helios
 			if (FAILED(hr))
 			{
 				OutputDebugString(L"Cannot create depth stencil view\n");
-				return;
+				return false;
 			}
 
+			return true;
 			//m_pDeviceContext->OMSetRenderTargets(0, nullptr, m_shadowDSV);
 		}
 
-		void D3D11GraphicsAPI::EnumerateComponents()
+		bool D3D11GraphicsAPI::EnumerateComponents()
 		{
 			UINT i = 0;
 
 			if (m_pDXGIFactory != nullptr)
 			{
 				// Get main video card
-				m_pDXGIFactory->EnumAdapters(i, &m_pAdapter);
+				HRESULT hr = m_pDXGIFactory->EnumAdapters(i, &m_pAdapter);
 
+				if (hr != S_OK)
+					return false;
 				DXGI_ADAPTER_DESC desc;
 				m_pAdapter->GetDesc(&desc);
 				std::wstring text = L"Adapter: ";
@@ -795,8 +915,10 @@ namespace Helios
 				m_videoCardInfo.description += desc.Description;
 				OutputDebugString(text.c_str());
 
+				return true;
 			}
 
+			return false;
 		}
 
 

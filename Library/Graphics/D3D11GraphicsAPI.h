@@ -36,8 +36,8 @@ namespace Helios
 
 			}
 
-			void Init(HWND hWnd, uint32_t w, uint32_t h, bool fs);
-			void Init(ID3D11Device* device, ID3D11DeviceContext* deviceContext, uint32_t w, uint32_t h);
+			bool Init(HWND hWnd, uint32_t w, uint32_t h, bool fs);
+			bool Init(ID3D11Device* device, ID3D11DeviceContext* deviceContext, uint32_t w, uint32_t h);
 			inline void SetWindowHandle(HWND hwnd) { m_hWnd = hwnd; }
 			inline  ID3D11Device* D3DDevice() const { return m_pD3D11Device; }
 			inline  ID3D11DeviceContext* DeviceContext() const { return m_pDeviceContext; }
@@ -53,18 +53,18 @@ namespace Helios
 
 			}
 
-			void EnumerateFeatureLevels();
-		    void FindBestFeatureLevel();
-			virtual void EnumerateComponents() override;
-			virtual void EnumerateDisplayResolutions(uint32_t screenWidth, uint32_t screenHeight, bool fullScreen) override;
+			bool EnumerateFeatureLevels();
+		    bool FindBestFeatureLevel();
+			virtual bool EnumerateComponents() override;
+			virtual bool EnumerateDisplayResolutions(uint32_t screenWidth, uint32_t screenHeight, bool fullScreen) override;
 
-			void CreateSwapChain();
-			void CreateRenderTargetView();
+			bool CreateSwapChain();
+			bool CreateRenderTargetView();
 		    bool CreateShaderResource(ID3D11Device* device, uint32_t width, uint32_t height);
-			void CreateDepthStencil();
-			void CreateDepthStencil(ID3D11Device* device, ID3D11DeviceContext* deviceContext, uint16_t w, uint16_t h);
+			bool CreateDepthStencil();
+			bool CreateDepthStencil(ID3D11Device* device, ID3D11DeviceContext* deviceContext, uint16_t w, uint16_t h);
 			void CreateViewport(uint32_t topLeftX, uint32_t topLeftY, uint32_t width, uint32_t height) override;
-			void CreateRasterizerState();
+			bool CreateRasterizerState();
 			void SetClearColor(float col[4]);
 			void ClearScreen(ID3D11DeviceContext* deviceContext);
 			void ClearScreen();
@@ -73,19 +73,19 @@ namespace Helios
 		//	void CreateInputLayout(const Shader& shader);
 			void CreateTexture() override;
 			bool CreateTexture(Texture* texture, const std::string& texFileName) override;
-			virtual void CreateVertexShader(Shader* shader, const std::wstring& shaderFileName, bool isCompiled) override;
-			virtual void CreatePixelShader(Shader* shader, const std::wstring& shaderFileName, bool isCompiled)  override;
-			void CompileShader(Shader* shader, const std::wstring& shaderFileName, SHADER_TYPE type);
+			virtual bool CreateVertexShader(Shader* shader, const std::wstring& shaderFileName, bool isCompiled) override;
+			virtual bool CreatePixelShader(Shader* shader, const std::wstring& shaderFileName, bool isCompiled)  override;
+			bool CompileShader(Shader* shader, const std::wstring& shaderFileName, SHADER_TYPE type);
 			virtual void RenderQuad() override;
 			virtual void RenderMeshesIndexed(std::vector<Mesh>& meshes, std::vector<Buffer*>& buffers, std::vector<Buffer*>& indexBuffers, std::vector<Shader*>& shaders) override;
 			virtual void RenderSceneIndexed( Scene* scene) override;
-			virtual void CreateBuffer(Buffer* buffer, BufferDesc& desc, uint32_t numElements, const std::vector<Vertex>& vertices = { Vertex(DirectX::XMFLOAT3(0.0f,0.0f,0.0f),  DirectX::XMFLOAT4(0.0f,0.0f,0.0f,0.0f)) }, const std::vector<uint32_t> indices = { 0 }) override;
+			virtual bool CreateBuffer(Buffer* buffer, BufferDesc& desc, uint32_t numElements, const std::vector<Vertex>& vertices = { Vertex(DirectX::XMFLOAT3(0.0f,0.0f,0.0f),  DirectX::XMFLOAT4(0.0f,0.0f,0.0f,0.0f)) }, const std::vector<uint32_t> indices = { 0 }) override;
 			virtual bool CreateSampler() override;
 		    bool CreateBlendState();
 			virtual void TurnOffZBuffer() override;
 			virtual void TurnOnZBuffer() override;
 			virtual bool DrawText(uint32_t posX, uint32_t posY, const std::string& text) override;
-			void CreateShadowTargetView();
+			bool CreateShadowTargetView();
 
 protected:
 		 ID3D11Device* m_pD3D11Device = nullptr;

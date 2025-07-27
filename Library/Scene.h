@@ -19,14 +19,11 @@ namespace Helios
 
 	class Scene
 	{
-		
-
-
 	public:
 		Scene() = default;
 		Scene(HWND hwnd, uint32_t w, uint32_t h, bool fullscreen);
-		void Init(HWND hwnd, uint32_t w, uint32_t h, bool fullscreen);
-		void LoadShader(const std::wstring& shaderName, SHADER_TYPE type);
+		bool Init(HWND hwnd, uint32_t w, uint32_t h, bool fullscreen);
+		bool LoadShader(const std::wstring& shaderName, SHADER_TYPE type);
 		void Update(float dt);
 		void SetCameraConstantBufferParams();
 		bool LoadMeshes(const std::string& filename);

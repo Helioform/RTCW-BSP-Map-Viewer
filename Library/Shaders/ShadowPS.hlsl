@@ -24,7 +24,7 @@ float4 main(PixelInputType input) : SV_TARGET
     float4 diffuseColor = float4(0.5, 0.5, 0.5, 1.0);
 
     // Set the default output color to the ambient light value for all pixels.
-    color = float4(0.6, 0.6, 0.6, 1.0);
+    color = float4(0.1, 0.1, 0.1, 1.0);
  
     // Calculate the projected texture coordinates.
     projectTexCoord.x = input.lightViewPosition.x / input.lightViewPosition.w / 2.0f + 0.5f;

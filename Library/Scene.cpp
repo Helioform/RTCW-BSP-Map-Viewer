@@ -7,11 +7,17 @@ Helios::Scene::Scene(HWND hWnd, uint32_t w, uint32_t h, bool fullscreen)
 
 }
 
-void Helios::Scene::Init(HWND hwnd, uint32_t w, uint32_t h, bool fullscreen)
+bool Helios::Scene::Init(HWND hwnd, uint32_t w, uint32_t h, bool fullscreen)
 {
 	gfxAPI = std::make_unique<D3D11GraphicsAPI>();
 
-	gfxAPI->Init(hwnd, w, h, fullscreen);
+	
+	if (!gfxAPI->Init(hwnd, w, h, fullscreen))
+	{
+		
+		return false;
+	}
+
 	float cc[4] = { 0.52f,0.8,0.92f,1.0f }; // sky blue
 	gfxAPI->SetClearColor(cc);
 
@@ -24,7 +30,12 @@ void Helios::Scene::Init(HWND hwnd, uint32_t w, uint32_t h, bool fullscreen)
 	desc.byteWidth = sizeof(LightSpaceMatrixBuffer);
 	D3DBuffer* cBuffer = new D3DBuffer();
 
-	gfxAPI->CreateBuffer(cBuffer, desc, 1);
+	if (!gfxAPI->CreateBuffer(cBuffer, desc, 1))
+	{
+		
+		return false;
+	}
+
 	constantBuffer.push_back(cBuffer); 
 		
 	// create constant buffer for light
@@ -36,14 +47,22 @@ void Helios::Scene::Init(HWND hwnd, uint32_t w, uint32_t h, bool fullscreen)
 	D3DBuffer* lBuffer = new D3DBuffer();
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	gfxAPI->CreateBuffer(lBuffer, lightBufferDesc, 1);
+	if(!gfxAPI->CreateBuffer(lBuffer, lightBufferDesc, 1))
+	{
+		
+		return false;
+	}
+
 	constantBuffer.push_back(lBuffer);
 
 	std::vector<std::wstring> shaderNames{ L"LightSpaceDepthVS.hlsl", L"ShadowVS.hlsl", L"ShadowPS.hlsl" };
 
-	LoadShader(shaderNames[0], SHADER_TYPE::VERTEX_SHADER);
-	LoadShader(shaderNames[1], SHADER_TYPE::VERTEX_SHADER);
-	LoadShader(shaderNames[2], SHADER_TYPE::PIXEL_SHADER);
+	if (!LoadShader(shaderNames[0], SHADER_TYPE::VERTEX_SHADER) || !LoadShader(shaderNames[1], SHADER_TYPE::VERTEX_SHADER) || !LoadShader(shaderNames[2], SHADER_TYPE::PIXEL_SHADER))
+	{	
+		
+		return false;
+	}
+
 
 	camera = std::make_unique<Camera>(PROJECTION_TYPE::PERSPECTIVE, 90.0f, XMFLOAT3(0.0f,1.0f,0.0f), XMFLOAT3(0.0f,0.0f,1.0f), XMFLOAT3(0.0f,1.0f,-2.0f), 0.1f, 1000.0f, w, h);
 	
@@ -74,6 +93,7 @@ void Helios::Scene::Init(HWND hwnd, uint32_t w, uint32_t h, bool fullscreen)
 	//D3DBuffer* d3dib = new D3DBuffer();
 	//gfxAPI->CreateBuffer(d3dib, ibdesc, m.GetNumIndices(), {}, m.GetIndices());
 	//indexBuffers.push_back(d3dib);
+
 	textures.push_back(new D3DTexture());
 	textures[0]->Register(gfxAPI->D3DDevice(), gfxAPI->DeviceContext());
 	textures.push_back(new D3DTexture());
@@ -88,24 +108,31 @@ void Helios::Scene::Init(HWND hwnd, uint32_t w, uint32_t h, bool fullscreen)
 
 	LoadMeshes("TestScene.obj");
 	//LoadMeshes("Track+Ship+Gems.obj");
-	
+
+
+
 	player = new Player();
 	/*player->playerMesh = &meshes[0];*/
 	player->playerCam = camera.get();
 	//player->playerMesh->SetWorldMatrix(XMMatrixIdentity());
 
+	return true;
 }
 
-void Helios::Scene::LoadShader(const std::wstring& shaderName, SHADER_TYPE type)
+bool Helios::Scene::LoadShader(const std::wstring& shaderName, SHADER_TYPE type)
 {
 	std::shared_ptr<D3DShader> sh = std::make_shared<D3DShader>();
-
+	bool success = false;
 	if (type == SHADER_TYPE::PIXEL_SHADER)
-		gfxAPI->CreatePixelShader(sh.get(), shaderName, false);
+		success = gfxAPI->CreatePixelShader(sh.get(), shaderName, false);
 	else if (type == SHADER_TYPE::VERTEX_SHADER)
-		gfxAPI->CreateVertexShader(sh.get(), shaderName, false);
+		success = gfxAPI->CreateVertexShader(sh.get(), shaderName, false);
 	
+	if (!success)
+		return false;
 	shaders.emplace(shaderName, sh);
+	
+	return true;
 }
 
 void Helios::Scene::Update(float dt)
